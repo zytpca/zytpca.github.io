@@ -1,0 +1,691 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="Insomniac">
+  <meta name="keywords" content="keywords">
+  
+    <meta name="description" content="函数原型123456HANDLE CreateEvent(    LPSECURITY_ATTRIBUTES lpEventAttributes, &#x2F;&#x2F; SD    BOOL bManualReset,                       &#x2F;&#x2F; reset type    BOOL bInitialState,                      &#x2F;&#x2F; initial state">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CreateEvent函数（synchapi.h）">
+<meta property="og:url" content="https://zytpca.github.io/2024/04/19/Win32_Api/CreateEvent%E5%87%BD%E6%95%B0%EF%BC%88synchapi.h%EF%BC%89/index.html">
+<meta property="og:site_name" content="Insomnia_">
+<meta property="og:description" content="函数原型123456HANDLE CreateEvent(    LPSECURITY_ATTRIBUTES lpEventAttributes, &#x2F;&#x2F; SD    BOOL bManualReset,                       &#x2F;&#x2F; reset type    BOOL bInitialState,                      &#x2F;&#x2F; initial state">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2024-04-19T08:40:34.000Z">
+<meta property="article:modified_time" content="2025-04-24T08:13:05.654Z">
+<meta property="article:author" content="Insomniac">
+<meta property="article:tag" content="keywords">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  
+  <title>CreateEvent函数（synchapi.h） - Insomnia_</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"zytpca.github.io","root":"/","version":"1.9.8","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Insomniac&#39;s Blog</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="CreateEvent函数（synchapi.h）"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2024-04-19 16:40" pubdate>
+          2024年4月19日 下午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          1k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          9 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">CreateEvent函数（synchapi.h）</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h2 id="函数原型"><a href="#函数原型" class="headerlink" title="函数原型"></a><font style="color:rgb(51, 51, 51);">函数原型</font></h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-function">HANDLE <span class="hljs-title">CreateEvent</span><span class="hljs-params">(  </span></span><br><span class="hljs-params"><span class="hljs-function">  LPSECURITY_ATTRIBUTES lpEventAttributes, <span class="hljs-comment">// SD  </span></span></span><br><span class="hljs-params"><span class="hljs-function">  BOOL bManualReset,                       <span class="hljs-comment">// reset type  </span></span></span><br><span class="hljs-params"><span class="hljs-function">  BOOL bInitialState,                      <span class="hljs-comment">// initial state  </span></span></span><br><span class="hljs-params"><span class="hljs-function">  LPCTSTR lpName                           <span class="hljs-comment">// object name  </span></span></span><br><span class="hljs-params"><span class="hljs-function">)</span></span>;  <br></code></pre></td></tr></table></figure>
+
+<h2 id="参数"><a href="#参数" class="headerlink" title="参数"></a>参数</h2><p><code>lpEventAttributes：</code></p>
+<p><font style="color:rgb(51, 51, 51);">指向SECURITY_ATTRIBUTES结构体，</font><font style="color:rgb(51, 51, 51);background-color:rgb(255, 102, 102);">此结构体决定函数的返回句柄是否可以让子进程继承</font><font style="color:rgb(51, 51, 51);">。</font><font style="color:rgb(204, 0, 0);">如果这个参数为NULL，这个句柄是不能继承的</font><font style="color:rgb(51, 51, 51);">。一般情况下，这个参数设置为NULL。</font></p>
+<p><code>bManualReset：</code></p>
+<p><font style="color:rgb(51, 51, 51);">指定将创建的EVENT是</font><font style="color:rgb(204, 0, 0);">自动复位还是手动复位</font><font style="color:rgb(51, 51, 51);">。如果为TRUE，</font><font style="color:rgb(255, 0, 0);">需要用ResetEvent(HANDLE)函数手动复位状态为无信号</font><font style="color:rgb(51, 51, 51);">，即一旦改EVENT被设置成有信号，则它会一直等到ResetEvent调用时才为无信号状态。如果为FALSE，当</font><font style="color:rgb(51, 51, 51);background-color:rgb(255, 153, 102);">一个有信号的等待线程被释放后，系统会自动复位状态为无信号状态</font><font style="color:rgb(51, 51, 51);">。</font></p>
+<p><code>bInitialState：</code></p>
+<p><font style="color:rgb(51, 51, 51);">指定事件对象的初始状态。如果为TRUE，初始状态为有信号，否则为无信号。</font></p>
+<p><code>lpName：</code>  </p>
+<p><font style="color:rgb(51, 51, 51);">事件对象的名称，以字符串表示。名称的长度受MAX_PATH的限制，名称是大小写敏感的。</font><font style="color:rgb(51, 51, 51);background-color:rgb(255, 204, 153);">如果lpName匹配一个存在的命名的事件对象，函数将请求EVENT_ALL_ACCESS来访问存在的对象。在这种情况下，bManualReset和bInitialState 被忽略，因为这两个参数已经被存在的事件设置</font><font style="color:rgb(51, 51, 51);">。如果lpEventAttributes参数不为NULL，这个参数可以决定是否句柄被继承，但是它的安全描述（security-descriptor）成员被忽略。如果lpName 为NULL，创建一个没有名称的事件。如果lpName 匹配一个存在的semaphore, mutex, waitable timer, job或者file-mapping对象的名称，函数调用失败，GetLastError函数返回ERROR_INVALID_HANDLE。由于这些对象共享相同的命名空间，才导致这种情况的发生。</font></p>
+<h2 id="返回值"><a href="#返回值" class="headerlink" title="返回值"></a><font style="color:rgb(51, 51, 51);">返回值</font></h2><p><font style="color:rgb(51, 51, 51);">函数返回句柄，该句柄具有EVENT_ALL_ACCESS权限去访问新的事件对象，同时它可以在任何需要事件对象句柄的函数中使用。</font></p>
+<h2 id="言论"><a href="#言论" class="headerlink" title="言论"></a><font style="color:rgb(22, 22, 22);">言论</font></h2><p><strong><font style="color:rgb(22, 22, 22);">    	</font></strong><font style="color:rgb(51, 51, 51);">调用过程中的任何线程，都可以在一个等待函数中指定事件对象句柄。当指定的对象的状态为有信号时，单对象等待函数（例如WaitForSingleObject）返回。对于多对象等待函数（例如WaitForMultipleObjects），可以指定为任意或所有指定的对象被置为有信号状态。当等待函数返回时，等待线程将被释放去继续它的执行。   事件对象的初始状态由bInitialState参数指定，</font><font style="color:rgb(0, 102, 0);">用SetEvent函数可以设置对象为有信号状态，用ResetEvent函数可以设置对象为无信号状态</font><font style="color:rgb(51, 51, 51);">。   当一个手动复原的事件对象的状态被置为有信号状态时，该对象将一直保持有信号状态，直至明确调用ResetEvent函数将其置为无符号状态。</font><font style="color:rgb(51, 51, 51);background-color:rgb(204, 0, 0);">当事件对象被设置为有信号状态时，任何数量的等待线程或者随后等待的线程都会被释放</font><font style="color:rgb(51, 51, 51);">。</font></p>
+<p><font style="color:rgb(51, 51, 51);">当一个自动复原事件对象的状态被设置为有信号状态时，该对象一直保持有信号状态，</font><font style="color:rgb(255, 0, 0);">直至一个单等待线程被释放；系统然后会自动重置对象到无信号状态</font><font style="color:rgb(51, 51, 51);">。<br></font><font style="color:rgb(51, 51, 51);">	</font><font style="color:rgb(255, 102, 102);">多个进程可持有同一个事件对象的多个句柄，可以通过使用此对象来实现进程间的同步</font><font style="color:rgb(51, 51, 51);">。下面的对象共享机制是可行的：</font></p>
+<ul>
+<li><font style="color:rgb(51, 51, 51);">在CreateEvent函数中，lpEventAttributes参数指定句柄可被继承时，通过CreateProcess函数创建的子进程继承的事件对象句柄。</font></li>
+<li><font style="color:rgb(51, 51, 51);">一个进程可以</font><font style="color:rgb(204, 0, 0);">在DuplicateHandle函数中指定事件对象句柄，从而获得一个复制的句柄</font><font style="color:rgb(51, 51, 51);">，此句柄可以被其它进程使用。</font></li>
+<li><font style="color:rgb(51, 51, 51);">一个进程可以在OpenEvent或CreateEvent函数中指定一个名字，从而获得一个有名的事件对象句柄。（在调用OpenEvent或CreateEvent函数时，一个进程可以指定事件对象的名字。）</font></li>
+<li><font style="color:rgb(51, 51, 51);"></font></li>
+</ul>
+<p><font style="color:rgb(22, 22, 22);">使用 </font><a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows/desktop/api/handleapi/nf-handleapi-closehandle"><font style="color:rgb(0, 101, 179);">CloseHandle</font></a><font style="color:rgb(22, 22, 22);"> 函数关闭句柄。 系统在进程终止时自动关闭句柄。 事件对象在关闭其最后一个句柄时被销毁。</font></p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/Win32-API/" class="category-chain-item">Win32_API</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>CreateEvent函数（synchapi.h）</div>
+      <div>https://zytpca.github.io/2024/04/19/Win32_Api/CreateEvent函数（synchapi.h）/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>Insomniac</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2024年4月19日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2024/05/08/Win32_Api/VisualStudio%E4%B8%8BC++%E7%94%9F%E6%88%90dump%E6%96%87%E4%BB%B6/" title="VisualStudio下C++生成dump文件">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">VisualStudio下C++生成dump文件</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2024/04/19/Win32_Api/%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1%E5%AE%9E%E7%8E%B0/" title="定时任务实现">
+                        <span class="hidden-mobile">定时任务实现</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+  
+  
+    <article id="comments" lazyload>
+      
+  <div id="valine"></div>
+  <script type="text/javascript">
+    Fluid.utils.loadComments('#valine', function() {
+      Fluid.utils.createScript('https://lib.baomitu.com/valine/1.5.1/Valine.min.js', function() {
+        var options = Object.assign(
+          {"appId":"ZDiOGqAWSCAU9bUYDktIk21c-gzGzoHsz","appKey":"JShbv4TgfpvIvvrRl7GFc57n","path":"window.location.pathname","placeholder":null,"avatar":"retro","meta":["nick","mail","link"],"requiredFields":[],"pageSize":10,"lang":"zh-CN","highlight":false,"recordIP":false,"serverURLs":"https://zdiogqaw.lc-cn-n1-shared.com","emojiCDN":null,"emojiMaps":null,"enableQQ":false},
+          {
+            el: "#valine",
+            path: window.location.pathname
+          }
+        )
+        new Valine(options);
+        Fluid.utils.waitElementVisible('#valine .vcontent', () => {
+          var imgSelector = '#valine .vcontent img:not(.vemoji)';
+          Fluid.plugins.imageCaption(imgSelector);
+          Fluid.plugins.fancyBox(imgSelector);
+        })
+      });
+    });
+  </script>
+  <noscript>Please enable JavaScript to view the comments</noscript>
+
+
+    </article>
+  
+
+
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

@@ -1,0 +1,693 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="Insomniac">
+  <meta name="keywords" content="keywords">
+  
+    <meta name="description" content="文件操作是应用程序最为基本的功能之一，Win32 API和MFC均提供有支持文件处理的函数和类。一般来说，这些函数可以满足大多数场合的要求，但是对于某些特殊应用领域所需要的动辄几十GB、几百GB、乃至几TB的海量存储，再以通常的文件处理方法进行处理显然是行不通的。目前，对于上述这种大文件的操作一般是以内存映射文件的方式来加以处理的。    	内存映射文件与虚拟内存有些类似，通过内存映射文件可以保">
+<meta property="og:type" content="article">
+<meta property="og:title" content="使用内存映射文件处理大文件">
+<meta property="og:url" content="https://zytpca.github.io/2024/04/19/Win32_Api/%E4%BD%BF%E7%94%A8%E5%86%85%E5%AD%98%E6%98%A0%E5%B0%84%E6%96%87%E4%BB%B6%E5%A4%84%E7%90%86%E5%A4%A7%E6%96%87%E4%BB%B6/index.html">
+<meta property="og:site_name" content="Insomnia_">
+<meta property="og:description" content="文件操作是应用程序最为基本的功能之一，Win32 API和MFC均提供有支持文件处理的函数和类。一般来说，这些函数可以满足大多数场合的要求，但是对于某些特殊应用领域所需要的动辄几十GB、几百GB、乃至几TB的海量存储，再以通常的文件处理方法进行处理显然是行不通的。目前，对于上述这种大文件的操作一般是以内存映射文件的方式来加以处理的。    	内存映射文件与虚拟内存有些类似，通过内存映射文件可以保">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://zytpca.github.io/2024/04/19/Win32_Api/%E4%BD%BF%E7%94%A8%E5%86%85%E5%AD%98%E6%98%A0%E5%B0%84%E6%96%87%E4%BB%B6%E5%A4%84%E7%90%86%E5%A4%A7%E6%96%87%E4%BB%B6/image-0.png">
+<meta property="article:published_time" content="2024-04-19T08:37:37.000Z">
+<meta property="article:modified_time" content="2025-04-23T07:32:59.057Z">
+<meta property="article:author" content="Insomniac">
+<meta property="article:tag" content="keywords">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://zytpca.github.io/2024/04/19/Win32_Api/%E4%BD%BF%E7%94%A8%E5%86%85%E5%AD%98%E6%98%A0%E5%B0%84%E6%96%87%E4%BB%B6%E5%A4%84%E7%90%86%E5%A4%A7%E6%96%87%E4%BB%B6/image-0.png">
+  
+  
+  
+  <title>使用内存映射文件处理大文件 - Insomnia_</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"zytpca.github.io","root":"/","version":"1.9.8","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Insomniac&#39;s Blog</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="使用内存映射文件处理大文件"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2024-04-19 16:37" pubdate>
+          2024年4月19日 下午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          1.7k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          15 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">使用内存映射文件处理大文件</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <p><font style="color:rgb(36, 41, 46);"></font></p>
+<p><font style="color:rgb(36, 41, 46);">文件操作是应用程序最为基本的功能之一，Win32 API和MFC均提供有支持文件处理的函数和类。一般来说，这些函数可以满足大多数场合的要求，但是对于某些特殊应用领域所需要的动辄几十GB、几百GB、乃至几TB的海量存储，再以通常的文件处理方法进行处理显然是行不通的。目前，对于上述这种大文件的操作一般是以内存映射文件的方式来加以处理的。</font></p>
+<font style="color:rgb(36, 41, 46);">  
+</font><font style="color:rgb(36, 41, 46);">	内存映射文件与虚拟内存有些类似，通过内存映射文件可以保留一个地址空间的区域，同时将物理存储器提交给此区域，只是内存文件映射的物理存储器来自一个已经存在于磁盘上的文件，而非系统的页文件，而且在对该文件进行操作之前必须首先对文件进行映射，就如同将整个文件从磁盘加载到内存。由此可以看出，使用内存映射文件处理存储于磁盘上的文件时，将不必再对文件执行I/O操作，这意味着在对文件进行处理时将不必再为文件申请并分配缓存，所有的文件缓存操作均由系统直接管理，由于取消了将文件数据加载到内存、数据从内存到文件的回写以及释放内存块等步骤，使得内存映射文件在处理大数据量的文件时能起到相当重要的作用。另外，实际工程中的系统往往需要在多个进程之间共享数据，如果数据量小，处理方法是灵活多变的，如果共享数据容量巨大，那么就需要借助于内存映射文件来进行。实际上，内存映射文件正是解决本地多个进程间数据共享的最有效方法。</font>
+
+<font style="color:rgb(36, 41, 46);">  
+</font><font style="color:rgb(36, 41, 46);">    	首先要通过CreateFile()函数来创建或打开一个文件内核对象，这个对象标识了磁盘上将要用作内存映射文件的文件。在用CreateFile()将文件映像在物理存储器的位置通告给操作系统后，只指定了映像文件的路径，映像的长度还没有指定。为了指定文件映射对象需要多大的物理存储空间还需要通过CreateFileMapping()函数来创建一个文件映射内核对象以告诉系统文件的尺寸以及访问文件的方式。</font><font style="color:rgb(36, 41, 46);">  
+</font><font style="color:rgb(36, 41, 46);">CreateFileMapping()在创建了文件映射对象后，还必须为文件数据保留一个地址空间区域，并把文件数据作为映射到该区域的物理存储器进行提交。由MapViewOfFile()函数负责通过系统的管理而将文件映射对象的全部或部分映射到进程地址空间，实际上相当于加载文件中指定的数据到内存中。此时，对内存映射文件的使用和处理同通常加载到内存中的文件数据的处理方式基本一样，在完成了对内存映射文件的使用时，还要通过一系列的操作完成对其的清除和使用过资源的释放。这部分相对比较简单，可以通过UnmapViewOfFile()完成从进程的地址空间撤消文件数据的映像、通过CloseHandle()关闭前面创建的文件映射对象和文件对象。</font><font style="color:rgb(36, 41, 46);">  
+</font><font style="color:rgb(36, 41, 46);">	实际上操作文件映射对象就相当于操作VC++文件读写方式下的文件内部指针。</font><font style="color:rgb(36, 41, 46);">  
+</font><font style="color:rgb(36, 41, 46);">而在某些特殊行业，经常要面对十几GB乃至几十GB容量的巨型文件，而一个32位进程所拥有的虚拟地址空间只有232 = 4GB，显然不能一次将文件映像全部映射进来。对于这种情况只能依次将大文件的各个部分映射到进程中的一个较小的地址空间。这需要对上面的一般流程进行适当的更改：</font><font style="color:rgb(36, 41, 46);">  
+</font><font style="color:rgb(36, 41, 46);">1）映射从文件开头的映像；</font><font style="color:rgb(36, 41, 46);">  
+</font><font style="color:rgb(36, 41, 46);">2）对该映像进行访问；</font><font style="color:rgb(36, 41, 46);">  
+</font><font style="color:rgb(36, 41, 46);">3）取消此映像；</font><font style="color:rgb(36, 41, 46);">  
+</font><font style="color:rgb(36, 41, 46);">4）映射一个从文件中的一个更深的位移开始的新映像；</font><font style="color:rgb(36, 41, 46);">  
+</font><font style="color:rgb(36, 41, 46);">5）重复步骤2，直到访问完全部的文件数据。</font>
+
+<p><img src="/2024/04/19/Win32_Api/%E4%BD%BF%E7%94%A8%E5%86%85%E5%AD%98%E6%98%A0%E5%B0%84%E6%96%87%E4%BB%B6%E5%A4%84%E7%90%86%E5%A4%A7%E6%96%87%E4%BB%B6/image-0.png" srcset="/img/loading.gif" lazyload></p>
+<h3 id="示例代码"><a href="#示例代码" class="headerlink" title="示例代码"></a><font style="color:rgb(36, 41, 46);">示例代码</font></h3><p><font style="color:rgb(36, 41, 46);"></font><font style="color:rgb(36, 41, 46);">    在本例中，首先通过GetFileSize()得到被处理文件长度（64位）的高32位和低32位值。然后在映射过程中设定每次映射的块大小为1000倍的分配粒度(系统的数据分块大小)，如果文件长度小于1000倍的分配粒度时则将块大小设置为文件的实际长度。在处理过程中由映射、访问、撤消映射构成了一个循环处理。其中，每处理完一个文件块后都通过关闭文件映射对象来对每个文件块进行整理。CreateFileMapping()、MapViewOfFile()等函数是专门用来进行内存文件映射处理用的。</font></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-comment">// 创建文件对象</span><br>HANDLE hFile = ::<span class="hljs-built_in">CreateFile</span>(strFile, GENERIC_READ,FILE_SHARE_READ, <span class="hljs-literal">NULL</span>, <br>OPEN_EXISTING, FILE_FLAG_RANDOM_ACCESS, <span class="hljs-literal">NULL</span>);<br><span class="hljs-keyword">if</span> (hFile == INVALID_HANDLE_VALUE)<br>&#123;<br>    <span class="hljs-built_in">TRACE</span>(<span class="hljs-string">&quot;创建文件对象失败,错误代码:%d\r\n&quot;</span>, <span class="hljs-built_in">GetLastError</span>());<br>    <span class="hljs-keyword">return</span>;<br>&#125;<br><br><span class="hljs-comment">// 创建文件映射对象</span><br>HANDLE hFileMap = <span class="hljs-built_in">CreateFileMapping</span>(hFile, <span class="hljs-literal">NULL</span>, PAGE_READONLY, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-literal">NULL</span>);<br><span class="hljs-keyword">if</span> (hFileMap == <span class="hljs-literal">NULL</span>)<br>&#123;<br>    <span class="hljs-built_in">TRACE</span>(<span class="hljs-string">&quot;创建文件映射对象失败,错误代码:%d\r\n&quot;</span>, <span class="hljs-built_in">GetLastError</span>());  <br>    <span class="hljs-keyword">return</span>;<br>&#125;<br><br><span class="hljs-comment">// 得到系统分配粒度</span><br>SYSTEM_INFO SysInfo;<br><span class="hljs-built_in">GetSystemInfo</span>(&amp;SysInfo);<br>DWORD dwGran = SysInfo.dwAllocationGranularity;<br><br><span class="hljs-comment">// 得到文件尺寸</span><br>DWORD dwFileSizeHigh;<br>__int64 qwFileSize = <span class="hljs-built_in">GetFileSize</span>(hFile, &amp;dwFileSizeHigh);<br>qwFileSize |= (((__int64)dwFileSizeHigh) &lt;&lt; <span class="hljs-number">32</span>);<span class="hljs-comment">///MSDN</span><br><br><span class="hljs-comment">// 偏移地址 </span><br>__int64 qwFileOffset = <span class="hljs-number">0</span>;<br>__int64 T_newmap = <span class="hljs-number">900</span> * dwGran;<br><span class="hljs-comment">// 块大小</span><br>DWORD dwBlockBytes = <span class="hljs-number">1000</span> * dwGran;<span class="hljs-comment">//文件数据分段大小</span><br><span class="hljs-keyword">if</span> (qwFileSize - qwFileOffset &lt; dwBlockBytes)<br>dwBlockBytes = (DWORD)qwFileSize;<br><br><span class="hljs-comment">// 映射视图</span><br><span class="hljs-type">char</span> *lpbMapAddress = (<span class="hljs-type">char</span> *)<span class="hljs-built_in">MapViewOfFile</span>(hFileMap,FILE_MAP_READ,<br>(DWORD)(qwFileOffset &gt;&gt; <span class="hljs-number">32</span>), (DWORD)(qwFileOffset &amp; <span class="hljs-number">0xFFFFFFFF</span>),dwBlockBytes);<br><span class="hljs-keyword">if</span> (lpbMapAddress == <span class="hljs-literal">NULL</span>)<br>&#123;<br>    <span class="hljs-built_in">TRACE</span>(<span class="hljs-string">&quot;映射文件映射失败,错误代码:%d &quot;</span>, <span class="hljs-built_in">GetLastError</span>());<br>    <span class="hljs-keyword">return</span>;<br>&#125; <br><br><span class="hljs-comment">// 关闭文件对象</span><br><span class="hljs-built_in">CloseHandle</span>(hFile); <br><br><span class="hljs-comment">///////////读文件数据</span><br><span class="hljs-keyword">while</span>(qwFileOffset &lt; qwFileSize)<br>&#123;<br>    <span class="hljs-comment">/********************            读文件             ***************************/</span>  <br>    <span class="hljs-comment">//read_eh(&amp;lpbMapAddress)读取已映射到内存的数据，</span><br>    <br>    <span class="hljs-comment">//并将文件指针作相应后移(lpbMapAddress++),返回指针偏移量</span><br>    qwFileOffset = qwFileOffset + <span class="hljs-built_in">read_eh</span>(&amp;lpbMapAddress); <span class="hljs-comment">//修改偏移量</span><br>    <span class="hljs-keyword">if</span> (qwFileOffset &gt; T_newmap)<br>    &#123;<span class="hljs-comment">//当数据读到90%时,为防数据溢出,需要映射在其后的数据  T_newmap</span><br>        <span class="hljs-built_in">UnmapViewOfFile</span>(lpbMapAddress);<span class="hljs-comment">//释放当前映射</span><br>        <br>        <span class="hljs-keyword">if</span> ((DWORD)(qwFileSize - T_newmap) &lt; dwBlockBytes)<br>            dwBlockBytes = (DWORD)(qwFileSize - T_newmap);<br>        lpbMapAddress = (<span class="hljs-type">char</span> *)<span class="hljs-built_in">MapViewOfFile</span>(hFileMap,FILE_MAP_READ,<br>        (DWORD)(T_newmap &gt;&gt; <span class="hljs-number">32</span>), (DWORD)(T_newmap &amp; <span class="hljs-number">0xFFFFFFFF</span>),dwBlockBytes);<br>        <br>        <span class="hljs-comment">// 修正参数</span><br>        lpbMapAddress = lpbMapAddress + qwFileOffset - T_newmap;<br>        T_newmap =T_newmap  + <span class="hljs-number">900</span> * dwGran;<br>        <br>        <span class="hljs-keyword">if</span> (lpbMapAddress == <span class="hljs-literal">NULL</span>)<br>        &#123;<br>            <span class="hljs-built_in">TRACE</span>(<span class="hljs-string">&quot;映射文件映射失败,错误代码:%d &quot;</span>, <span class="hljs-built_in">GetLastError</span>());<br>            <span class="hljs-keyword">return</span>;<br>        &#125; <br>    &#125;<br>&#125;<br><br><span class="hljs-comment">//释放最后数据块映射</span><br><span class="hljs-built_in">UnmapViewOfFile</span>(lpbMapAddress);<br><br><span class="hljs-comment">// 关闭文件映射对象句柄</span><br><span class="hljs-built_in">CloseHandle</span>(hFileMap); <br></code></pre></td></tr></table></figure>
+
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/Win32-API/" class="category-chain-item">Win32_API</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>使用内存映射文件处理大文件</div>
+      <div>https://zytpca.github.io/2024/04/19/Win32_Api/使用内存映射文件处理大文件/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>Insomniac</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2024年4月19日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2024/04/19/Win32_Api/%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1%E5%AE%9E%E7%8E%B0/" title="定时任务实现">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">定时任务实现</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2024/04/10/Win32_Api/%E3%80%90NOTE%E3%80%91Windows%E7%9A%84%E7%A3%81%E7%9B%98%E6%93%8D%E4%BD%9C/" title="【NOTE】Windows的磁盘操作">
+                        <span class="hidden-mobile">【NOTE】Windows的磁盘操作</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+  
+  
+    <article id="comments" lazyload>
+      
+  <div id="valine"></div>
+  <script type="text/javascript">
+    Fluid.utils.loadComments('#valine', function() {
+      Fluid.utils.createScript('https://lib.baomitu.com/valine/1.5.1/Valine.min.js', function() {
+        var options = Object.assign(
+          {"appId":"ZDiOGqAWSCAU9bUYDktIk21c-gzGzoHsz","appKey":"JShbv4TgfpvIvvrRl7GFc57n","path":"window.location.pathname","placeholder":null,"avatar":"retro","meta":["nick","mail","link"],"requiredFields":[],"pageSize":10,"lang":"zh-CN","highlight":false,"recordIP":false,"serverURLs":"https://zdiogqaw.lc-cn-n1-shared.com","emojiCDN":null,"emojiMaps":null,"enableQQ":false},
+          {
+            el: "#valine",
+            path: window.location.pathname
+          }
+        )
+        new Valine(options);
+        Fluid.utils.waitElementVisible('#valine .vcontent', () => {
+          var imgSelector = '#valine .vcontent img:not(.vemoji)';
+          Fluid.plugins.imageCaption(imgSelector);
+          Fluid.plugins.fancyBox(imgSelector);
+        })
+      });
+    });
+  </script>
+  <noscript>Please enable JavaScript to view the comments</noscript>
+
+
+    </article>
+  
+
+
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

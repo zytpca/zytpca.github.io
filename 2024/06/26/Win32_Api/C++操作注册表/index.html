@@ -1,0 +1,850 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="Insomniac">
+  <meta name="keywords" content="keywords">
+  
+    <meta name="description" content="1.注册表简介注册表是为Windows NT和Windows95中所有32位硬件&#x2F;驱动和32位应用程序设计的数据文件，用于存储系统和应用程序的设置信息。16位驱动在Winnt (Windows New Technology)下无法工作，所以所有设备都通过注册表来控制，一般这些是通过BIOS（基本输入输出系统）来控制的。在Win95下，16位驱动会继续以实模式方式设备工作，它们使用syst">
+<meta property="og:type" content="article">
+<meta property="og:title" content="C++操作注册表">
+<meta property="og:url" content="https://zytpca.github.io/2024/06/26/Win32_Api/C++%E6%93%8D%E4%BD%9C%E6%B3%A8%E5%86%8C%E8%A1%A8/index.html">
+<meta property="og:site_name" content="Insomnia_">
+<meta property="og:description" content="1.注册表简介注册表是为Windows NT和Windows95中所有32位硬件&#x2F;驱动和32位应用程序设计的数据文件，用于存储系统和应用程序的设置信息。16位驱动在Winnt (Windows New Technology)下无法工作，所以所有设备都通过注册表来控制，一般这些是通过BIOS（基本输入输出系统）来控制的。在Win95下，16位驱动会继续以实模式方式设备工作，它们使用syst">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2024-06-26T13:45:15.000Z">
+<meta property="article:modified_time" content="2025-04-24T08:26:24.131Z">
+<meta property="article:author" content="Insomniac">
+<meta property="article:tag" content="keywords">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  
+  <title>C++操作注册表 - Insomnia_</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"zytpca.github.io","root":"/","version":"1.9.8","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Insomniac&#39;s Blog</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="C++操作注册表"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2024-06-26 21:45" pubdate>
+          2024年6月26日 晚上
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          3.9k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          33 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">C++操作注册表</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="1-注册表简介"><a href="#1-注册表简介" class="headerlink" title="1.注册表简介"></a>1.注册表简介</h1><p>注册表是为Windows NT和Windows95中所有32位硬件&#x2F;驱动和32位应用程序设计的数据文件，用于存储系统和应用程序的设置信息。16位驱动在Winnt (Windows New Technology)下无法工作，所以所有设备都通过注册表来控制，一般这些是通过BIOS（基本输入输出系统）来控制的。在Win95下，16位驱动会继续以实模式方式设备工作，它们使用system.ini来控制。16位应用程序会工作在NT或者Win95 下，它们的程序仍然会参考win.ini和system.ini文件获得信息和控制。</p>
+<h1 id="2-注册表结构"><a href="#2-注册表结构" class="headerlink" title="2. 注册表结构"></a>2. 注册表结构</h1><h2 id="2-1-简介"><a href="#2-1-简介" class="headerlink" title="2.1.简介"></a>2.1.简介</h2><p>注册表是是Microsoft Windows中的一个重要而又复杂的信息数据库，它是多层次式的。在不同系统上注册表的基本结构相同。其中的复杂数据会在不同方式上结合，从而产生出一个绝对唯一的注册表。从用户的角度看，注册表系统由两个部分组成：注册表数据库和注册表编辑器。注册表数据库包括两个文件：system.dat和user.dat。system.dat用来保存微机的系统信息，如安装的硬件和调和驱动程序的有关信息等。user.dat用来保存每个用户特有的信息，如桌面设置、墙纸或窗口的颜色设置等。由于注册表是最重要的系统文件之一，因此对于它的保护和备份就特别重要。系统在每次成功启动之后都将此次启动时的注册表作一个备份。system.dat的备份文件为system.dao，user.dat的备份文件为user.dao。如果由于某种原因注册表受到破坏，则可以用这两个备份文件来恢复注册表。Win 98&#x2F;Win Me备份的注册表文件保存在C:&#x2F;WINDOWS&#x2F;SYSBCKUP文件夹(这是个隐藏文件夹)中，文件名称是rb000.cab、rb002.cab、rb003.cab、rb004.cab、rb005.cab（通常为五个）。</p>
+<h2 id="2-2-数据结构"><a href="#2-2-数据结构" class="headerlink" title="2.2.数据结构"></a>2.2.数据结构</h2><p>注册表由键（或称“项”）、子键（子项）和值项构成。一个键就是分支中的一个文件夹，而子键就是这个文件夹中的子文件夹，子键同样是一个键。一个值项则是一个键的当前定义，由名称、数据类型以及分配的值组成。一个键可以有一个或多个值，每个值的名称各不相同，如果一个值的名称为空，则该值为该键的默认值。</p>
+<p>注册表的数据类型主要有以下四种：</p>
+<table>
+<thead>
+<tr>
+<th>显示类型（在编辑器中）</th>
+<th>数据类型</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>REG_SZ</td>
+<td>字符串</td>
+<td>文本字符串</td>
+</tr>
+<tr>
+<td>REG_MULTI_SZ</td>
+<td>多字符串</td>
+<td>含有多个文本值的字符串</td>
+</tr>
+<tr>
+<td>REG_BINARY</td>
+<td>二进制数</td>
+<td>二进制值，以十六进制显示</td>
+</tr>
+<tr>
+<td>REG_DWORD</td>
+<td>双字</td>
+<td>一个32位的二进制值，显示为8位的十六进制值</td>
+</tr>
+</tbody></table>
+<h2 id="2-3-几个主键简介"><a href="#2-3-几个主键简介" class="headerlink" title="2.3.几个主键简介"></a>2.3.几个主键简介</h2><p>（1）<code>HKEY_CLASSES_ROOT</code></p>
+<p>在注册表中HKEY_CLASSES_ROOT是系统中控制所有数据文件的项。HKEY_CLASSES_ROOT控制键包括了所有文件扩展和所有和执行文件相关的文件。它同样也决定了当一个文件被双击时起反应的相关应用程序。 HKEY_CLASSES_ROOT被用作程序员在安装软件时方便的发送信息，在Win95和Winnt中，HKEY_CLASSES_ROOT和HKEY_LOCAL_MACHINE&#x2F;Software&#x2F;Classes是相同的。程序员在运行他们的启动程序时不需要担忧实际的位置，相反的，他们只需要在HKEY_CLASSES_ROOT中加入数据就可以了。</p>
+<p>（2）<code>HKEY_CURRENT_CONFIG</code></p>
+<p>win95一般只使用一个硬件配置文件。如果有多个硬件配置文件。HKEY_LOCAL_MACHINE&#x2F;Config中就会添加一个键。HKEY_LOCAL_MACHINE&#x2F;Config包含了HKEY_LOCAL_MACHINE中相同的数据。</p>
+<p>在启动时，你可以选择你愿意使用的配置文件。如果有多个安装，每次系统重新启动时，你就必须选择。	HKEY_CURRENT_CONFIG是在启动时控制目前硬件配置的键。在系统启动以后，任何地方的变化都会自动影响到它。程序员经常使用HKEY_CURRENT_CONFIG方便的来存取配置信息。HKEY_CURRENT_CONFIG包括了系统中现有的所有配置文件的细节。你的选择影响了哪一个硬件配置文件成为现在的。举例来说，如果配置0002被选择了，所有0002的配置信息会被映射到这些键上。HKEY_CURRENT_CONFIG允许软件和设备驱动程序员很方便的更新注册表，而不涉及到多个配置文件信息。 	HKEY_LOCAL_MACHINE中同样的数据和任何注册表的变化都会同时的变化。</p>
+<p>（3）<code>HKEY_USERS</code></p>
+<p>HKEY_USERS将缺省用户和目前登陆用户的信息输入到注册表编辑器，在win95中，它仅被那些配置文件激活的登陆用户使用，同样在winnt下，它也是这样。 win95从user.dat中取得他们的信息，winnt从ntuser.dat中取得信息。.dat文件包含了所有基于用户的注册表设置并且允许你取配置这些用户的环境。如果你改变了缺省用户的设置，所有新用户会继承同样的设置。而且，那些已经被建立的用户变的失效。</p>
+<p>（4）<code>HKEY_LOCAL_MACHINE</code></p>
+<p>HKEY_LOCAL_MACHINE是一个显示控制系统和软件的处理键。HKLM键保存着计算机的系统信息。它包括网络和硬件上所有的软件设置。（比如文件的位置，注册和未注册的状态，版本号等等）这些设置和用户无关，因为这些设置是针对使用这个系统的所有用户的。</p>
+<p>（5）<code>HKEY_CURRENT_USER</code></p>
+<p>HKEY_CURRENT_USER包含着在HKEY_USERS安全辨别里列出的同样信息。任何在HKEY_CURRENT_USER里的改动也都会立即HKEY_USERS改动。相反也是这样。 HKEY_CURRENT_USER允许程序员和开发者易于存取目前登陆用户的设置。通过建立这个键，微软很容易在不涉及到用户的SID下改变，添加和设置。也就是说，所有当前的操作改变只是针对当前用户而改变，并不影响其他用户。</p>
+<h1 id="3-C-操作注册表"><a href="#3-C-操作注册表" class="headerlink" title="3. C++操作注册表"></a>3. C++操作注册表</h1><p>Windows注册表（Registry）是Windows操作系统中用于存储系统配置信息、用户设置和应用程序数据的一个集中式数据库。它是一个层次结构的数据库，由键（Key）和值（Value）组成，这些键和值被用于存储各种系统和应用程序的配置信息。</p>
+<p>以下是注册表的一些基本概念：</p>
+<ol>
+<li>键（Key）： 注册表中的数据结构，类似于文件夹，用于组织和存储相关的信息。每个键可以包含子键和&#x2F;或值。</li>
+<li>子键（Subkey）： 位于注册表中的键的层次结构中的更深一层的键。子键可以包含其他子键或值。</li>
+<li>值（Value）： 存储在注册表中的数据单元，通常与键相关联。值可以包含配置信息、用户设置等数据。</li>
+<li>数据类型（Data Type）： 值的数据类型定义了值的内容和用途。常见的数据类型包括字符串、整数、二进制数据等。</li>
+<li>根键（Root Key）： 注册表的最顶层，有几个根键，常见的包括 <code>HKEY_CLASSES_ROOT</code>、<code>HKEY_CURRENT_USER</code>、<code>HKEY_LOCAL_MACHINE</code> 等。</li>
+</ol>
+<p>Windows注册表的作用包括：</p>
+<ul>
+<li>存储系统配置信息： 注册表中存储了操作系统的配置信息，包括系统启动时需要加载的驱动程序、系统服务、文件关联等。</li>
+<li>存储用户设置： 注册表中存储了用户特定的设置，如桌面背景、主题、鼠标指针样式等。</li>
+<li>应用程序配置： 许多应用程序使用注册表存储其配置信息。当应用程序安装时，它可能会在注册表中创建相关的键和值来保存配置。</li>
+<li>组织系统和应用程序数据： 注册表提供了一个结构化的方式来组织系统和应用程序需要存储的数据，使得操作系统和应用程序可以轻松地检索和修改配置信息。</li>
+<li>提供对系统设置的访问： 通过注册表，用户和系统管理员可以访问和修改系统的各种设置，从而对系统行为进行调整和优化。</li>
+</ul>
+<h3 id="枚举注册表项"><a href="#枚举注册表项" class="headerlink" title="枚举注册表项"></a>枚举注册表项</h3><p><code>RegOpenKeyEx</code> 是一个用于打开指定的注册表键的 Windows API 函数。它允许应用程序访问和操作 Windows 注册表的子键。在较新的 Windows 版本中，例如 Windows 10，<code>RegOpenKeyEx</code> 已被推荐的函数 <code>RegOpenKey</code> 和 <code>RegOpenKeyEx</code> 代替。以下是 <code>RegOpenKeyEx</code> 的一般用法：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-function">LSTATUS <span class="hljs-title">RegOpenKeyEx</span><span class="hljs-params">(</span></span><br><span class="hljs-params"><span class="hljs-function">    HKEY    hKey,</span></span><br><span class="hljs-params"><span class="hljs-function">    LPCTSTR lpSubKey,</span></span><br><span class="hljs-params"><span class="hljs-function">    DWORD   ulOptions,</span></span><br><span class="hljs-params"><span class="hljs-function">    REGSAM  samDesired,</span></span><br><span class="hljs-params"><span class="hljs-function">    PHKEY   phkResult</span></span><br><span class="hljs-params"><span class="hljs-function">)</span></span>;<br></code></pre></td></tr></table></figure>
+
+<p>参数说明：</p>
+<ul>
+<li><code>hKey</code>: 指定要打开的基础键的句柄，可以是 <code>HKEY_CLASSES_ROOT</code>、<code>HKEY_CURRENT_USER</code>、<code>HKEY_LOCAL_MACHINE</code> 等。</li>
+<li><code>lpSubKey</code>: 指定相对于 <code>hKey</code> 的子键路径。</li>
+<li><code>ulOptions</code>: 保留参数，通常可以设置为 0。</li>
+<li><code>samDesired</code>: 指定键的访问权限，例如 <code>KEY_READ</code> 或 <code>KEY_WRITE</code>。</li>
+<li><code>phkResult</code>: 接收指向打开的注册表键的句柄的指针。</li>
+</ul>
+<p>函数返回值：</p>
+<ul>
+<li>如果函数调用成功，返回 <code>ERROR_SUCCESS</code>。</li>
+<li>如果函数调用失败，返回一个错误代码。</li>
+</ul>
+<p><code>RegEnumValue</code> 用于列举指定注册表键中的值。它可以用来遍历注册表键中的所有值，以便你可以获取键中包含的信息。以下是 <code>RegEnumValue</code> 的一般用法：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-function">LSTATUS <span class="hljs-title">RegEnumValue</span><span class="hljs-params">(</span></span><br><span class="hljs-params"><span class="hljs-function">    HKEY    hKey,</span></span><br><span class="hljs-params"><span class="hljs-function">    DWORD   dwIndex,</span></span><br><span class="hljs-params"><span class="hljs-function">    LPTSTR  lpValueName,</span></span><br><span class="hljs-params"><span class="hljs-function">    LPDWORD lpcchValueName,</span></span><br><span class="hljs-params"><span class="hljs-function">    LPDWORD lpReserved,</span></span><br><span class="hljs-params"><span class="hljs-function">    LPDWORD lpType,</span></span><br><span class="hljs-params"><span class="hljs-function">    LPBYTE  lpData,</span></span><br><span class="hljs-params"><span class="hljs-function">    LPDWORD lpcbData</span></span><br><span class="hljs-params"><span class="hljs-function">)</span></span>;<br></code></pre></td></tr></table></figure>
+
+<p>参数说明：</p>
+<ul>
+<li><code>hKey</code>: 指定要列举值的注册表键的句柄。</li>
+<li><code>dwIndex</code>: 指定要检索的值的索引。从 0 开始，逐渐递增。</li>
+<li><code>lpValueName</code>: 接收值的名称的缓冲区。</li>
+<li><code>lpcchValueName</code>: 接收值名称的缓冲区大小的指针。在调用函数之前，你应该将其设置为缓冲区大小。</li>
+<li><code>lpReserved</code>: 保留参数，通常可以设置为 NULL。</li>
+<li><code>lpType</code>: 接收值的数据类型的指针。</li>
+<li><code>lpData</code>: 接收值的数据的缓冲区。</li>
+<li><code>lpcbData</code>: 接收数据缓冲区大小的指针。在调用函数之前，你应该将其设置为缓冲区大小。</li>
+</ul>
+<p>函数返回值：</p>
+<ul>
+<li>如果函数调用成功，返回 <code>ERROR_SUCCESS</code>。</li>
+<li>如果函数调用失败，返回一个错误代码。</li>
+</ul>
+<p>枚举指定键值对中是否存在值，如果存在则循环将其输出。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;stdio.h&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;Windows.h&gt;</span></span><br><br><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">Enum_Regedit</span><span class="hljs-params">(HKEY Reg_Root,<span class="hljs-type">const</span> <span class="hljs-type">char</span> *Reg_Path)</span></span><br><span class="hljs-function"></span>&#123;<br>    HKEY hKey = <span class="hljs-literal">NULL</span>;<br>    DWORD dwType = <span class="hljs-number">0</span>;<br>    <span class="hljs-type">char</span> szValueName[MAXBYTE], szValueKey[MAXBYTE] = &#123; <span class="hljs-number">0</span> &#125;;<br>    DWORD dwBufferSize = MAXBYTE, dwKeySize = MAXBYTE;<br><br>    <span class="hljs-comment">// 打开注册表项</span><br>    LONG lRet = <span class="hljs-built_in">RegOpenKeyEx</span>(Reg_Root, Reg_Path, <span class="hljs-number">0</span>, KEY_ALL_ACCESS, &amp;hKey);<br><br>    <span class="hljs-type">int</span> index = <span class="hljs-number">0</span>;<br>    <span class="hljs-keyword">while</span> (<span class="hljs-number">1</span>)<br>        &#123;<br>            <span class="hljs-comment">// 枚举注册表键项</span><br>            lRet = <span class="hljs-built_in">RegEnumValue</span>(hKey, index, szValueName, &amp;dwBufferSize, <span class="hljs-literal">NULL</span>,<br>                &amp;dwType, (<span class="hljs-type">unsigned</span> <span class="hljs-type">char</span> *)szValueKey, &amp;dwKeySize);<br><br>            <span class="hljs-keyword">if</span> (lRet == ERROR_NO_MORE_ITEMS)<br>                <span class="hljs-keyword">break</span>;<br><br>            <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;序号: %3d 名称: %-25s 值: %-50s 类型: &quot;</span>, index, szValueName, szValueKey);<br>            <span class="hljs-keyword">switch</span> (dwType)<br>                &#123;<br>                    <span class="hljs-keyword">case</span> <span class="hljs-number">1</span>: <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;REG_SZ \n&quot;</span>); <span class="hljs-keyword">break</span>;<br>                    <span class="hljs-keyword">case</span> <span class="hljs-number">2</span>: <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;REG_EXPAND_SZ \n&quot;</span>); <span class="hljs-keyword">break</span>;<br>                    <span class="hljs-keyword">case</span> <span class="hljs-number">4</span>: <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;REG_DWORD \n&quot;</span>); <span class="hljs-keyword">break</span>;<br>                    <span class="hljs-keyword">case</span> <span class="hljs-number">7</span>: <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;REG_MULTI_SZ \n&quot;</span>); <span class="hljs-keyword">break</span>;<br>                    <span class="hljs-keyword">default</span>: <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;None \n&quot;</span>); <span class="hljs-keyword">break</span>;<br>                &#125;<br>            dwBufferSize = MAXBYTE;<br>            dwKeySize = MAXBYTE;<br>            index++;<br>        &#125;<br>    <span class="hljs-built_in">RegCloseKey</span>(hKey);<br>&#125;<br><br><span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">(<span class="hljs-type">int</span> argc, <span class="hljs-type">char</span> *argv[])</span></span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-comment">// 枚举普通启动项</span><br>    <span class="hljs-built_in">Enum_Regedit</span>(HKEY_LOCAL_MACHINE, <span class="hljs-string">&quot;Software\\Microsoft\\Windows\\CurrentVersion\\Run&quot;</span>);<br>    <span class="hljs-built_in">Enum_Regedit</span>(HKEY_CURRENT_USER, <span class="hljs-string">&quot;Software\\Microsoft\\Windows\\CurrentVersion\\Run&quot;</span>);<br><br>    <span class="hljs-comment">// 枚举Boot启动项</span><br>    <span class="hljs-comment">// HKLM\System\CurrentControlSet\Control\Session Manager\BootExecute</span><br>    <span class="hljs-built_in">Enum_Regedit</span>(HKEY_LOCAL_MACHINE, <span class="hljs-string">&quot;System\\CurrentControlSet\\Control\\Session Manager\\&quot;</span>);<br><br>    <span class="hljs-comment">// 枚举ActiveX启动项,在子键中添加SubPath即可完成开机自启动.</span><br>    <span class="hljs-built_in">Enum_Regedit</span>(HKEY_LOCAL_MACHINE, <span class="hljs-string">&quot;SOFTWARE\\Microsoft\\Active Setup\\Installed Components\\&quot;</span>);<br><br>    <span class="hljs-built_in">system</span>(<span class="hljs-string">&quot;pause&quot;</span>);<br>    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h3 id="添加注册表项"><a href="#添加注册表项" class="headerlink" title="添加注册表项"></a>添加注册表项</h3><p><code>RegCreateKey</code> 是用于创建或打开指定的注册表键。如果键不存在，则它将被创建；如果存在，则它将被打开。以下是 <code>RegCreateKey</code> 的一般用法：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-function">LSTATUS <span class="hljs-title">RegCreateKey</span><span class="hljs-params">(</span></span><br><span class="hljs-params"><span class="hljs-function">  HKEY    hKey,</span></span><br><span class="hljs-params"><span class="hljs-function">  LPCTSTR lpSubKey,</span></span><br><span class="hljs-params"><span class="hljs-function">  PHKEY   phkResult</span></span><br><span class="hljs-params"><span class="hljs-function">)</span></span>;<br></code></pre></td></tr></table></figure>
+
+<p>参数说明：</p>
+<ul>
+<li><code>hKey</code>: 指定要创建或打开的基础键的句柄，可以是 <code>HKEY_CLASSES_ROOT</code>、<code>HKEY_CURRENT_USER</code>、<code>HKEY_LOCAL_MACHINE</code> 等。</li>
+<li><code>lpSubKey</code>: 指定相对于 <code>hKey</code> 的子键路径。</li>
+<li><code>phkResult</code>: 接收指向创建或打开的注册表键的句柄的指针。</li>
+</ul>
+<p>函数返回值：</p>
+<ul>
+<li>如果函数调用成功，返回 <code>ERROR_SUCCESS</code>。</li>
+<li>如果函数调用失败，返回一个错误代码。</li>
+</ul>
+<p><code>RegSetValueEx</code> 是用于在指定的注册表键中设置一个值。它可以用于创建新的键值，也可以用于修改现有键值。以下是 <code>RegSetValueEx</code> 的一般用法：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-function">LSTATUS <span class="hljs-title">RegSetValueEx</span><span class="hljs-params">(</span></span><br><span class="hljs-params"><span class="hljs-function">  HKEY       hKey,</span></span><br><span class="hljs-params"><span class="hljs-function">  LPCTSTR    lpValueName,</span></span><br><span class="hljs-params"><span class="hljs-function">  DWORD      Reserved,</span></span><br><span class="hljs-params"><span class="hljs-function">  DWORD      dwType,</span></span><br><span class="hljs-params"><span class="hljs-function">  <span class="hljs-type">const</span> BYTE *lpData,</span></span><br><span class="hljs-params"><span class="hljs-function">  DWORD      cbData</span></span><br><span class="hljs-params"><span class="hljs-function">)</span></span>;<br></code></pre></td></tr></table></figure>
+
+<p>参数说明：</p>
+<ul>
+<li><code>hKey</code>: 指定要设置值的注册表键的句柄。</li>
+<li><code>lpValueName</code>: 指定要设置的值的名称。</li>
+<li><code>Reserved</code>: 保留参数，通常可以设置为 0。</li>
+<li><code>dwType</code>: 指定值的数据类型，例如 <code>REG_SZ</code> 表示字符串。</li>
+<li><code>lpData</code>: 指定要设置的值的数据。</li>
+<li><code>cbData</code>: 指定数据的大小。</li>
+</ul>
+<p>函数返回值：</p>
+<ul>
+<li>如果函数调用成功，返回 <code>ERROR_SUCCESS</code>。</li>
+<li>如果函数调用失败，返回一个错误代码。</li>
+</ul>
+<p>通过获取自身进程名称，并将该进程路径写入到<code>CurrentVersion</code>变量中实现开机自启。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;stdio.h&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;Windows.h&gt;</span></span><br><br><span class="hljs-meta">#<span class="hljs-keyword">define</span> Reg_Path <span class="hljs-string">&quot;Software\\Microsoft\\Windows\\CurrentVersion\\Run&quot;</span></span><br><br><span class="hljs-function">BOOL <span class="hljs-title">Reg_Regedit</span><span class="hljs-params">(HKEY Reg_Root,<span class="hljs-type">char</span> *lpszFileName, <span class="hljs-type">char</span> *lpszValueName)</span></span><br><span class="hljs-function"></span>&#123;<br>    HKEY hKey;<br>    <span class="hljs-keyword">if</span> (ERROR_SUCCESS != <span class="hljs-built_in">RegOpenKeyEx</span>(Reg_Root, Reg_Path, <span class="hljs-number">0</span>, KEY_WRITE, &amp;hKey))<br>    &#123;<br>        <span class="hljs-keyword">return</span> FALSE;<br>    &#125;<br>    <span class="hljs-keyword">if</span> (ERROR_SUCCESS != <span class="hljs-built_in">RegSetValueEx</span>(hKey, lpszValueName, <span class="hljs-number">0</span>, REG_SZ, (BYTE *)lpszFileName, (<span class="hljs-number">1</span> + ::<span class="hljs-built_in">lstrlen</span>(lpszFileName))))<br>    &#123;<br>        <span class="hljs-built_in">RegCloseKey</span>(hKey);<br>        <span class="hljs-keyword">return</span> FALSE;<br>    &#125;<br>    <span class="hljs-built_in">RegCloseKey</span>(hKey);<br>    <span class="hljs-keyword">return</span> TRUE;<br>&#125;<br><br><span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">(<span class="hljs-type">int</span> argc, <span class="hljs-type">char</span> *argv[])</span></span><br><span class="hljs-function"></span>&#123;<br>    TCHAR szPath[MAX_PATH] = &#123; <span class="hljs-number">0</span> &#125;;<br>    <span class="hljs-keyword">if</span> (<span class="hljs-built_in">GetModuleFileName</span>(<span class="hljs-literal">NULL</span>, szPath, MAX_PATH))<br>    &#123;<br>        <span class="hljs-type">int</span> ret = <span class="hljs-built_in">Reg_Regedit</span>(HKEY_CURRENT_USER, szPath, <span class="hljs-string">&quot;main&quot;</span>);<br>        <span class="hljs-keyword">if</span> (ret == <span class="hljs-number">1</span>)<br>            <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;添加自身启动项成功 \n&quot;</span>);<br>    &#125;<br><br>    <span class="hljs-built_in">system</span>(<span class="hljs-string">&quot;pause&quot;</span>);<br>    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>注册表项不仅可以实现开机自启动，由于Win系统都是在注册表之上工作的，只要向指定位置写入键值,即可实现许多不可思议的功能。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-comment">// 禁用系统任务管理器</span><br><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">RegTaskmanagerForbidden</span><span class="hljs-params">()</span></span><br><span class="hljs-function"></span>&#123;<br>    HKEY hkey;<br>    DWORD value = <span class="hljs-number">1</span>;<br>    <span class="hljs-built_in">RegCreateKey</span>(HKEY_CURRENT_USER, <span class="hljs-string">&quot;Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\System&quot;</span>, &amp;hkey);<br>    <span class="hljs-built_in">RegSetValueEx</span>(hkey, <span class="hljs-string">&quot;DisableTaskMgr&quot;</span>, <span class="hljs-literal">NULL</span>, REG_DWORD, (LPBYTE)&amp;value, <span class="hljs-built_in">sizeof</span>(DWORD));<br>    <span class="hljs-built_in">RegCloseKey</span>(hkey);<br>&#125;<br><br><span class="hljs-comment">// 禁用注册表编辑器</span><br><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">RegEditForbidden</span><span class="hljs-params">()</span></span><br><span class="hljs-function"></span>&#123;<br>    HKEY hkey;<br>    DWORD value = <span class="hljs-number">1</span>;<br>    <span class="hljs-built_in">RegCreateKey</span>(HKEY_CURRENT_USER, <span class="hljs-string">&quot;Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\System&quot;</span>, &amp;hkey);<br>    <span class="hljs-built_in">RegSetValueEx</span>(hkey, <span class="hljs-string">&quot;DisableRegistryTools&quot;</span>, <span class="hljs-literal">NULL</span>, REG_DWORD, (LPBYTE)&amp;value, <span class="hljs-built_in">sizeof</span>(DWORD));<br>    <span class="hljs-built_in">RegCloseKey</span>(hkey);<br>&#125;<br><br><span class="hljs-comment">// 干掉桌面壁纸</span><br><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">RegModifyBackroud</span><span class="hljs-params">()</span></span><br><span class="hljs-function"></span>&#123;<br>    DWORD value = <span class="hljs-number">1</span>;<br>    HKEY hkey;<br>    <span class="hljs-built_in">RegCreateKey</span>(HKEY_CURRENT_USER, <span class="hljs-string">&quot;Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\System&quot;</span>, &amp;hkey);<br>    <span class="hljs-built_in">RegSetValueEx</span>(hkey, <span class="hljs-string">&quot;Wallpaper&quot;</span>, <span class="hljs-literal">NULL</span>, REG_SZ, (<span class="hljs-type">unsigned</span> <span class="hljs-type">char</span> *)<span class="hljs-string">&quot;c://&quot;</span>, <span class="hljs-number">3</span>);<br>    <span class="hljs-built_in">RegSetValueEx</span>(hkey, <span class="hljs-string">&quot;WallpaperStyle&quot;</span>, <span class="hljs-literal">NULL</span>, REG_DWORD, (LPBYTE)&amp;value, <span class="hljs-built_in">sizeof</span>(DWORD));<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h3 id="判断键值状态"><a href="#判断键值状态" class="headerlink" title="判断键值状态"></a>判断键值状态</h3><p><code>RegQueryValueEx</code> 是用于检索指定注册表键中的指定值。它可以用来获取注册表键中的数据，例如字符串、整数等。以下是 <code>RegQueryValueEx</code> 的一般用法：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-function">LSTATUS <span class="hljs-title">RegQueryValueEx</span><span class="hljs-params">(</span></span><br><span class="hljs-params"><span class="hljs-function">  HKEY    hKey,</span></span><br><span class="hljs-params"><span class="hljs-function">  LPCTSTR lpValueName,</span></span><br><span class="hljs-params"><span class="hljs-function">  LPDWORD lpReserved,</span></span><br><span class="hljs-params"><span class="hljs-function">  LPDWORD lpType,</span></span><br><span class="hljs-params"><span class="hljs-function">  LPBYTE  lpData,</span></span><br><span class="hljs-params"><span class="hljs-function">  LPDWORD lpcbData</span></span><br><span class="hljs-params"><span class="hljs-function">)</span></span>;<br></code></pre></td></tr></table></figure>
+
+<p>参数说明：</p>
+<ul>
+<li><code>hKey</code>: 指定要查询值的注册表键的句柄。</li>
+<li><code>lpValueName</code>: 指定要查询的值的名称。</li>
+<li><code>lpReserved</code>: 保留参数，通常可以设置为 NULL。</li>
+<li><code>lpType</code>: 接收值的数据类型的指针。</li>
+<li><code>lpData</code>: 接收值的数据的缓冲区。</li>
+<li><code>lpcbData</code>: 接收数据缓冲区大小的指针。在调用函数之前，你应该将其设置为缓冲区大小。</li>
+</ul>
+<p>函数返回值：</p>
+<ul>
+<li>如果函数调用成功，返回 <code>ERROR_SUCCESS</code>。</li>
+<li>如果函数调用失败，返回一个错误代码。</li>
+</ul>
+<p>判断指定键值对是否存在,是否被设置过.</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;stdio.h&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;Windows.h&gt;</span></span><br><br><span class="hljs-meta">#<span class="hljs-keyword">define</span> Reg_Path <span class="hljs-string">&quot;Software\\Microsoft\\Windows\\CurrentVersion\\Run&quot;</span></span><br><br><span class="hljs-function">BOOL <span class="hljs-title">Check_Regedit</span><span class="hljs-params">(HKEY Reg_Root,<span class="hljs-type">char</span> * name)</span></span><br><span class="hljs-function"></span>&#123;<br>    HKEY hKey;<br>    <span class="hljs-keyword">if</span> (ERROR_SUCCESS == <span class="hljs-built_in">RegOpenKeyEx</span>(Reg_Root, Reg_Path, <span class="hljs-literal">NULL</span>, KEY_ALL_ACCESS, &amp;hKey))<br>    &#123;<br>        DWORD dwSize = <span class="hljs-number">255</span>, dwType = REG_SZ;<br>        <span class="hljs-type">char</span> String[<span class="hljs-number">256</span>];<br>        <span class="hljs-keyword">if</span> (ERROR_SUCCESS == <span class="hljs-built_in">RegQueryValueEx</span>(hKey, name, <span class="hljs-number">0</span>, &amp;dwType, (BYTE *)String, &amp;dwSize))<br>        &#123;<br>            <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;<br>        &#125;<br>    &#125;<br>    <span class="hljs-built_in">RegCloseKey</span>(hKey);<br>    <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;<br>&#125;<br><br><span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">(<span class="hljs-type">int</span> argc, <span class="hljs-type">char</span> *argv[])</span></span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-type">int</span> ret = <span class="hljs-built_in">Check_Regedit</span>(HKEY_CURRENT_USER, <span class="hljs-string">&quot;ctfmon&quot;</span>);<br>    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;启动项存在: %d \n&quot;</span>, ret);<br><br>    <span class="hljs-built_in">system</span>(<span class="hljs-string">&quot;pause&quot;</span>);<br>    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h3 id="删除键值对"><a href="#删除键值对" class="headerlink" title="删除键值对"></a>删除键值对</h3><p><code>RegDeleteValue</code> 是用于删除指定注册表键中的指定值。它可以用来删除注册表键中的数据值。以下是 <code>RegDeleteValue</code> 的一般用法：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-function">LSTATUS <span class="hljs-title">RegDeleteValue</span><span class="hljs-params">(</span></span><br><span class="hljs-params"><span class="hljs-function">  HKEY    hKey,</span></span><br><span class="hljs-params"><span class="hljs-function">  LPCTSTR lpValueName</span></span><br><span class="hljs-params"><span class="hljs-function">)</span></span>;<br></code></pre></td></tr></table></figure>
+
+<p>参数说明：</p>
+<ul>
+<li><code>hKey</code>: 指定要删除值的注册表键的句柄。</li>
+<li><code>lpValueName</code>: 指定要删除的值的名称。</li>
+</ul>
+<p>函数返回值：</p>
+<ul>
+<li>如果函数调用成功，返回 <code>ERROR_SUCCESS</code>。</li>
+<li>如果函数调用失败，返回一个错误代码。</li>
+</ul>
+<p>传入需要删除的注册表位置，以及该表中键值对的名字即可完成删除。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;stdio.h&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;Windows.h&gt;</span></span><br><br><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">Delete_Regedit</span><span class="hljs-params">(<span class="hljs-type">const</span> <span class="hljs-type">char</span> *Reg_Path,<span class="hljs-type">const</span> <span class="hljs-type">char</span> *Key_Name)</span></span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-type">char</span> szKeyName[MAXBYTE] = &#123; <span class="hljs-number">0</span> &#125;;<br>    HKEY hKey = <span class="hljs-literal">NULL</span>;<br>    LONG lRet = <span class="hljs-built_in">RegOpenKeyEx</span>(HKEY_LOCAL_MACHINE, Reg_Path, <span class="hljs-number">0</span>, KEY_ALL_ACCESS, &amp;hKey);<br>    <span class="hljs-built_in">RegDeleteValue</span>(hKey, Key_Name);<br>    <span class="hljs-built_in">RegCloseKey</span>(hKey);<br>&#125;<br><br><span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">(<span class="hljs-type">int</span> argc, <span class="hljs-type">char</span> *argv[])</span></span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-built_in">Delete_Regedit</span>(<span class="hljs-string">&quot;Software\\Microsoft\\Windows\\CurrentVersion\\Run&quot;</span>, <span class="hljs-string">&quot;main1&quot;</span>);<br><br>    <span class="hljs-built_in">system</span>(<span class="hljs-string">&quot;pause&quot;</span>);<br>    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+<blockquote>
+<p>文章出处：<a target="_blank" rel="noopener" href="https://www.cnblogs.com/LyShark/p/17850186.html">https://www.cnblogs.com/LyShark/p/17850186.html</a>  </p>
+</blockquote>
+<blockquote>
+</blockquote>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/Win32-API/" class="category-chain-item">Win32_API</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>C++操作注册表</div>
+      <div>https://zytpca.github.io/2024/06/26/Win32_Api/C++操作注册表/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>Insomniac</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2024年6月26日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2024/07/11/Win32_Api/StackWalker%EF%BC%9A%E6%B7%B1%E5%85%A5%E8%B0%83%E7%94%A8%E6%A0%88%E7%9A%84%E6%8E%A2%E7%B4%A2%E5%B7%A5%E5%85%B7/" title="StackWalker：深入调用栈的探索工具">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">StackWalker：深入调用栈的探索工具</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2024/06/26/Win32_Api/%E6%89%BE%E4%B8%8D%E5%88%B0%E6%98%A0%E5%B0%84%E7%9A%84%E7%BD%91%E7%BB%9C%E9%A9%B1%E5%8A%A8%E5%99%A8/" title="找不到映射的网络驱动器">
+                        <span class="hidden-mobile">找不到映射的网络驱动器</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+  
+  
+    <article id="comments" lazyload>
+      
+  <div id="valine"></div>
+  <script type="text/javascript">
+    Fluid.utils.loadComments('#valine', function() {
+      Fluid.utils.createScript('https://lib.baomitu.com/valine/1.5.1/Valine.min.js', function() {
+        var options = Object.assign(
+          {"appId":"ZDiOGqAWSCAU9bUYDktIk21c-gzGzoHsz","appKey":"JShbv4TgfpvIvvrRl7GFc57n","path":"window.location.pathname","placeholder":null,"avatar":"retro","meta":["nick","mail","link"],"requiredFields":[],"pageSize":10,"lang":"zh-CN","highlight":false,"recordIP":false,"serverURLs":"https://zdiogqaw.lc-cn-n1-shared.com","emojiCDN":null,"emojiMaps":null,"enableQQ":false},
+          {
+            el: "#valine",
+            path: window.location.pathname
+          }
+        )
+        new Valine(options);
+        Fluid.utils.waitElementVisible('#valine .vcontent', () => {
+          var imgSelector = '#valine .vcontent img:not(.vemoji)';
+          Fluid.plugins.imageCaption(imgSelector);
+          Fluid.plugins.fancyBox(imgSelector);
+        })
+      });
+    });
+  </script>
+  <noscript>Please enable JavaScript to view the comments</noscript>
+
+
+    </article>
+  
+
+
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

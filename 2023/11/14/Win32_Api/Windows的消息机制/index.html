@@ -1,0 +1,717 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="Insomniac">
+  <meta name="keywords" content="keywords">
+  
+    <meta name="description" content="一、消息队列首先我们要明确一个观点：窗口是和线程相关联的，消息队列也是和线程相关联的，这个线程无论是主线程还是子线程。 当一个线程被创建时，系统假定该线程不会被用于任何与用户界面相关的任务，所以不会为它分配相应的资源（如消息队列等），因为这样可以减少线程对系统资源的占用。 但是，一旦这个线程调用一个与图形用户界面有关的函数（例如检查它的消息队列或建立一个窗口），系统就会为该线程分配一些额外的资源，">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Windows的消息机制">
+<meta property="og:url" content="https://zytpca.github.io/2023/11/14/Win32_Api/Windows%E7%9A%84%E6%B6%88%E6%81%AF%E6%9C%BA%E5%88%B6/index.html">
+<meta property="og:site_name" content="Insomnia_">
+<meta property="og:description" content="一、消息队列首先我们要明确一个观点：窗口是和线程相关联的，消息队列也是和线程相关联的，这个线程无论是主线程还是子线程。 当一个线程被创建时，系统假定该线程不会被用于任何与用户界面相关的任务，所以不会为它分配相应的资源（如消息队列等），因为这样可以减少线程对系统资源的占用。 但是，一旦这个线程调用一个与图形用户界面有关的函数（例如检查它的消息队列或建立一个窗口），系统就会为该线程分配一些额外的资源，">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://zytpca.github.io/2023/11/14/Win32_Api/Windows%E7%9A%84%E6%B6%88%E6%81%AF%E6%9C%BA%E5%88%B6/image-0.png">
+<meta property="article:published_time" content="2023-11-14T09:42:12.000Z">
+<meta property="article:modified_time" content="2025-04-24T06:49:41.329Z">
+<meta property="article:author" content="Insomniac">
+<meta property="article:tag" content="keywords">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://zytpca.github.io/2023/11/14/Win32_Api/Windows%E7%9A%84%E6%B6%88%E6%81%AF%E6%9C%BA%E5%88%B6/image-0.png">
+  
+  
+  
+  <title>Windows的消息机制 - Insomnia_</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"zytpca.github.io","root":"/","version":"1.9.8","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Insomniac&#39;s Blog</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="Windows的消息机制"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2023-11-14 17:42" pubdate>
+          2023年11月14日 下午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          2.2k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          18 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">Windows的消息机制</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h3 id="一、消息队列"><a href="#一、消息队列" class="headerlink" title="一、消息队列"></a><font style="color:rgb(79, 79, 79);">一、消息队列</font></h3><p><font style="color:rgb(77, 77, 77);">首先我们要明确一个观点：</font><strong><font style="color:rgb(77, 77, 77);">窗口是和线程相关联的，消息队列也是和线程相关联的，这个线程无论是主线程还是子线程</font></strong><font style="color:rgb(77, 77, 77);">。</font></p>
+<p><font style="color:rgb(77, 77, 77);">当一个线程被创建时，系统假定该线程不会被用于任何与用户界面相关的任务，所以不会为它分配相应的资源（如消息队列等），因为这样可以减少线程对系统资源的占用。</font></p>
+<p><font style="color:rgb(77, 77, 77);">但是，一旦这个线程调用一个与图形用户界面有关的函数（例如检查它的消息队列或建立一个窗口），系统就会为该线程分配一些额外的资源，以便它能够执行与用户界面有关的任务。特别是，系统会分配一个</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">THREADINFO</font><font style="color:rgb(77, 77, 77);">结构，并将这个数据结构与线程关联起来。</font></p>
+<p><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">THREADINFO</font><font style="color:rgb(77, 77, 77);">结构是微软内部的、没有被公开的数据结构，我们无法找到这个结构体的准确的定义。但从其他文档中可以得知，</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">THREADINFO</font><font style="color:rgb(77, 77, 77);">结构包含：</font></p>
+<ul>
+<li><font style="color:rgba(0, 0, 0, 0.75);">一组成员变量，利用这组成员，线程可以认为它是在自己独占的环境中运行。</font></li>
+<li><font style="color:rgba(0, 0, 0, 0.75);">登记消息队列（posted-message queue）</font></li>
+<li><font style="color:rgba(0, 0, 0, 0.75);">发送消息队列（ send-message queue）</font></li>
+<li><font style="color:rgba(0, 0, 0, 0.75);">应答消息队列（ reply -message queue）</font></li>
+<li><font style="color:rgba(0, 0, 0, 0.75);">虚拟输入队列（virtualized-input queue）</font></li>
+<li><font style="color:rgba(0, 0, 0, 0.75);">唤醒标志（wake flag）</font></li>
+<li><font style="color:rgba(0, 0, 0, 0.75);">用来描述线程局部输入状态的若干变量。</font></li>
+</ul>
+<p><img src="/2023/11/14/Win32_Api/Windows%E7%9A%84%E6%B6%88%E6%81%AF%E6%9C%BA%E5%88%B6/image-0.png" srcset="/img/loading.gif" lazyload></p>
+<p><font style="color:rgb(77, 77, 77);">上图描述了</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">THREADINFO</font><font style="color:rgb(77, 77, 77);">结构中的各个成员。线程拥有了</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">THREADINFO</font><font style="color:rgb(77, 77, 77);">结构也就有了各种消息队列。</font></p>
+<h3 id="二、窗口消息处理函数"><a href="#二、窗口消息处理函数" class="headerlink" title="二、窗口消息处理函数"></a><font style="color:rgb(79, 79, 79);">二、窗口消息处理函数</font></h3><p><font style="color:rgb(77, 77, 77);">下面是一个完整的、简单的创建Windows窗体的C++代码：</font></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;windows.h&gt;</span></span><br><br><span class="hljs-function">LRESULT CALLBACK <span class="hljs-title">WndProc</span><span class="hljs-params">(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)</span> </span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-keyword">switch</span> (message) &#123;<br>        <span class="hljs-keyword">case</span> WM_DESTROY:<br>            <span class="hljs-built_in">PostQuitMessage</span>(<span class="hljs-number">0</span>);<br>            <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>    &#125;<br><br>    <span class="hljs-keyword">return</span> <span class="hljs-built_in">DefWindowProc</span>(hwnd, message, wParam, lParam);<br>&#125;<br><br><br><span class="hljs-function"><span class="hljs-type">int</span> WINAPI <span class="hljs-title">WinMain</span><span class="hljs-params">(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, <span class="hljs-type">int</span> iCmdShow)</span></span><br><span class="hljs-function"></span>&#123;<br>    WNDCLASS wndclass;<br>    wndclass.style = CS_HREDRAW | CS_VREDRAW;<br>    wndclass.cbClsExtra = <span class="hljs-number">0</span>;<br>    wndclass.cbWndExtra = <span class="hljs-number">0</span>;<br>    wndclass.hInstance = hInstance;<br>    wndclass.hIcon = <span class="hljs-built_in">LoadIcon</span>(<span class="hljs-literal">NULL</span>, IDI_APPLICATION);<br>    wndclass.hCursor = <span class="hljs-built_in">LoadCursor</span>(<span class="hljs-literal">NULL</span>, IDC_ARROW);<br>    wndclass.hbrBackground = (HBRUSH)<span class="hljs-built_in">GetStockObject</span>(WHITE_BRUSH);<br>    wndclass.lpszMenuName = <span class="hljs-literal">NULL</span>;<br>    wndclass.lpfnWndProc = WndProc; <span class="hljs-comment">//设置窗体消息处理函数</span><br>    wndclass.lpszClassName = <span class="hljs-built_in">TEXT</span>(<span class="hljs-string">&quot;SimpleWindow&quot;</span>);<br>    <span class="hljs-keyword">if</span> (!<span class="hljs-built_in">RegisterClass</span>(&amp;wndclass)) &#123;  <span class="hljs-comment">//注册窗体类</span><br>        <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>    &#125;;<br><br>    HWND hwnd = <span class="hljs-built_in">CreateWindow</span>(<span class="hljs-built_in">TEXT</span>(<span class="hljs-string">&quot;SimpleWindow&quot;</span>), <span class="hljs-comment">// window class name</span><br>    <span class="hljs-built_in">TEXT</span>(<span class="hljs-string">&quot;SimpleWindow&quot;</span>),   <span class="hljs-comment">// window caption</span><br>    WS_OVERLAPPEDWINDOW, <span class="hljs-comment">// window style</span><br>    CW_USEDEFAULT,<span class="hljs-comment">// initial x position</span><br>    CW_USEDEFAULT,<span class="hljs-comment">// initial y position</span><br>    CW_USEDEFAULT,<span class="hljs-comment">// initial x size</span><br>    CW_USEDEFAULT,<span class="hljs-comment">// initial y size</span><br>    <span class="hljs-literal">NULL</span>, <span class="hljs-comment">// parent window handle</span><br>    <span class="hljs-literal">NULL</span>, <span class="hljs-comment">// window menu handle</span><br>    hInstance, <span class="hljs-comment">// program instance handle</span><br>    <span class="hljs-literal">NULL</span>);<br><br>    <span class="hljs-built_in">ShowWindow</span>(hwnd, SW_SHOW);<br><br>    MSG msg;<br>    <span class="hljs-keyword">while</span> (<span class="hljs-built_in">GetMessage</span>(&amp;msg, <span class="hljs-literal">NULL</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>)) &#123;<br>        <span class="hljs-built_in">TranslateMessage</span>(&amp;msg);<br>        <span class="hljs-built_in">DispatchMessage</span>(&amp;msg);<br>    &#125;<br><br>    <span class="hljs-keyword">return</span> msg.wParam;<br>&#125;<br><br></code></pre></td></tr></table></figure>
+
+<p><font style="color:rgb(77, 77, 77);">上面代码中的</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">WndProc</font><font style="color:rgb(77, 77, 77);">函数就是窗口消息处理函数。消息循环中的</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">DispatchMessage</font><font style="color:rgb(77, 77, 77);">函数派发消息时，系统就会调用这个函数对消息进行处理。</font></p>
+<h3 id="三、消息循环"><a href="#三、消息循环" class="headerlink" title="三、消息循环"></a><font style="color:rgb(79, 79, 79);">三、消息循环</font></h3><p><font style="color:rgb(77, 77, 77);">消息循环是程序员自己编写的从线程消息队列中循环获取（Get或Peek）消息的循环体，代码大致如下：</font></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-keyword">while</span>(<span class="hljs-built_in">GetMessage</span>(&amp;Msg, <span class="hljs-literal">NULL</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>))   <br>&#123;   <br>    <span class="hljs-built_in">TranslateMessage</span>(&amp;Msg);<br>    <span class="hljs-built_in">DispatchMessage</span>(&amp;Msg);<br>&#125;   <br><br></code></pre></td></tr></table></figure>
+
+<h5 id="3-1-循环何时结束？"><a href="#3-1-循环何时结束？" class="headerlink" title="3.1 循环何时结束？"></a><font style="color:rgb(79, 79, 79);">3.1 循环何时结束？</font></h5><p><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">GetMessage</font><font style="color:rgb(77, 77, 77);">函数的返回值如下：</font></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs plain">收到WM_QUIT消息，返回0<br>收到非WM_QUIT消息，返回非0<br>错误，返回-1<br></code></pre></td></tr></table></figure>
+
+<p><font style="color:rgb(77, 77, 77);">利用</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">GetMessage</font><font style="color:rgb(77, 77, 77);">函数返回值的特性，在收到</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">WM_QUIT</font><font style="color:rgb(77, 77, 77);">消息之后，消息循环就会结束。</font></p>
+<h5 id="3-2-TranslateMessage"><a href="#3-2-TranslateMessage" class="headerlink" title="3.2 TranslateMessage"></a><font style="color:rgb(79, 79, 79);">3.2 TranslateMessage</font></h5><p><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">TranslateMessage</font><font style="color:rgb(77, 77, 77);">函数的作用就是将虚拟键值信息转换为字符信息。这一步并不是必须的。</font></p>
+<h5 id="3-3-DispatchMessage"><a href="#3-3-DispatchMessage" class="headerlink" title="3.3 DispatchMessage"></a><font style="color:rgb(79, 79, 79);">3.3 DispatchMessage</font></h5><p><font style="color:rgb(77, 77, 77);">将消息派发到窗口的消息处理函数（如第2节中的</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">WndProc</font><font style="color:rgb(77, 77, 77);">函数）。</font></p>
+<h3 id="四、PostMessage"><a href="#四、PostMessage" class="headerlink" title="四、PostMessage"></a><font style="color:rgb(79, 79, 79);">四、PostMessage</font></h3><h4 id="4-1-PostMessage原理"><a href="#4-1-PostMessage原理" class="headerlink" title="4.1 PostMessage原理"></a><font style="color:rgb(79, 79, 79);">4.1 PostMessage原理</font></h4><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-function">BOOL <span class="hljs-title">PostMessage</span><span class="hljs-params">(</span></span><br><span class="hljs-params"><span class="hljs-function">    HWND hwnd,</span></span><br><span class="hljs-params"><span class="hljs-function">    UINT uMsg,</span></span><br><span class="hljs-params"><span class="hljs-function">    WPARAM wParam,</span></span><br><span class="hljs-params"><span class="hljs-function">    LPARAM lParam</span></span><br><span class="hljs-params"><span class="hljs-function">)</span></span>;<br></code></pre></td></tr></table></figure>
+
+<p><font style="color:rgb(77, 77, 77);">当一个线程调用这个函数时，系统要确定是哪一个线程建立了用</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">hwnd</font><font style="color:rgb(77, 77, 77);">参数标识的窗口。然后系统分配一块内存，将这个消息参数存储在这块内存中，并将这块内存增加到相应线程的登记消息队列中。并且，这个函数还设置</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">QS_POSTMESSAGE</font><font style="color:rgb(77, 77, 77);">唤醒位。</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">PostMessage</font><font style="color:rgb(77, 77, 77);">函数在登记了消息之后立即返回，调用该函数的线程不知道登记的消息是否被指定窗口的窗口过程所处理。实际上，有可能这个指定的窗口永远不会收到登记的消息。</font></p>
+<h4 id="4-2-PostThreadMessage"><a href="#4-2-PostThreadMessage" class="headerlink" title="4.2 PostThreadMessage"></a><font style="color:rgb(79, 79, 79);">4.2 PostThreadMessage</font></h4><p><font style="color:rgb(77, 77, 77);">还可以通过调用</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">PostThreadMessage</font><font style="color:rgb(77, 77, 77);">将消息放置在线程的登记消息队列中。</font></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-function">BOOL <span class="hljs-title">PostThreadMessage</span><span class="hljs-params">(</span></span><br><span class="hljs-params"><span class="hljs-function">    DWORD dwThreadId,</span></span><br><span class="hljs-params"><span class="hljs-function">    UINT uMsg,</span></span><br><span class="hljs-params"><span class="hljs-function">    WPARAM wParam,</span></span><br><span class="hljs-params"><span class="hljs-function">    LPARAM lParam</span></span><br><span class="hljs-params"><span class="hljs-function">)</span></span>;<br></code></pre></td></tr></table></figure>
+
+<h4 id="4-3-PostQuitMessage"><a href="#4-3-PostQuitMessage" class="headerlink" title="4.3 PostQuitMessage"></a><font style="color:rgb(79, 79, 79);">4.3 PostQuitMessage</font></h4><p><font style="color:rgb(77, 77, 77);">为了终止线程的消息循环，可以调用</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">PostQuitMessage</font><font style="color:rgb(77, 77, 77);">函数。</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">PostQuitMessage</font><font style="color:rgb(77, 77, 77);">函数类似于：<br></font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">PostThreadMessage(GetCurrentThreadId(), WM_QUIT, nExitCode, 0);</font><font style="color:rgb(77, 77, 77);"><br></font><font style="color:rgb(77, 77, 77);">但是，</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">PostQuitMessage</font><font style="color:rgb(77, 77, 77);">并不实际登记一个消息到任何一个</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">THREADINFO</font><font style="color:rgb(77, 77, 77);">结构的消息队列。只是在内部，</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">PostQuitMessage</font><font style="color:rgb(77, 77, 77);">会设定</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">QS_QUIT</font><font style="color:rgb(77, 77, 77);">唤醒标志，并对</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">THREADINFO</font><font style="color:rgb(77, 77, 77);">结构的</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">nExitCode</font><font style="color:rgb(77, 77, 77);">成员进行设置。因为这些操作永远不会失败，所以</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">PostQuitMessage</font><font style="color:rgb(77, 77, 77);">的原型被定义成</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">VOID</font><font style="color:rgb(77, 77, 77);">返回类型。</font></p>
+<h3 id="五、SendMessage"><a href="#五、SendMessage" class="headerlink" title="五、SendMessage"></a><font style="color:rgb(79, 79, 79);">五、SendMessage</font></h3><p><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">SendMessage</font><font style="color:rgb(77, 77, 77);">的实现分为2种情况：向本线程的窗口发送消息、向其他线程的窗口发送消息。</font></p>
+<h4 id="5-1-向本线程的窗口发送消息"><a href="#5-1-向本线程的窗口发送消息" class="headerlink" title="5.1 向本线程的窗口发送消息"></a><font style="color:rgb(79, 79, 79);">5.1 向本线程的窗口发送消息</font></h4><p><font style="color:rgb(77, 77, 77);">如果调用</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">SendMessage</font><font style="color:rgb(77, 77, 77);">的线程向本线程所建立的一个窗口发送一个消息，</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">SendMessage</font><font style="color:rgb(77, 77, 77);">的做法很简单：直接调用指定窗口的“窗口消息处理函数”，将其作为一个子例程。当“窗口消息处理函数”完成对消息的处理后，该函数会返回一个值给</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">SendMessage</font><font style="color:rgb(77, 77, 77);">，</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">SendMessage</font><font style="color:rgb(77, 77, 77);">再将这个值返回给调用线程。</font></p>
+<h4 id="5-2-向其他线程的窗口发送消息"><a href="#5-2-向其他线程的窗口发送消息" class="headerlink" title="5.2 向其他线程的窗口发送消息"></a><font style="color:rgb(79, 79, 79);">5.2 向其他线程的窗口发送消息</font></h4><p><font style="color:rgb(77, 77, 77);">但是，当调用</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">SendMessage</font><font style="color:rgb(77, 77, 77);">的线程向其他线程所建立的窗口发送消息时，</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">SendMessage</font><font style="color:rgb(77, 77, 77);">的内部工作就复杂得多（即使两个线程在同一进程中也是如此）。</font></p>
+<p><font style="color:rgb(77, 77, 77);">Windows要求建立窗口的线程来处理该窗口的消息。所以当一个线程调用</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">SendMessage</font><font style="color:rgb(77, 77, 77);">向一个由其他进程所建立的窗口发送一个消息，也就是向其他的线程发送消息，发送线程不可能处理窗口消息，因为发送线程不是运行在接收进程的地址空间中，因此不能访问相应窗口过程的代码和数据。实际上，发送线程要挂起，而由另外的线程处理消息。所以为了向其他线程建立的窗口发送一个窗口消息，系统必须执行下面的动作：</font></p>
+<p><font style="color:rgb(77, 77, 77);">首先，发送的消息要追加到接收线程的发送消息队列，同时还为这个线程设定</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">QS_SENDMESSAGE</font><font style="color:rgb(77, 77, 77);">标志（后面将讨论）。<br></font><font style="color:rgb(77, 77, 77);">其次，如果接收线程已经在执行代码并且没有等待消息（等待消息是指：如调用</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">GetMessage</font><font style="color:rgb(77, 77, 77);">、</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">PeekMessage</font><font style="color:rgb(77, 77, 77);">或</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">WaitMessage</font><font style="color:rgb(77, 77, 77);">等），发送的消息不会被处理，系统不能中断线程来立即处理消息。当接收进程在等待消息时，系统首先检查线程的</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">QS_SENDMESSAGE</font><font style="color:rgb(77, 77, 77);">唤醒标志是否被设定，如果是，系统扫描发送消息队列中消息的列表，并找到第一个发送的消息。有可能在这个队列中有几个发送的消息。例如，几个线程可以同时向一个窗口分别发送消息。当发生这样的事时，系统只是将这些消息追加到接收线程的发送消息队列中。</font></p>
+<p><font style="color:rgb(77, 77, 77);">当接收线程等待消息时，系统从发送消息队列中取出第一个消息并调用适当的窗口过程来处理消息。如果在发送消息队列中再没有消息了，则</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">QS_SENDMESSAGE</font><font style="color:rgb(77, 77, 77);">唤醒标志被关闭。当接收线程处理消息的时候，调用</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">SendMessage</font><font style="color:rgb(77, 77, 77);">的线程被设置成空闲状态（idle），等待一个消息出现在它的应答消息队列中。在发送的消息处理之后，窗口过程的返回值被登记到发送线程的应答消息队列中。发送线程现在被唤醒，取出包含在应答消息队列中的返回值。这个返回值就是</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">SendMessage</font><font style="color:rgb(77, 77, 77);">的返回值。这时，发送线程继续正常执行。</font></p>
+<p><font style="color:rgb(77, 77, 77);">当一个线程等待</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">SendMessage</font><font style="color:rgb(77, 77, 77);">返回时，它基本上是处于空闲状态。但它可以执行一个任务：如果系统中另外一个线程向一个窗口发送消息，这个窗口是由这个等待</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">SendMessage</font><font style="color:rgb(77, 77, 77);">返回的线程所建立的，则系统要立即处理发送的消息。在这种情况下，系统不必等待线程去调用</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">GetMessage</font><font style="color:rgb(77, 77, 77);">、</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">PeekMessage</font><font style="color:rgb(77, 77, 77);">或</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">WaitMessage</font><font style="color:rgb(77, 77, 77);">。</font></p>
+<p><font style="color:rgb(77, 77, 77);">由于Windows使用上述方法处理线程之间发送的消息，所以有可能造成线程挂起。例如，当处理发送消息的线程含有错误时，会导致进入死循环。那么对于调用</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">SendMessage</font><font style="color:rgb(77, 77, 77);">的线程会发生什么事呢？它会恢复执行吗？这是否意味着一个程序中的bug会导致另一个程序挂起？答案是确实有这种可能。</font></p>
+<p><font style="color:rgb(77, 77, 77);">利用4个函数—— </font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">SendMessageTimeOut</font><font style="color:rgb(77, 77, 77);">、</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">SendMessageCallback</font><font style="color:rgb(77, 77, 77);">、</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">SendNotifyMessage</font><font style="color:rgb(77, 77, 77);">和</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">ReplayMessage</font><font style="color:rgb(77, 77, 77);">，可以编写保护性代码防止出现这种情况。</font></p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/Win32-API/" class="category-chain-item">Win32_API</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>Windows的消息机制</div>
+      <div>https://zytpca.github.io/2023/11/14/Win32_Api/Windows的消息机制/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>Insomniac</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2023年11月14日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2023/11/14/Win32_Api/Windows%E5%B9%B3%E5%8F%B0%E2%80%9C%E8%B7%AF%E5%BE%84%E2%80%9D%E7%9B%B8%E5%85%B3API%E6%B1%87%E6%80%BB/" title="Windows平台“路径”相关API汇总">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">Windows平台“路径”相关API汇总</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2023/11/14/Win32_Api/%E3%80%90NOTE%E3%80%91Windows%E5%86%85%E5%AD%98%E4%BD%93%E7%B3%BB/" title="【NOTE】Windows内存体系">
+                        <span class="hidden-mobile">【NOTE】Windows内存体系</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+  
+  
+    <article id="comments" lazyload>
+      
+  <div id="valine"></div>
+  <script type="text/javascript">
+    Fluid.utils.loadComments('#valine', function() {
+      Fluid.utils.createScript('https://lib.baomitu.com/valine/1.5.1/Valine.min.js', function() {
+        var options = Object.assign(
+          {"appId":"ZDiOGqAWSCAU9bUYDktIk21c-gzGzoHsz","appKey":"JShbv4TgfpvIvvrRl7GFc57n","path":"window.location.pathname","placeholder":null,"avatar":"retro","meta":["nick","mail","link"],"requiredFields":[],"pageSize":10,"lang":"zh-CN","highlight":false,"recordIP":false,"serverURLs":"https://zdiogqaw.lc-cn-n1-shared.com","emojiCDN":null,"emojiMaps":null,"enableQQ":false},
+          {
+            el: "#valine",
+            path: window.location.pathname
+          }
+        )
+        new Valine(options);
+        Fluid.utils.waitElementVisible('#valine .vcontent', () => {
+          var imgSelector = '#valine .vcontent img:not(.vemoji)';
+          Fluid.plugins.imageCaption(imgSelector);
+          Fluid.plugins.fancyBox(imgSelector);
+        })
+      });
+    });
+  </script>
+  <noscript>Please enable JavaScript to view the comments</noscript>
+
+
+    </article>
+  
+
+
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

@@ -1,0 +1,1212 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="Insomniac">
+  <meta name="keywords" content="keywords">
+  
+    <meta name="description" content="遍历Windows USB设备树的几种方法1. 设备信息1.1. 设备实例ID 设备ID设备 ID(Device ID) 是一个字符串，由设备的报告枚举器。 设备只有一个设备 id。如USB存储设备ID:USB\VID_23A9&amp;PID_EF18\5&amp;19353383&amp;0&amp;2 实例ID实例 ID (Instance ID)是将设备与计算机上相同类型的其他设备进行区分">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【NOTE】遍历Windows_USB设备树">
+<meta property="og:url" content="https://zytpca.github.io/2023/11/20/Win32_Api/%E3%80%90NOTE%E3%80%91%E9%81%8D%E5%8E%86Windows_USB%E8%AE%BE%E5%A4%87%E6%A0%91/index.html">
+<meta property="og:site_name" content="Insomnia_">
+<meta property="og:description" content="遍历Windows USB设备树的几种方法1. 设备信息1.1. 设备实例ID 设备ID设备 ID(Device ID) 是一个字符串，由设备的报告枚举器。 设备只有一个设备 id。如USB存储设备ID:USB\VID_23A9&amp;PID_EF18\5&amp;19353383&amp;0&amp;2 实例ID实例 ID (Instance ID)是将设备与计算机上相同类型的其他设备进行区分">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://zytpca.github.io/2023/11/20/Win32_Api/%E3%80%90NOTE%E3%80%91%E9%81%8D%E5%8E%86Windows_USB%E8%AE%BE%E5%A4%87%E6%A0%91/image-0.png">
+<meta property="article:published_time" content="2023-11-20T06:14:14.000Z">
+<meta property="article:modified_time" content="2025-04-24T07:23:40.648Z">
+<meta property="article:author" content="Insomniac">
+<meta property="article:tag" content="USB">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://zytpca.github.io/2023/11/20/Win32_Api/%E3%80%90NOTE%E3%80%91%E9%81%8D%E5%8E%86Windows_USB%E8%AE%BE%E5%A4%87%E6%A0%91/image-0.png">
+  
+  
+  
+  <title>【NOTE】遍历Windows_USB设备树 - Insomnia_</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"zytpca.github.io","root":"/","version":"1.9.8","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Insomniac&#39;s Blog</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="【NOTE】遍历Windows_USB设备树"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2023-11-20 14:14" pubdate>
+          2023年11月20日 下午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          7.8k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          65 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">【NOTE】遍历Windows_USB设备树</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="遍历Windows-USB设备树的几种方法"><a href="#遍历Windows-USB设备树的几种方法" class="headerlink" title="遍历Windows USB设备树的几种方法"></a>遍历Windows USB设备树的几种方法</h1><h2 id="1-设备信息"><a href="#1-设备信息" class="headerlink" title="1. 设备信息"></a><font style="color:rgb(79, 79, 79);">1. 设备信息</font></h2><h3 id="1-1-设备实例ID"><a href="#1-1-设备实例ID" class="headerlink" title="1.1. 设备实例ID"></a><font style="color:rgb(79, 79, 79);">1.1. 设备实例ID</font></h3><ul>
+<li><font style="color:rgb(77, 77, 77);">设备ID<br></font><font style="color:rgb(77, 77, 77);">设备 ID(Device ID) 是一个字符串，由设备的报告枚举器。 设备只有一个设备 id。如USB存储设备ID:</font><font style="color:rgb(85, 86, 102);background-color:rgb(238, 240, 244);">USB\VID_23A9&amp;PID_EF18\5&amp;19353383&amp;0&amp;2</font></li>
+<li><font style="color:rgb(77, 77, 77);">实例ID<br></font><font style="color:rgb(77, 77, 77);">实例 ID (Instance ID)是将设备与计算机上相同类型的其他设备进行区分的设备标识字符串。 实例 ID 包含序列号信息（如果基础总线支持）或某些类型的位置信息。</font></li>
+<li><font style="color:rgb(77, 77, 77);">设备实例 ID<br></font><a target="_blank" rel="noopener" href="https://so.csdn.net/so/search?q=%E8%AE%BE%E5%A4%87%E6%A0%91&spm=1001.2101.3001.7020">设备树</a><font style="color:rgb(77, 77, 77);">的每个节点都称为一个设备节点中，或devnode。设备实例 ID 是系统提供的设备标识字符串，用于在系统中唯一标识设备。 即插即用（PnP）管理器为系统设备树中的每个设备节点（devnode）分配一个设备实例 ID。<br></font><font style="color:rgb(77, 77, 77);">此字符串的格式由连接到设备 ID的实例 ID组成，如下所示：</font><font style="color:rgb(85, 86, 102);background-color:rgb(238, 240, 244);"><instance-specific-ID></font><font style="color:rgb(77, 77, 77);">设备实例 ID 的字符数（不包括 NULL 终止符）必须小于 MAX_DEVICE_ID_LEN。 此约束适用于设备 ID和实例特定 ID字段之间所有字段的长度与 “” 字段分隔符之和。<br></font><font style="color:rgb(77, 77, 77);">在系统重新启动期间，设备实例 ID 是永久性的。<br></font><font style="color:rgb(77, 77, 77);">下面是连接到 PCI 设备的设备 ID 的实例 ID （“1 &amp; 08”）的示例：</font><font style="color:rgb(85, 86, 102);background-color:rgb(238, 240, 244);">PCI\VEN_1000&amp;DEV_0001&amp;SUBSYS_00000000&amp;REV_02\1&amp;08</font></li>
+</ul>
+<h3 id="1-2-设备树"><a href="#1-2-设备树" class="headerlink" title="1.2. 设备树"></a><font style="color:rgb(79, 79, 79);">1.2. 设备树</font></h3><p><img src="/2023/11/20/Win32_Api/%E3%80%90NOTE%E3%80%91%E9%81%8D%E5%8E%86Windows_USB%E8%AE%BE%E5%A4%87%E6%A0%91/image-0.png" srcset="/img/loading.gif" lazyload></p>
+<h2 id="2-使用CM系列函数枚举所有设备"><a href="#2-使用CM系列函数枚举所有设备" class="headerlink" title="2. 使用CM系列函数枚举所有设备"></a><font style="color:rgb(79, 79, 79);">2. 使用CM系列函数枚举所有设备</font></h2><p><font style="color:rgb(77, 77, 77);">CM 是Configuration Manager的简写。Configuration Manager functions是用来查询Windows系统中接入的设备信息。</font></p>
+<h3 id="2-1-常用的函数"><a href="#2-1-常用的函数" class="headerlink" title="2.1. 常用的函数"></a><font style="color:rgb(79, 79, 79);">2.1. 常用的函数</font></h3><ul>
+<li><font style="color:rgba(0, 0, 0, 0.75);">获取设备实例句柄<br></font><font style="color:rgba(0, 0, 0, 0.75);">pDeviceID如果配置为设备ID，则返回对应设备的设备实例句柄。如果pDeviceID为NULL，则返回根设备的设备实例句柄。</font></li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-function">CMAPI CONFIGRET <span class="hljs-title">CM_Locate_DevNode</span><span class="hljs-params">(</span></span><br><span class="hljs-params"><span class="hljs-function">PDEVINST    pdnDevInst,</span></span><br><span class="hljs-params"><span class="hljs-function">DEVINSTID_A pDeviceID,</span></span><br><span class="hljs-params"><span class="hljs-function">ULONG       ulFlags)</span></span>;<br></code></pre></td></tr></table></figure>
+
+<ul>
+<li><font style="color:rgba(0, 0, 0, 0.75);">从注册表中获取设备对应的属性<br></font><font style="color:rgba(0, 0, 0, 0.75);">根据不同的ulProperty获取对应的属性，如设备描述、硬件ID、位置信息、GUID等。</font></li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-function">CMAPI CONFIGRET <span class="hljs-title">CM_Get_DevNode_Registry_PropertyW</span><span class="hljs-params">(</span></span><br><span class="hljs-params"><span class="hljs-function">DEVINST dnDevInst,</span></span><br><span class="hljs-params"><span class="hljs-function">ULONG   ulProperty,</span></span><br><span class="hljs-params"><span class="hljs-function">PULONG  pulRegDataType,</span></span><br><span class="hljs-params"><span class="hljs-function">PVOID   Buffer,</span></span><br><span class="hljs-params"><span class="hljs-function">PULONG  pulLength,</span></span><br><span class="hljs-params"><span class="hljs-function">ULONG   ulFlags</span></span><br><span class="hljs-params"><span class="hljs-function">)</span></span>;<br></code></pre></td></tr></table></figure>
+
+<ul>
+<li><font style="color:rgba(0, 0, 0, 0.75);">枚举函数<br></font><font style="color:rgba(0, 0, 0, 0.75);">分别根据现有的设备实例句柄，找到子设备实例句柄、兄弟设备实例句柄、父设备实例句柄。</font></li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-function">CMAPI CONFIGRET <span class="hljs-title">CM_Get_Child</span><span class="hljs-params">(</span></span><br><span class="hljs-params"><span class="hljs-function">PDEVINST pdnDevInst,</span></span><br><span class="hljs-params"><span class="hljs-function">DEVINST  dnDevInst,</span></span><br><span class="hljs-params"><span class="hljs-function">ULONG    ulFlags</span></span><br><span class="hljs-params"><span class="hljs-function">)</span></span>;<br><span class="hljs-function">CMAPI CONFIGRET <span class="hljs-title">CM_Get_Sibling</span><span class="hljs-params">(</span></span><br><span class="hljs-params"><span class="hljs-function">PDEVINST pdnDevInst,</span></span><br><span class="hljs-params"><span class="hljs-function">DEVINST  dnDevInst,</span></span><br><span class="hljs-params"><span class="hljs-function">ULONG    ulFlags</span></span><br><span class="hljs-params"><span class="hljs-function">)</span></span>;<br><span class="hljs-function">CMAPI CONFIGRET <span class="hljs-title">CM_Get_Parent</span><span class="hljs-params">(</span></span><br><span class="hljs-params"><span class="hljs-function">PDEVINST pdnDevInst,</span></span><br><span class="hljs-params"><span class="hljs-function">DEVINST  dnDevInst,</span></span><br><span class="hljs-params"><span class="hljs-function">ULONG    ulFlags</span></span><br><span class="hljs-params"><span class="hljs-function">)</span></span>;<br></code></pre></td></tr></table></figure>
+
+<ul>
+<li><font style="color:rgba(0, 0, 0, 0.75);">获取设备ID<br></font><font style="color:rgba(0, 0, 0, 0.75);">根据设备实例句柄获取对应的设备ID</font></li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-function">CMAPI CONFIGRET <span class="hljs-title">CM_Get_Device_IDW</span><span class="hljs-params">(</span></span><br><span class="hljs-params"><span class="hljs-function">DEVINST dnDevInst,</span></span><br><span class="hljs-params"><span class="hljs-function">PWSTR   Buffer,</span></span><br><span class="hljs-params"><span class="hljs-function">ULONG   BufferLen,</span></span><br><span class="hljs-params"><span class="hljs-function">ULONG   ulFlags</span></span><br><span class="hljs-params"><span class="hljs-function">)</span></span>;<br></code></pre></td></tr></table></figure>
+
+<h3 id="2-2-示例"><a href="#2-2-示例" class="headerlink" title="2.2. 示例"></a><font style="color:rgb(79, 79, 79);">2.2. 示例</font></h3><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-function">UINT <span class="hljs-title">EnumeAllDeviceByCM</span><span class="hljs-params">()</span></span><br><span class="hljs-function"></span>&#123;<br>    DEVINST     devInst = &#123;<span class="hljs-number">0</span>&#125;;<br>    DEVINST     devInstNext = &#123;<span class="hljs-number">0</span>&#125;;<br>    CONFIGRET   cr = &#123;<span class="hljs-number">0</span>&#125;;<br>    ULONG       walkDone = <span class="hljs-number">0</span>;<br>    ULONG       len = <span class="hljs-number">0</span>;<br>    <span class="hljs-type">char</span>		buf[<span class="hljs-number">1024</span>] = &#123;<span class="hljs-number">0</span>&#125;;<br><br>    <span class="hljs-comment">// Get Root DevNode</span><br>    cr = <span class="hljs-built_in">CM_Locate_DevNode</span>(&amp;devInst, <span class="hljs-literal">NULL</span>, <span class="hljs-number">0</span>);<br>    <span class="hljs-comment">// 可以指定根设备ID</span><br>    <span class="hljs-comment">//cr = CM_Locate_DevNode(&amp;devInst, &quot;PCI\\VEN_8086&amp;DEV_9D2F&amp;SUBSYS_17091D72&amp;REV_21\\3&amp;11583659&amp;1&amp;A0&quot;, 0);</span><br>    <span class="hljs-keyword">if</span> (cr != CR_SUCCESS)<br>    &#123;<br>        <span class="hljs-keyword">return</span> <span class="hljs-number">1</span>;<br>    &#125;<br><br>    <span class="hljs-comment">// Do a depth first search for the DevNode with a matching</span><br>    <span class="hljs-comment">// DriverName value</span><br>    <span class="hljs-keyword">while</span> (!walkDone)<br>        &#123;<br>            <span class="hljs-type">char</span> szDeviceID[<span class="hljs-number">1024</span>] = &#123;<span class="hljs-number">0</span>&#125;;<br>            <span class="hljs-type">char</span> szProperty[<span class="hljs-number">1024</span>] = &#123;<span class="hljs-number">0</span>&#125;;<br><br>            len = <span class="hljs-number">1024</span>;<br>            cr = <span class="hljs-built_in">CM_Get_Device_ID</span>(devInst, szDeviceID, len, <span class="hljs-number">0</span>);<br><br>            <span class="hljs-keyword">if</span> (cr == CR_SUCCESS)<br>            &#123;<br><br>                <span class="hljs-keyword">for</span> (UINT uIdx = <span class="hljs-number">1</span>; uIdx &lt;= _countof(CM_PROPERTY); uIdx++)<br>                    &#123;<br>                        len = <span class="hljs-number">1024</span>;<br>                        cr = <span class="hljs-built_in">CM_Get_DevNode_Registry_Property</span>(devInst,<br>                            uIdx,<br>                            <span class="hljs-literal">NULL</span>,<br>                            szProperty,<br>                            &amp;len,<br>                            <span class="hljs-number">0</span>);<br>                        <span class="hljs-keyword">if</span> (cr == CR_SUCCESS)<br>                        &#123;<br>                            std::cout&lt;&lt;CM_PROPERTY[uIdx<span class="hljs-number">-1</span>]&lt;&lt;std::endl;<br>                            std::cout&lt;&lt;szProperty&lt;&lt;std::endl;<br>                            <span class="hljs-built_in">OutputDebugString</span>(CM_PROPERTY[uIdx<span class="hljs-number">-1</span>]);<span class="hljs-built_in">OutputDebugString</span>(<span class="hljs-string">&quot;:&quot;</span>);<br>                            <span class="hljs-built_in">OutputDebugString</span>(szProperty);<span class="hljs-built_in">OutputDebugString</span>(<span class="hljs-string">&quot;\r\n&quot;</span>);<br>                        &#125;<br>                    &#125;<br>            &#125;<br>            <span class="hljs-keyword">else</span><br>            &#123;<br>                <span class="hljs-keyword">return</span> <span class="hljs-number">1</span>;<br>            &#125;<br><br>            <span class="hljs-comment">// This DevNode didn&#x27;t match, go down a level to the first child.</span><br>            cr = <span class="hljs-built_in">CM_Get_Child</span>(&amp;devInstNext,<br>                devInst,<br>                <span class="hljs-number">0</span>);<br><br>            <span class="hljs-keyword">if</span> (cr == CR_SUCCESS)<br>            &#123;<br>                devInst = devInstNext;<br>                <span class="hljs-keyword">continue</span>;<br>            &#125;<br><br>            <span class="hljs-comment">// Can&#x27;t go down any further, go across to the next sibling.  If</span><br>            <span class="hljs-comment">// there are no more siblings, go back up until there is a sibling.</span><br>            <span class="hljs-comment">// If we can&#x27;t go up any further, we&#x27;re back at the root and we&#x27;re</span><br>            <span class="hljs-comment">// done.</span><br>            <span class="hljs-keyword">for</span> (;;)<br>                &#123;<br>                    cr = <span class="hljs-built_in">CM_Get_Sibling</span>(&amp;devInstNext,devInst,<span class="hljs-number">0</span>);<br>                    <span class="hljs-keyword">if</span> (cr == CR_SUCCESS)<br>                    &#123;<br>                        devInst = devInstNext;<br>                        <span class="hljs-keyword">break</span>;<br>                    &#125;<br><br>                    cr = <span class="hljs-built_in">CM_Get_Parent</span>(&amp;devInstNext,devInst,<span class="hljs-number">0</span>);<br>                    <span class="hljs-keyword">if</span> (cr == CR_SUCCESS)<br>                    &#123;<br>                        devInst = devInstNext;<br>                    &#125;<br>                    <span class="hljs-keyword">else</span><br>                    &#123;<br>                        walkDone = <span class="hljs-number">1</span>;<br>                        <span class="hljs-keyword">break</span>;<br>                    &#125;<br>                &#125;<br>        &#125;<br><br>    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h2 id="3-使用SetupAPI枚举所有设备"><a href="#3-使用SetupAPI枚举所有设备" class="headerlink" title="3. 使用SetupAPI枚举所有设备"></a><font style="color:rgb(79, 79, 79);">3. 使用SetupAPI枚举所有设备</font></h2><p><font style="color:rgb(77, 77, 77);">Windows的安装的设备都归为设备信息集中(device information set)中，并提供一套Setup开头的API来访问设备的相关信息。</font></p>
+<h3 id="3-1-常用的函数"><a href="#3-1-常用的函数" class="headerlink" title="3.1. 常用的函数"></a><font style="color:rgb(79, 79, 79);">3.1. 常用的函数</font></h3><ul>
+<li><font style="color:rgba(0, 0, 0, 0.75);">获取设备信息集句柄<br></font><font style="color:rgba(0, 0, 0, 0.75);">ClassGuid可以指定对应设备类型的GUID，如果不指定，则枚举所有。Enumerator如果指定枚举字符串，则枚举相应枚举器下的设备，否则返回根设备信息集句柄。</font></li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-function">WINSETUPAPI HDEVINFO <span class="hljs-title">SetupDiGetClassDevsW</span><span class="hljs-params">(</span></span><br><span class="hljs-params"><span class="hljs-function"><span class="hljs-type">const</span> GUID *ClassGuid,</span></span><br><span class="hljs-params"><span class="hljs-function">PCWSTR     Enumerator,</span></span><br><span class="hljs-params"><span class="hljs-function">HWND       hwndParent,</span></span><br><span class="hljs-params"><span class="hljs-function">DWORD      Flags</span></span><br><span class="hljs-params"><span class="hljs-function">)</span></span>;<br></code></pre></td></tr></table></figure>
+
+<ul>
+<li><font style="color:rgba(0, 0, 0, 0.75);">获取指定设备信息集中的对应序号的设备信息数据<br></font><font style="color:rgba(0, 0, 0, 0.75);">DeviceInfoData可以给相关函数标识设备，并且DeviceInfoData中有设备实例句柄可以给CM函数使用。</font></li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-function">WINSETUPAPI BOOL <span class="hljs-title">SetupDiEnumDeviceInfo</span><span class="hljs-params">(</span></span><br><span class="hljs-params"><span class="hljs-function">HDEVINFO         DeviceInfoSet,</span></span><br><span class="hljs-params"><span class="hljs-function">DWORD            MemberIndex,</span></span><br><span class="hljs-params"><span class="hljs-function">PSP_DEVINFO_DATA DeviceInfoData</span></span><br><span class="hljs-params"><span class="hljs-function">)</span></span>;<br></code></pre></td></tr></table></figure>
+
+<ul>
+<li><font style="color:rgba(0, 0, 0, 0.75);">从注册表中获取设备属性<br></font><font style="color:rgba(0, 0, 0, 0.75);">根据不同的ulProperty获取对应的属性，如设备描述、硬件ID、位置信息、GUID等。作用基本与CM_Get_DevNode_Registry_Property相同。</font></li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-function">WINSETUPAPI BOOL <span class="hljs-title">SetupDiGetDeviceRegistryPropertyA</span><span class="hljs-params">(</span></span><br><span class="hljs-params"><span class="hljs-function">HDEVINFO         DeviceInfoSet,</span></span><br><span class="hljs-params"><span class="hljs-function">PSP_DEVINFO_DATA DeviceInfoData,</span></span><br><span class="hljs-params"><span class="hljs-function">DWORD            Property,</span></span><br><span class="hljs-params"><span class="hljs-function">PDWORD           PropertyRegDataType,</span></span><br><span class="hljs-params"><span class="hljs-function">PBYTE            PropertyBuffer,</span></span><br><span class="hljs-params"><span class="hljs-function">DWORD            PropertyBufferSize,</span></span><br><span class="hljs-params"><span class="hljs-function">PDWORD           RequiredSize</span></span><br><span class="hljs-params"><span class="hljs-function">)</span></span>;<br></code></pre></td></tr></table></figure>
+
+<ul>
+<li><font style="color:rgba(0, 0, 0, 0.75);">获取设备所有属性<br></font><font style="color:rgba(0, 0, 0, 0.75);">获取设备的所有属性，包括了注册表中的信息。并且其中有获取设备ID、子设备的实例ID、父设备的实例ID、兄弟设备的实例ID等，要以进行与CM类似的枚举。</font></li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-function">WINSETUPAPI BOOL <span class="hljs-title">SetupDiGetDevicePropertyW</span><span class="hljs-params">(</span></span><br><span class="hljs-params"><span class="hljs-function">HDEVINFO         DeviceInfoSet,</span></span><br><span class="hljs-params"><span class="hljs-function">PSP_DEVINFO_DATA DeviceInfoData,</span></span><br><span class="hljs-params"><span class="hljs-function"><span class="hljs-type">const</span> DEVPROPKEY *PropertyKey,</span></span><br><span class="hljs-params"><span class="hljs-function">DEVPROPTYPE      *PropertyType,</span></span><br><span class="hljs-params"><span class="hljs-function">PBYTE            PropertyBuffer,</span></span><br><span class="hljs-params"><span class="hljs-function">DWORD            PropertyBufferSize,</span></span><br><span class="hljs-params"><span class="hljs-function">PDWORD           RequiredSize,</span></span><br><span class="hljs-params"><span class="hljs-function">DWORD            Flags</span></span><br><span class="hljs-params"><span class="hljs-function">)</span></span>;<br></code></pre></td></tr></table></figure>
+
+<ul>
+<li><font style="color:rgba(0, 0, 0, 0.75);">获取设备路径<br></font><font style="color:rgba(0, 0, 0, 0.75);">DeviceInfoSet从SetupDiGetClassDevs获取，DeviceInterfaceData从SetupDiEnumDeviceInterfaces获取。</font></li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-function">WINSETUPAPI BOOL <span class="hljs-title">SetupDiGetDeviceInterfaceDetailA</span><span class="hljs-params">(</span></span><br><span class="hljs-params"><span class="hljs-function">HDEVINFO                           DeviceInfoSet,</span></span><br><span class="hljs-params"><span class="hljs-function">PSP_DEVICE_INTERFACE_DATA          DeviceInterfaceData,</span></span><br><span class="hljs-params"><span class="hljs-function">PSP_DEVICE_INTERFACE_DETAIL_DATA_A DeviceInterfaceDetailData,</span></span><br><span class="hljs-params"><span class="hljs-function">DWORD                              DeviceInterfaceDetailDataSize,</span></span><br><span class="hljs-params"><span class="hljs-function">PDWORD                             RequiredSize,</span></span><br><span class="hljs-params"><span class="hljs-function">PSP_DEVINFO_DATA                   DeviceInfoData</span></span><br><span class="hljs-params"><span class="hljs-function">)</span></span>;<br></code></pre></td></tr></table></figure>
+
+<ul>
+<li><font style="color:rgba(0, 0, 0, 0.75);">获取设备ID<br></font><font style="color:rgba(0, 0, 0, 0.75);">DeviceInfoSet从SetupDiGetClassDevs获取，DeviceInfoData从SetupDiEnumDeviceInfo获取。</font></li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-function">WINSETUPAPI BOOL <span class="hljs-title">SetupDiGetDeviceInstanceIdA</span><span class="hljs-params">(</span></span><br><span class="hljs-params"><span class="hljs-function">HDEVINFO         DeviceInfoSet,</span></span><br><span class="hljs-params"><span class="hljs-function">PSP_DEVINFO_DATA DeviceInfoData,</span></span><br><span class="hljs-params"><span class="hljs-function">PSTR             DeviceInstanceId,</span></span><br><span class="hljs-params"><span class="hljs-function">DWORD            DeviceInstanceIdSize,</span></span><br><span class="hljs-params"><span class="hljs-function">PDWORD           RequiredSize</span></span><br><span class="hljs-params"><span class="hljs-function">)</span></span>;<br></code></pre></td></tr></table></figure>
+
+<h3 id="3-2-示例"><a href="#3-2-示例" class="headerlink" title="3.2. 示例"></a><font style="color:rgb(79, 79, 79);">3.2. 示例</font></h3><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-function">UINT <span class="hljs-title">EnumAllDeviceBySetup</span><span class="hljs-params">()</span></span><br><span class="hljs-function"></span>&#123;<br>    HDEVINFO DeviceInfoSet = <span class="hljs-built_in">SetupDiGetClassDevs</span>(<span class="hljs-literal">NULL</span>, <span class="hljs-literal">NULL</span>, <span class="hljs-literal">NULL</span>, DIGCF_ALLCLASSES | DIGCF_PRESENT);<br>    <span class="hljs-keyword">if</span> (DeviceInfoSet == INVALID_HANDLE_VALUE)<br>        <span class="hljs-keyword">return</span> <span class="hljs-number">1</span>;<br>    <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> i = <span class="hljs-number">0</span>; ; i++) <br>        &#123;<br>            SP_DEVINFO_DATA DeviceInfoData;<br>            DeviceInfoData.cbSize = <span class="hljs-built_in">sizeof</span>(DeviceInfoData);<br>            <span class="hljs-keyword">if</span> (!<span class="hljs-built_in">SetupDiEnumDeviceInfo</span>(DeviceInfoSet, i, &amp;DeviceInfoData))<br>                <span class="hljs-keyword">break</span>;<br>            <span class="hljs-type">char</span> szDeviceID[<span class="hljs-number">256</span>] = &#123;&#125;;<br>            DWORD dwTemp = <span class="hljs-number">0</span>;<br>            <span class="hljs-built_in">SetupDiGetDeviceInstanceId</span>(DeviceInfoSet, &amp;DeviceInfoData, szDeviceID, <span class="hljs-number">256</span>, &amp;dwTemp);<br><br>            DEVPROPKEY devicePropertyKey[<span class="hljs-number">256</span>] = &#123;<span class="hljs-number">0</span>&#125;;<br>            DWORD RequiredSize = <span class="hljs-number">0</span>;<br>            DEVPROPTYPE PropertyType = <span class="hljs-number">0</span>;<br>            CHAR PropertyBuffer[<span class="hljs-number">8192</span>] = &#123; <span class="hljs-number">0</span> &#125;;<br>            <span class="hljs-keyword">for</span> (UINT uIdx = <span class="hljs-number">0</span>; uIdx &lt; _countof(szSPDRPName); uIdx++)<br>                &#123;<br>                    DWORD DataT = <span class="hljs-number">0</span>;<br>                    DWORD buffersize = <span class="hljs-number">0</span>;<br>                    <span class="hljs-keyword">if</span> (<span class="hljs-built_in">SetupDiGetDeviceRegistryProperty</span>(DeviceInfoSet, &amp;DeviceInfoData, uIdx, &amp;DataT, <span class="hljs-built_in">reinterpret_cast</span>&lt;PBYTE&gt;(PropertyBuffer), <span class="hljs-number">8192</span>, &amp;RequiredSize))<br>                    &#123;<br>                        CString strLog = szSPDRPName[uIdx];<br>                        strLog += <span class="hljs-string">&quot;:&quot;</span>;<br>                        strLog += PropertyBuffer;<br>                        strLog += <span class="hljs-string">&quot;\r\n&quot;</span>;<br>                        <span class="hljs-built_in">OutputDebugString</span>(strLog);<br>                        std::cout&lt;&lt;strLog.<span class="hljs-built_in">GetString</span>();<br>                    &#125;<br>                &#125;<br>        &#125;<br><br>    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>&#125;<br><br><span class="hljs-function">UINT <span class="hljs-title">GetAllUSBDeviceID</span><span class="hljs-params">(<span class="hljs-type">char</span>** _ppDeviceID, <span class="hljs-type">char</span>** _ppHubID)</span></span><br><span class="hljs-function"></span>&#123;<br>    GUID* pGUID = (GUID*)&amp;GUID_DEVINTERFACE_DISK;<br>    HDEVINFO hDevInfoSet = <span class="hljs-built_in">SetupDiGetClassDevs</span>(pGUID, <span class="hljs-literal">NULL</span>, <span class="hljs-literal">NULL</span>, DIGCF_PRESENT | DIGCF_DEVICEINTERFACE);<br>    <span class="hljs-keyword">if</span> ( hDevInfoSet == INVALID_HANDLE_VALUE ) <br>    &#123;<br>        <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>    &#125;<br><br>    SP_DEVICE_INTERFACE_DATA ifdata;<br>    PSP_DEVICE_INTERFACE_DETAIL_DATA pDetail = (PSP_DEVICE_INTERFACE_DETAIL_DATA)<span class="hljs-built_in">malloc</span>(<span class="hljs-number">1024</span>);<br>    <span class="hljs-keyword">if</span> (pDetail == <span class="hljs-literal">NULL</span>)<br>    &#123;<br>        <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>    &#125;<br>    pDetail-&gt;cbSize = <span class="hljs-built_in">sizeof</span>(SP_DEVICE_INTERFACE_DETAIL_DATA);<br><br>    U32 dwDeviceIdx = <span class="hljs-number">0</span>;<br>    U32 dwUSBDeviceCnt = <span class="hljs-number">0</span>;<br>    BOOL result = TRUE;<br>    SP_DEVINFO_DATA spdd;<br><br>    <span class="hljs-comment">// device index = 0, 1, 2... test the device interface one by one</span><br>    <span class="hljs-keyword">while</span> (result)<br>        &#123;<br>            ifdata.cbSize = <span class="hljs-built_in">sizeof</span>(ifdata);<br><br>            <span class="hljs-comment">//enumerates the device interfaces that are contained in a device information set</span><br>            result = <span class="hljs-built_in">SetupDiEnumDeviceInterfaces</span>(<br>                hDevInfoSet,     <span class="hljs-comment">// DeviceInfoSet</span><br>                <span class="hljs-literal">NULL</span>,            <span class="hljs-comment">// DeviceInfoData</span><br>                pGUID,           <span class="hljs-comment">// GUID</span><br>                dwDeviceIdx,	 <span class="hljs-comment">// MemberIndex</span><br>                &amp;ifdata          <span class="hljs-comment">// DeviceInterfaceData</span><br>                );<br>            <span class="hljs-keyword">if</span> (result)<br>            &#123;<br>                <span class="hljs-comment">// get the buffer size of details</span><br>                U32 dwSize = <span class="hljs-number">0</span>;<br>                result = <span class="hljs-built_in">SetupDiGetDeviceInterfaceDetail</span>(hDevInfoSet, &amp;ifdata, <span class="hljs-literal">NULL</span>, <span class="hljs-number">0</span>, &amp;dwSize, <span class="hljs-literal">NULL</span>);<br><br>                <span class="hljs-keyword">if</span> ((ERROR_INSUFFICIENT_BUFFER == <span class="hljs-built_in">GetLastError</span>()) &amp;&amp; (dwSize &gt; <span class="hljs-number">0</span>))<br>                &#123;<br>                    pDetail-&gt;cbSize = <span class="hljs-built_in">sizeof</span>(*pDetail);<br><br>                    <span class="hljs-built_in">ZeroMemory</span>((PVOID)&amp;spdd, <span class="hljs-built_in">sizeof</span>(spdd));<br>                    spdd.cbSize = <span class="hljs-built_in">sizeof</span>(spdd);<br><br>                    <span class="hljs-comment">// get details about a device interface</span><br>                    result = <span class="hljs-built_in">SetupDiGetDeviceInterfaceDetail</span>(<br>                        hDevInfoSet,    <span class="hljs-comment">// DeviceInfoSet</span><br>                        &amp;ifdata,        <span class="hljs-comment">// DeviceInterfaceData</span><br>                        pDetail,        <span class="hljs-comment">// DeviceInterfaceDetailData</span><br>                        <span class="hljs-number">1024</span>,			<span class="hljs-comment">// DeviceInterfaceDetailDataSize</span><br>                        &amp;dwSize,        <span class="hljs-comment">// RequiredSize</span><br>                        &amp;spdd			<span class="hljs-comment">// DeviceInfoData</span><br>                        );		<br><br>                    dwDeviceIdx++;<br><br>                    <span class="hljs-comment">// 设备路径必须是usbstor</span><br>                    <span class="hljs-keyword">if</span> (<span class="hljs-literal">NULL</span> == <span class="hljs-built_in">strstr</span>(pDetail-&gt;DevicePath, <span class="hljs-string">&quot;usb&quot;</span>))<br>                    &#123;<br>                        <span class="hljs-keyword">continue</span>;<br>                    &#125;<br><br>                    <span class="hljs-keyword">if</span> (result)<br>                    &#123;<br>                        DEVINST DevInstParent = <span class="hljs-number">0</span>;<br>					CONFIGRET cr = <span class="hljs-built_in">CM_Get_Parent</span>(&amp;DevInstParent, spdd.DevInst, <span class="hljs-number">0</span>);<br>					<span class="hljs-keyword">if</span> (cr != CR_SUCCESS)<br>					&#123;			<br>						<span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>					&#125;<br>					<span class="hljs-type">char</span> szBuff[<span class="hljs-number">512</span>] = &#123;<span class="hljs-number">0</span>&#125;;<br>					cr = <span class="hljs-built_in">CM_Get_Device_ID</span>(DevInstParent, szBuff, <span class="hljs-number">512</span>, <span class="hljs-number">0</span>);<br>					<span class="hljs-keyword">if</span> (cr != CR_SUCCESS)<br>					&#123;			<br>						<span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>					&#125;<br><br>					<span class="hljs-built_in">strcpy_s</span>(_ppDeviceID[dwUSBDeviceCnt], DEVICE_ID_SIZE, szBuff);<br><br>					<span class="hljs-comment">// 再向上查找一级即为HUBID</span><br>					DEVINST hubDevInst = <span class="hljs-number">0</span>;<br>					cr = <span class="hljs-built_in">CM_Get_Parent</span>(&amp;hubDevInst, DevInstParent, <span class="hljs-number">0</span>);<br>					<span class="hljs-keyword">if</span> (cr != CR_SUCCESS)<br>					&#123;			<br>						<span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>					&#125;<br><br>					<span class="hljs-type">char</span> szHubBuff[<span class="hljs-number">512</span>] = &#123;<span class="hljs-number">0</span>&#125;;<br>					cr = <span class="hljs-built_in">CM_Get_Device_ID</span>(hubDevInst, szHubBuff, <span class="hljs-number">512</span>, <span class="hljs-number">0</span>);<br>					<span class="hljs-keyword">if</span> (cr != CR_SUCCESS)<br>					&#123;			<br>						<span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>					&#125;<br><br>					<span class="hljs-built_in">strcpy_s</span>(_ppHubID[dwUSBDeviceCnt++], DEVICE_ID_SIZE, szHubBuff);<br>				&#125;<br>			&#125;<br>		&#125;<br>	&#125;<br><br>	<span class="hljs-built_in">free</span>(pDetail);<br>	<span class="hljs-built_in">SetupDiDestroyDeviceInfoList</span>(hDevInfoSet);<br><br>	<span class="hljs-keyword">return</span> dwUSBDeviceCnt;<br>&#125;<br><br><span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">EnumAllDeviceBySetupEx</span><span class="hljs-params">()</span></span><br><span class="hljs-function"></span>&#123;<br>	<span class="hljs-comment">//HDEVINFO DeviceInfoSet = SetupDiGetClassDevs(NULL, &quot;USB&quot;, NULL, DIGCF_ALLCLASSES | DIGCF_PRESENT);</span><br>	HDEVINFO DeviceInfoSet = <span class="hljs-built_in">SetupDiGetClassDevs</span>(<span class="hljs-literal">NULL</span>, <span class="hljs-literal">NULL</span>, <span class="hljs-literal">NULL</span>, DIGCF_ALLCLASSES | DIGCF_PRESENT);<br>	<span class="hljs-keyword">if</span> (DeviceInfoSet == INVALID_HANDLE_VALUE)<br>		<span class="hljs-keyword">return</span> <span class="hljs-number">1</span>;<br><br>	<span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> nIdx = <span class="hljs-number">0</span>; ; nIdx++) <br>	&#123;<br>		SP_DEVINFO_DATA DeviceInfoData;<br>		DeviceInfoData.cbSize = <span class="hljs-built_in">sizeof</span>(DeviceInfoData);<br>		<span class="hljs-keyword">if</span> (!<span class="hljs-built_in">SetupDiEnumDeviceInfo</span>(DeviceInfoSet, nIdx, &amp;DeviceInfoData))<br>			<span class="hljs-keyword">break</span>;<br>		<span class="hljs-type">char</span> szDeviceID[<span class="hljs-number">256</span>] = &#123;&#125;;<br>		DWORD dwTemp = <span class="hljs-number">0</span>;<br>		<span class="hljs-built_in">SetupDiGetDeviceInstanceId</span>(DeviceInfoSet, &amp;DeviceInfoData, szDeviceID, <span class="hljs-number">256</span>, &amp;dwTemp);<br>		<br>		DEVPROPKEY devicePropertyKey[<span class="hljs-number">256</span>] = &#123;<span class="hljs-number">0</span>&#125;;<br>		DWORD dwCount = <span class="hljs-number">128</span>;<br>		<span class="hljs-keyword">if</span> (!<span class="hljs-built_in">SetupDiGetDevicePropertyKeys</span>(DeviceInfoSet, &amp;DeviceInfoData, devicePropertyKey, dwCount, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>))<br>			<span class="hljs-keyword">continue</span>;<br>		DWORD RequiredSize = <span class="hljs-number">0</span>;<br>		DEVPROPTYPE PropertyType = <span class="hljs-number">0</span>;<br>		WCHAR PropertyBuffer[<span class="hljs-number">1024</span>] = &#123;<span class="hljs-number">0</span>&#125;;<br>		<span class="hljs-keyword">for</span> (UINT uIdx = <span class="hljs-number">0</span>; uIdx &lt; _countof(devicePropertyKey); uIdx++)<br>		&#123;<br>			<span class="hljs-keyword">if</span> (<span class="hljs-number">0</span> == devicePropertyKey[uIdx].pid)<br>				<span class="hljs-keyword">continue</span>;<br><br>			<span class="hljs-keyword">if</span> (<span class="hljs-built_in">SetupDiGetDevicePropertyW</span>(DeviceInfoSet, &amp;DeviceInfoData, &amp;devicePropertyKey[uIdx], &amp;PropertyType, <span class="hljs-built_in">reinterpret_cast</span>&lt;PBYTE&gt;(PropertyBuffer), <span class="hljs-built_in">sizeof</span>(PropertyBuffer), <span class="hljs-literal">NULL</span>, <span class="hljs-number">0</span>))<br>			&#123;<br>				<span class="hljs-keyword">for</span> (UINT uKeyIdx = <span class="hljs-number">0</span>; uKeyIdx &lt; _countof(ARR_DEV_KEYS); uKeyIdx++)<br>				&#123;<br>					<span class="hljs-keyword">if</span> ((devicePropertyKey[uIdx].fmtid == ARR_DEV_KEYS[uKeyIdx].fmtid)<br>						&amp;&amp; (devicePropertyKey[uIdx].pid == ARR_DEV_KEYS[uKeyIdx].pid))<br>					&#123;<br>						CString strLog = ARR_STR_DEV_KEYS[uKeyIdx];<br>						strLog += <span class="hljs-string">&quot;:&quot;</span>;<br>						USES_CONVERSION;<br>						strLog += <span class="hljs-built_in">W2A</span>(PropertyBuffer);<br>						strLog += <span class="hljs-string">&quot;\r\n&quot;</span>;<br>						<span class="hljs-built_in">OutputDebugString</span>(strLog);<br>						std::cout&lt;&lt;strLog.<span class="hljs-built_in">GetString</span>();<br>						<span class="hljs-keyword">break</span>;<br>					&#125;<br>				&#125;<br>			&#125;<br>		&#125;<br>	&#125;<br>	<span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h2 id="4-使用DeviceIOControl枚举所有设备"><a href="#4-使用DeviceIOControl枚举所有设备" class="headerlink" title="4. 使用DeviceIOControl枚举所有设备"></a><font style="color:rgb(79, 79, 79);">4. 使用DeviceIOControl枚举所有设备</font></h2><h3 id="4-1-枚举基本流程"><a href="#4-1-枚举基本流程" class="headerlink" title="4.1. 枚举基本流程"></a><font style="color:rgb(79, 79, 79);">4.1. 枚举基本流程</font></h3><ul>
+<li><font style="color:rgba(0, 0, 0, 0.75);">获取根Hub名字<br></font><font style="color:rgba(0, 0, 0, 0.75);">打开根设备，并且通过DeviceIoControl(IOCTL_USB_GET_ROOT_HUB_NAME来获取HubName。</font></li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-built_in">sprintf_s</span>(hcdName, <span class="hljs-string">&quot;\\\\.\\HCD%d&quot;</span>, nHCDNo);<br>HANDLE hHCDev = <span class="hljs-built_in">CreateFile</span>(hcdName, GENERIC_WRITE, FILE_SHARE_WRITE, <span class="hljs-literal">NULL</span>, OPEN_EXISTING, <span class="hljs-number">0</span>, <span class="hljs-literal">NULL</span>);<br>std::string strRootHubName = <span class="hljs-built_in">GetRootHubName</span>(hHCDev);<br></code></pre></td></tr></table></figure>
+
+<ul>
+<li><font style="color:rgba(0, 0, 0, 0.75);">通过HubName获取Hub的节点信息</font></li>
+<li><font style="color:rgba(0, 0, 0, 0.75);">通过CreateFile(HubNmae…）,然后再通过 DeviceIoControl(hHubDevice,IOCTL_USB_GET_NODE_INFORMATION,获取设备节点信息。</font></li>
+<li><font style="color:rgba(0, 0, 0, 0.75);">设备节点信息中包括Hub有几个子设备。</font></li>
+<li><font style="color:rgba(0, 0, 0, 0.75);">遍历设备节点连接信息<br></font><font style="color:rgba(0, 0, 0, 0.75);">通过DeviceIoControl(hHubDevice,IOCTL_USB_GET_NODE_CONNECTION_INFORMATION_EX，并且指定Hub中设备的索引，获取指定索引的设备连接信息。主要包括设备描述、速度、是否Hub等。</font></li>
+<li><font style="color:rgba(0, 0, 0, 0.75);">获取设备驱动名<br></font><font style="color:rgba(0, 0, 0, 0.75);">通过DeviceIoControl(Hub,IOCTL_USB_GET_NODE_CONNECTION_DRIVERKEY_NAME并且指定索引获取设备驱动名，可以作为设备的唯一标识，且与CM属性CM_DRP_DRIVER进行匹配。</font></li>
+<li><font style="color:rgba(0, 0, 0, 0.75);">获取设备的连接名(设备路径)<br></font><font style="color:rgba(0, 0, 0, 0.75);">通过DeviceIoControl(Hub,IOCTL_USB_GET_NODE_CONNECTION_NAME并且指定索引获取设备连接名，也即设备路径，可以作为设备唯一标识。子Hub设备路径，可以进行新一轮枚举。</font></li>
+</ul>
+<h3 id="4-2-示例"><a href="#4-2-示例" class="headerlink" title="4.2. 示例"></a><font style="color:rgb(79, 79, 79);">4.2. 示例</font></h3><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br><span class="line">219</span><br><span class="line">220</span><br><span class="line">221</span><br><span class="line">222</span><br><span class="line">223</span><br><span class="line">224</span><br><span class="line">225</span><br><span class="line">226</span><br><span class="line">227</span><br><span class="line">228</span><br><span class="line">229</span><br><span class="line">230</span><br><span class="line">231</span><br><span class="line">232</span><br><span class="line">233</span><br><span class="line">234</span><br><span class="line">235</span><br><span class="line">236</span><br><span class="line">237</span><br><span class="line">238</span><br><span class="line">239</span><br><span class="line">240</span><br><span class="line">241</span><br><span class="line">242</span><br><span class="line">243</span><br><span class="line">244</span><br><span class="line">245</span><br><span class="line">246</span><br><span class="line">247</span><br><span class="line">248</span><br><span class="line">249</span><br><span class="line">250</span><br><span class="line">251</span><br><span class="line">252</span><br><span class="line">253</span><br><span class="line">254</span><br><span class="line">255</span><br><span class="line">256</span><br><span class="line">257</span><br><span class="line">258</span><br><span class="line">259</span><br><span class="line">260</span><br><span class="line">261</span><br><span class="line">262</span><br><span class="line">263</span><br><span class="line">264</span><br><span class="line">265</span><br><span class="line">266</span><br><span class="line">267</span><br><span class="line">268</span><br><span class="line">269</span><br><span class="line">270</span><br><span class="line">271</span><br><span class="line">272</span><br><span class="line">273</span><br><span class="line">274</span><br><span class="line">275</span><br><span class="line">276</span><br><span class="line">277</span><br><span class="line">278</span><br><span class="line">279</span><br><span class="line">280</span><br><span class="line">281</span><br><span class="line">282</span><br><span class="line">283</span><br><span class="line">284</span><br><span class="line">285</span><br><span class="line">286</span><br><span class="line">287</span><br><span class="line">288</span><br><span class="line">289</span><br><span class="line">290</span><br><span class="line">291</span><br><span class="line">292</span><br><span class="line">293</span><br><span class="line">294</span><br><span class="line">295</span><br><span class="line">296</span><br><span class="line">297</span><br><span class="line">298</span><br><span class="line">299</span><br><span class="line">300</span><br><span class="line">301</span><br><span class="line">302</span><br><span class="line">303</span><br><span class="line">304</span><br><span class="line">305</span><br><span class="line">306</span><br><span class="line">307</span><br><span class="line">308</span><br><span class="line">309</span><br><span class="line">310</span><br><span class="line">311</span><br><span class="line">312</span><br><span class="line">313</span><br><span class="line">314</span><br><span class="line">315</span><br><span class="line">316</span><br><span class="line">317</span><br><span class="line">318</span><br><span class="line">319</span><br><span class="line">320</span><br><span class="line">321</span><br><span class="line">322</span><br><span class="line">323</span><br><span class="line">324</span><br><span class="line">325</span><br><span class="line">326</span><br><span class="line">327</span><br><span class="line">328</span><br><span class="line">329</span><br><span class="line">330</span><br><span class="line">331</span><br><span class="line">332</span><br><span class="line">333</span><br><span class="line">334</span><br><span class="line">335</span><br><span class="line">336</span><br><span class="line">337</span><br><span class="line">338</span><br><span class="line">339</span><br><span class="line">340</span><br><span class="line">341</span><br><span class="line">342</span><br><span class="line">343</span><br><span class="line">344</span><br><span class="line">345</span><br><span class="line">346</span><br><span class="line">347</span><br><span class="line">348</span><br><span class="line">349</span><br><span class="line">350</span><br><span class="line">351</span><br><span class="line">352</span><br><span class="line">353</span><br><span class="line">354</span><br><span class="line">355</span><br><span class="line">356</span><br><span class="line">357</span><br><span class="line">358</span><br><span class="line">359</span><br><span class="line">360</span><br><span class="line">361</span><br><span class="line">362</span><br><span class="line">363</span><br><span class="line">364</span><br><span class="line">365</span><br><span class="line">366</span><br><span class="line">367</span><br><span class="line">368</span><br><span class="line">369</span><br><span class="line">370</span><br><span class="line">371</span><br><span class="line">372</span><br><span class="line">373</span><br><span class="line">374</span><br><span class="line">375</span><br><span class="line">376</span><br><span class="line">377</span><br><span class="line">378</span><br><span class="line">379</span><br><span class="line">380</span><br><span class="line">381</span><br><span class="line">382</span><br><span class="line">383</span><br><span class="line">384</span><br><span class="line">385</span><br><span class="line">386</span><br><span class="line">387</span><br><span class="line">388</span><br><span class="line">389</span><br><span class="line">390</span><br><span class="line">391</span><br><span class="line">392</span><br><span class="line">393</span><br><span class="line">394</span><br><span class="line">395</span><br><span class="line">396</span><br><span class="line">397</span><br><span class="line">398</span><br><span class="line">399</span><br><span class="line">400</span><br><span class="line">401</span><br><span class="line">402</span><br><span class="line">403</span><br><span class="line">404</span><br><span class="line">405</span><br><span class="line">406</span><br><span class="line">407</span><br><span class="line">408</span><br><span class="line">409</span><br><span class="line">410</span><br><span class="line">411</span><br><span class="line">412</span><br><span class="line">413</span><br><span class="line">414</span><br><span class="line">415</span><br><span class="line">416</span><br><span class="line">417</span><br><span class="line">418</span><br><span class="line">419</span><br><span class="line">420</span><br><span class="line">421</span><br><span class="line">422</span><br><span class="line">423</span><br><span class="line">424</span><br><span class="line">425</span><br><span class="line">426</span><br><span class="line">427</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-function"><span class="hljs-type">const</span> std::string <span class="hljs-title">GetDriverKeyName</span><span class="hljs-params">(HANDLE Hub, ULONG ConnectionIndex)</span></span><br><span class="hljs-function"></span>&#123;<br>    BOOL                                success;<br>    ULONG                               nBytes;<br>    USB_NODE_CONNECTION_DRIVERKEY_NAME  driverKeyName;<br>    PUSB_NODE_CONNECTION_DRIVERKEY_NAME driverKeyNameW = <span class="hljs-literal">NULL</span>;<br><br>    <span class="hljs-comment">// Get the length of the name of the driver key of the device attached to</span><br>    <span class="hljs-comment">// the specified port.</span><br>    <span class="hljs-comment">//</span><br>    driverKeyName.ConnectionIndex = ConnectionIndex;<br><br>    success = <span class="hljs-built_in">DeviceIoControl</span>(Hub,<br>        IOCTL_USB_GET_NODE_CONNECTION_DRIVERKEY_NAME,<br>        &amp;driverKeyName,<br>        <span class="hljs-built_in">sizeof</span>(driverKeyName),<br>        &amp;driverKeyName,<br>        <span class="hljs-built_in">sizeof</span>(driverKeyName),<br>        &amp;nBytes,<br>        <span class="hljs-literal">NULL</span>);<br>    <span class="hljs-keyword">if</span> (!success)<br>    &#123;<br>        <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;&quot;</span>;<br>    &#125;<br><br>    <span class="hljs-comment">// Allocate space to hold the driver key name</span><br>    <span class="hljs-comment">//</span><br>    nBytes = driverKeyName.ActualLength;<br><br>    <span class="hljs-keyword">if</span> (nBytes &lt;= <span class="hljs-built_in">sizeof</span>(driverKeyName))<br>    &#123;<br>        <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;&quot;</span>;<br>    &#125;<br><br>    driverKeyNameW = (PUSB_NODE_CONNECTION_DRIVERKEY_NAME)<span class="hljs-keyword">new</span> BYTE[nBytes];<br>    <span class="hljs-keyword">if</span> (driverKeyNameW == <span class="hljs-literal">NULL</span>)<br>    &#123;<br>        <span class="hljs-keyword">delete</span>[] driverKeyNameW;<br>        <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;&quot;</span>;<br>    &#125;<br><br>    <span class="hljs-comment">// Get the name of the driver key of the device attached to</span><br>    <span class="hljs-comment">// the specified port.</span><br>    <span class="hljs-comment">//</span><br>    driverKeyNameW-&gt;ConnectionIndex = ConnectionIndex;<br><br>    success = <span class="hljs-built_in">DeviceIoControl</span>(Hub,<br>        IOCTL_USB_GET_NODE_CONNECTION_DRIVERKEY_NAME,<br>        driverKeyNameW,<br>        nBytes,<br>        driverKeyNameW,<br>        nBytes,<br>        &amp;nBytes,<br>        <span class="hljs-literal">NULL</span>);<br><br>    <span class="hljs-keyword">if</span> (!success)<br>    &#123;<br>        <span class="hljs-keyword">delete</span>[] driverKeyNameW;<br>        <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;&quot;</span>;<br>    &#125;<br><br>    <span class="hljs-comment">// Convert the driver key name</span><br>    <span class="hljs-comment">//</span><br>    USES_CONVERSION;<br>    std::string driverKeyNameA = <span class="hljs-built_in">W2A</span>(driverKeyNameW-&gt;DriverKeyName);<br>    <span class="hljs-keyword">delete</span>[] driverKeyNameW;<br><br>    <span class="hljs-keyword">return</span> driverKeyNameA;<br>&#125;<br><br><br><span class="hljs-function"><span class="hljs-type">const</span> std::string <span class="hljs-title">GetExternalHubName</span><span class="hljs-params">(HANDLE Hub, ULONG ConnectionIndex)</span></span><br><span class="hljs-function"></span>&#123;<br>BOOL                        success;<br>ULONG                       nBytes;<br>USB_NODE_CONNECTION_NAME	extHubName;<br>PUSB_NODE_CONNECTION_NAME   extHubNameW = <span class="hljs-literal">NULL</span>;<br>std::string                  extHubNameA;<br><br><span class="hljs-comment">// Get the length of the name of the external hub attached to the</span><br><span class="hljs-comment">// specified port.</span><br><span class="hljs-comment">//</span><br>extHubName.ConnectionIndex = ConnectionIndex;<br><br>success = <span class="hljs-built_in">DeviceIoControl</span>(Hub,<br>    IOCTL_USB_GET_NODE_CONNECTION_NAME,<br>    &amp;extHubName,<br>    <span class="hljs-built_in">sizeof</span>(extHubName),<br>    &amp;extHubName,<br>    <span class="hljs-built_in">sizeof</span>(extHubName),<br>    &amp;nBytes,<br>    <span class="hljs-literal">NULL</span>);<br><br><span class="hljs-keyword">if</span> (!success)<br>&#123;<br>    <span class="hljs-keyword">goto</span> GetExternalHubNameError;<br>&#125;<br><br><span class="hljs-comment">// Allocate space to hold the external hub name</span><br><span class="hljs-comment">//</span><br>nBytes = extHubName.ActualLength;<br><br><span class="hljs-keyword">if</span> (nBytes &lt;= <span class="hljs-built_in">sizeof</span>(extHubName))<br>&#123;<br>    <span class="hljs-keyword">goto</span> GetExternalHubNameError;<br>&#125;<br><br>extHubNameW = (PUSB_NODE_CONNECTION_NAME) <span class="hljs-keyword">new</span> BYTE[nBytes];<br><br><span class="hljs-keyword">if</span> (extHubNameW == <span class="hljs-literal">NULL</span>)<br>&#123;<br>    <span class="hljs-keyword">goto</span> GetExternalHubNameError;<br>&#125;<br><br><span class="hljs-comment">// Get the name of the external hub attached to the specified port</span><br><span class="hljs-comment">//</span><br>extHubNameW-&gt;ConnectionIndex = ConnectionIndex;<br><br>success = <span class="hljs-built_in">DeviceIoControl</span>(Hub,<br>    IOCTL_USB_GET_NODE_CONNECTION_NAME,<br>    extHubNameW,<br>    nBytes,<br>    extHubNameW,<br>    nBytes,<br>    &amp;nBytes,<br>    <span class="hljs-literal">NULL</span>);<br><br><span class="hljs-keyword">if</span> (!success)<br>&#123;<br>    <span class="hljs-keyword">goto</span> GetExternalHubNameError;<br>&#125;<br><br><span class="hljs-comment">// Convert the External Hub name</span><br><span class="hljs-comment">//</span><br>USES_CONVERSION;<br>extHubNameA = <span class="hljs-built_in">W2A</span>(extHubNameW-&gt;NodeName);<br><br><span class="hljs-comment">// All done, free the uncoverted external hub name and return the</span><br><span class="hljs-comment">// converted external hub name</span><br><span class="hljs-comment">//</span><br><span class="hljs-keyword">delete</span> []extHubNameW;<br><br><span class="hljs-keyword">return</span> extHubNameA;<br><br><br>GetExternalHubNameError:<br>	<span class="hljs-comment">// There was an error, free anything that was allocated</span><br>	<span class="hljs-comment">//</span><br>	<span class="hljs-keyword">if</span> (extHubNameW != <span class="hljs-literal">NULL</span>)<br>	&#123;<br>		<span class="hljs-keyword">delete</span> [](extHubNameW);<br>		extHubNameW = <span class="hljs-literal">NULL</span>;<br>	&#125;<br><br>	<span class="hljs-keyword">return</span> <span class="hljs-literal">NULL</span>;<br>&#125;<br><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">EnumerateHub</span><span class="hljs-params">(std::string rootHubName, <span class="hljs-type">bool</span> bRoot = <span class="hljs-literal">false</span>)</span></span>;<br><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">EnumerateHubPorts</span><span class="hljs-params">(LPCTSTR _lpcHubName, HANDLE hHubDevice, ULONG NumPorts, <span class="hljs-type">bool</span> bFindAnc, <span class="hljs-type">bool</span> bRoot)</span></span><br><span class="hljs-function"></span>&#123;<br>	<span class="hljs-built_in">UNREFERENCED_PARAMETER</span>(bFindAnc);<br>	<span class="hljs-built_in">UNREFERENCED_PARAMETER</span>(bRoot);<br>	ULONG       index;<br>	BOOL        success;<br>	std::string	strDebug;<br><br>	PUSB_NODE_CONNECTION_INFORMATION_EX connectionInfoEx;<br><br>	std::string driverKeyName;<br>	std::string deviceDesc;<br><br>	BOOL bHaveOneHubPort = FALSE;<br>	<span class="hljs-comment">// Loop over all ports of the hub.</span><br>	<span class="hljs-comment">//</span><br>	<span class="hljs-comment">// Port indices are 1 based, not 0 based.</span><br>	<span class="hljs-comment">//</span><br>	<span class="hljs-keyword">for</span> (index=<span class="hljs-number">1</span>; index &lt;= NumPorts; index++)<br>	&#123;<br>		ULONG nBytesEx;<br><br>		<span class="hljs-comment">// Allocate space to hold the connection info for this port.</span><br>		<span class="hljs-comment">// For now, allocate it big enough to hold info for 30 pipes.</span><br>		<span class="hljs-comment">//</span><br>		<span class="hljs-comment">// Endpoint numbers are 0-15.  Endpoint number 0 is the standard</span><br>		<span class="hljs-comment">// control endpoint which is not explicitly listed in the Configuration</span><br>		<span class="hljs-comment">// Descriptor.  There can be an IN endpoint and an OUT endpoint at</span><br>		<span class="hljs-comment">// endpoint numbers 1-15 so there can be a maximum of 30 endpoints</span><br>		<span class="hljs-comment">// per device configuration.</span><br>		<span class="hljs-comment">//</span><br>		<span class="hljs-comment">// Should probably size this dynamically at some point.</span><br>		<span class="hljs-comment">//</span><br>		nBytesEx = <span class="hljs-built_in">sizeof</span>(USB_NODE_CONNECTION_INFORMATION_EX) +<br>			<span class="hljs-built_in">sizeof</span>(USB_PIPE_INFO) * <span class="hljs-number">30</span>;<br><br>		connectionInfoEx = (PUSB_NODE_CONNECTION_INFORMATION_EX)<span class="hljs-keyword">new</span> BYTE[nBytesEx];<br><br>		<span class="hljs-keyword">if</span> (connectionInfoEx == <span class="hljs-literal">NULL</span>)<br>		&#123;<br>			<span class="hljs-keyword">break</span>;<br>		&#125;<br><br>		<span class="hljs-comment">//</span><br>		<span class="hljs-comment">// Now query USBHUB for the USB_NODE_CONNECTION_INFORMATION_EX structure</span><br>		<span class="hljs-comment">// for this port.  This will tell us if a device is attached to this</span><br>		<span class="hljs-comment">// port, among other things.</span><br>		<span class="hljs-comment">//</span><br>		connectionInfoEx-&gt;ConnectionIndex = index;<br><br>		success = <span class="hljs-built_in">DeviceIoControl</span>(hHubDevice,<br>			IOCTL_USB_GET_NODE_CONNECTION_INFORMATION_EX,<br>			connectionInfoEx,<br>			nBytesEx,<br>			connectionInfoEx,<br>			nBytesEx,<br>			&amp;nBytesEx,<br>			<span class="hljs-literal">NULL</span>);<br><br>		<span class="hljs-keyword">if</span> (!success)<br>		&#123;<br>			PUSB_NODE_CONNECTION_INFORMATION    connectionInfo;<br>			ULONG                               nBytes;<br><br>			<span class="hljs-comment">// Try using IOCTL_USB_GET_NODE_CONNECTION_INFORMATION</span><br>			<span class="hljs-comment">// instead of IOCTL_USB_GET_NODE_CONNECTION_INFORMATION_EX</span><br>			<span class="hljs-comment">//</span><br>			nBytes = <span class="hljs-built_in">sizeof</span>(USB_NODE_CONNECTION_INFORMATION) + <span class="hljs-built_in">sizeof</span>(USB_PIPE_INFO) * <span class="hljs-number">30</span>;<br>			connectionInfo = (PUSB_NODE_CONNECTION_INFORMATION)<span class="hljs-keyword">new</span> BYTE[nBytes];<br>			connectionInfo-&gt;ConnectionIndex = index;<br><br>			success = <span class="hljs-built_in">DeviceIoControl</span>(hHubDevice,<br>				IOCTL_USB_GET_NODE_CONNECTION_INFORMATION,<br>				connectionInfo,<br>				nBytes,<br>				connectionInfo,<br>				nBytes,<br>				&amp;nBytes,<br>				<span class="hljs-literal">NULL</span>);<br><br>			<span class="hljs-keyword">if</span> (!success)<br>			&#123;<br>				<span class="hljs-keyword">delete</span> []connectionInfo;<br>				<span class="hljs-keyword">delete</span> []connectionInfoEx;<br>				<span class="hljs-keyword">continue</span>;<br>			&#125;<br><br>			<span class="hljs-comment">// Copy IOCTL_USB_GET_NODE_CONNECTION_INFORMATION into</span><br>			<span class="hljs-comment">// IOCTL_USB_GET_NODE_CONNECTION_INFORMATION_EX structure.</span><br>			<span class="hljs-comment">//</span><br>			connectionInfoEx-&gt;ConnectionIndex =	connectionInfo-&gt;ConnectionIndex;<br>			connectionInfoEx-&gt;DeviceDescriptor = connectionInfo-&gt;DeviceDescriptor;<br>			connectionInfoEx-&gt;CurrentConfigurationValue =	connectionInfo-&gt;CurrentConfigurationValue;<br>			connectionInfoEx-&gt;Speed = connectionInfo-&gt;LowSpeed ? <span class="hljs-number">0</span> : <span class="hljs-number">1</span>;<br>			connectionInfoEx-&gt;DeviceIsHub =	connectionInfo-&gt;DeviceIsHub;<br>			connectionInfoEx-&gt;DeviceAddress = connectionInfo-&gt;DeviceAddress;<br>			connectionInfoEx-&gt;NumberOfOpenPipes = connectionInfo-&gt;NumberOfOpenPipes;<br>			connectionInfoEx-&gt;ConnectionStatus = connectionInfo-&gt;ConnectionStatus;<br><br>			<span class="hljs-built_in">memcpy</span>(&amp;connectionInfoEx-&gt;PipeList[<span class="hljs-number">0</span>],<br>				&amp;connectionInfo-&gt;PipeList[<span class="hljs-number">0</span>],<br>				<span class="hljs-built_in">sizeof</span>(USB_PIPE_INFO) * <span class="hljs-number">30</span>);<br><br>			<span class="hljs-keyword">delete</span> []connectionInfo;<br><br>		&#125;<br><br>		<span class="hljs-comment">// If there is a device connected, get the Device Description</span><br>		<span class="hljs-comment">//</span><br>		<span class="hljs-keyword">if</span> (connectionInfoEx-&gt;ConnectionStatus != NoDeviceConnected)<br>		&#123;<br>			driverKeyName = <span class="hljs-built_in">GetDriverKeyName</span>(hHubDevice,index);<br>			_strupr_s(<span class="hljs-built_in">const_cast</span>&lt;<span class="hljs-type">char</span>*&gt;(deviceDesc.<span class="hljs-built_in">c_str</span>()), deviceDesc.<span class="hljs-built_in">length</span>()<span class="hljs-number">+1</span>);<br>			<span class="hljs-keyword">if</span> (connectionInfoEx-&gt;DeviceIsHub)<br>			&#123;<br>				std::string extHubName = <span class="hljs-built_in">GetExternalHubName</span>(hHubDevice, index);<br>				<span class="hljs-built_in">EnumerateHub</span>(extHubName);<br><br>				bHaveOneHubPort = TRUE;<br>			&#125;<br>		&#125;<br><br>		<span class="hljs-keyword">delete</span> []connectionInfoEx;<br>	&#125;<br>&#125;<br><br><br><span class="hljs-function">std::string <span class="hljs-title">GetRootHubName</span><span class="hljs-params">(HANDLE HostController)</span></span><br><span class="hljs-function"></span>&#123;<br>	BOOL                success;<br>	ULONG               nBytes;<br>	USB_ROOT_HUB_NAME   rootHubName;<br>	PUSB_ROOT_HUB_NAME  rootHubNameW= <span class="hljs-literal">NULL</span>;<br>	std::string          rootHubNameA;<br><br>	<span class="hljs-comment">// Get the length of the name of the Root Hub attached to the</span><br>	<span class="hljs-comment">// Host Controller</span><br>	<span class="hljs-comment">//</span><br>	success = <span class="hljs-built_in">DeviceIoControl</span>(HostController,<br>		IOCTL_USB_GET_ROOT_HUB_NAME,<br>		<span class="hljs-number">0</span>,<br>		<span class="hljs-number">0</span>,<br>		&amp;rootHubName,<br>		<span class="hljs-built_in">sizeof</span>(rootHubName),<br>		&amp;nBytes,<br>		<span class="hljs-literal">NULL</span>);<br><br>	<span class="hljs-keyword">if</span> (!success)<br>	&#123;<br>		<span class="hljs-keyword">goto</span> GetRootHubNameError;<br>	&#125;<br><br>	<span class="hljs-comment">// Allocate space to hold the Root Hub name</span><br>	<span class="hljs-comment">//</span><br>	nBytes = rootHubName.ActualLength;<br><br>	rootHubNameW = (PUSB_ROOT_HUB_NAME)<span class="hljs-keyword">new</span> BYTE[nBytes];<br><br>	<span class="hljs-keyword">if</span> (rootHubNameW == <span class="hljs-literal">NULL</span>)<br>	&#123;<br>		<span class="hljs-keyword">goto</span> GetRootHubNameError;<br>	&#125;<br><br>	<span class="hljs-comment">// Get the name of the Root Hub attached to the Host Controller</span><br>	<span class="hljs-comment">//</span><br>	success = <span class="hljs-built_in">DeviceIoControl</span>(HostController,<br>		IOCTL_USB_GET_ROOT_HUB_NAME,<br>		<span class="hljs-literal">NULL</span>,<br>		<span class="hljs-number">0</span>,<br>		rootHubNameW,<br>		nBytes,<br>		&amp;nBytes,<br>		<span class="hljs-literal">NULL</span>);<br><br>	<span class="hljs-keyword">if</span> (!success)<br>	&#123;<br>		<span class="hljs-keyword">goto</span> GetRootHubNameError;<br>	&#125;<br><br>	<span class="hljs-comment">// Convert the Root Hub name</span><br>	<span class="hljs-comment">//</span><br>	USES_CONVERSION;<br>	rootHubNameA = <span class="hljs-built_in">W2A</span>(rootHubNameW-&gt;RootHubName);<br><br>	<span class="hljs-comment">// All done, free the uncoverted Root Hub name and return the</span><br>	<span class="hljs-comment">// converted Root Hub name</span><br>	<span class="hljs-comment">//</span><br>	<span class="hljs-keyword">delete</span> []rootHubNameW;<br><br>	<span class="hljs-keyword">return</span> rootHubNameA;<br><br><br>GetRootHubNameError:<br>	<span class="hljs-comment">// There was an error, free anything that was allocated</span><br>	<span class="hljs-comment">//</span><br>	<span class="hljs-keyword">if</span> (rootHubNameW != <span class="hljs-literal">NULL</span>)<br>	&#123;<br>		<span class="hljs-keyword">delete</span> []rootHubNameW;<br>		rootHubNameW = <span class="hljs-literal">NULL</span>;<br>	&#125;<br><br>	<span class="hljs-keyword">return</span> <span class="hljs-string">&quot;&quot;</span>;<br>&#125;<br><br><br><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">EnumerateHub</span><span class="hljs-params">(std::string rootHubName, <span class="hljs-type">bool</span> bRoot <span class="hljs-comment">/*= false*/</span>)</span></span><br><span class="hljs-function"></span>&#123;<br>	<span class="hljs-keyword">if</span> (rootHubName.<span class="hljs-built_in">empty</span>())<br>	&#123;<br>		<span class="hljs-keyword">return</span>;<br>	&#125;<br>	_strupr_s(<span class="hljs-built_in">const_cast</span>&lt;<span class="hljs-type">char</span>*&gt;(rootHubName.<span class="hljs-built_in">c_str</span>()), rootHubName.<span class="hljs-built_in">length</span>()<span class="hljs-number">+1</span>);<br><br>	std::string DeviceName;<br>	HANDLE  hHubDevice;<br>	USB_NODE_INFORMATION   hubInfo;<br>	ULONG                   nBytes;<br>	DeviceName = <span class="hljs-string">&quot;\\\\.\\&quot;</span>;<br>	DeviceName += rootHubName;<br>	hHubDevice = <span class="hljs-built_in">CreateFile</span>(DeviceName.<span class="hljs-built_in">c_str</span>(),<br>		GENERIC_WRITE,<br>		FILE_SHARE_WRITE,<br>		<span class="hljs-literal">NULL</span>,<br>		OPEN_EXISTING,<br>		<span class="hljs-number">0</span>,<br>		<span class="hljs-literal">NULL</span>);<br>	<span class="hljs-keyword">if</span> (hHubDevice != INVALID_HANDLE_VALUE)<br>	&#123;<br>		<span class="hljs-keyword">if</span> (<span class="hljs-built_in">DeviceIoControl</span>(hHubDevice,<br>			IOCTL_USB_GET_NODE_INFORMATION,<br>			&amp;hubInfo,<br>			<span class="hljs-built_in">sizeof</span>(USB_NODE_INFORMATION),<br>			&amp;hubInfo,<br>			<span class="hljs-built_in">sizeof</span>(USB_NODE_INFORMATION),<br>			&amp;nBytes,<br>			<span class="hljs-literal">NULL</span>))<br>		&#123;<br>			<span class="hljs-built_in">EnumerateHubPorts</span>(<br>				rootHubName.<span class="hljs-built_in">c_str</span>(),<br>				hHubDevice,<br>				hubInfo.u.HubInformation.HubDescriptor.bNumberOfPorts,<br>				<span class="hljs-number">0</span>,<br>				bRoot);<br><br>			<span class="hljs-built_in">CloseHandle</span>(hHubDevice);<br>		&#125;<br>	&#125;<br>&#125;<br><br><span class="hljs-function">DWORD <span class="hljs-title">EnumeAllDeviceByDeviceIOControl</span><span class="hljs-params">()</span></span><br><span class="hljs-function"></span>&#123;<br>	<span class="hljs-type">const</span> <span class="hljs-type">int</span> MAX_HCD_COUNT = <span class="hljs-number">10</span>;<br>	<span class="hljs-type">char</span> hcdName[<span class="hljs-number">16</span>] = &#123;<span class="hljs-number">0</span>&#125;;<br>	<span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> nHCDNo = <span class="hljs-number">0</span>; nHCDNo &lt; MAX_HCD_COUNT; nHCDNo++)<br>	&#123;<br>		<span class="hljs-built_in">sprintf_s</span>(hcdName, <span class="hljs-string">&quot;\\\\.\\HCD%d&quot;</span>, nHCDNo);<br>		HANDLE hHCDev = <span class="hljs-built_in">CreateFile</span>(hcdName, GENERIC_WRITE, FILE_SHARE_WRITE, <span class="hljs-literal">NULL</span>, OPEN_EXISTING, <span class="hljs-number">0</span>, <span class="hljs-literal">NULL</span>);<br>		<span class="hljs-keyword">if</span> (hHCDev == INVALID_HANDLE_VALUE)<br>			<span class="hljs-keyword">continue</span>;<br><br>		std::string strRootHubName = <span class="hljs-built_in">GetRootHubName</span>(hHCDev);<br>		<span class="hljs-keyword">if</span> (strRootHubName.<span class="hljs-built_in">empty</span>())<br>			<span class="hljs-keyword">continue</span>;<br><br>		<span class="hljs-built_in">EnumerateHub</span>(strRootHubName.<span class="hljs-built_in">c_str</span>(), <span class="hljs-literal">true</span>);<br>	&#125;<br><br>	<span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>&#125;<br><br></code></pre></td></tr></table></figure>
+
+<h2 id="5-几种方式的关系"><a href="#5-几种方式的关系" class="headerlink" title="5. 几种方式的关系"></a><font style="color:rgb(79, 79, 79);">5. 几种方式的关系</font></h2><h3 id="5-1-SetupAPI与CM"><a href="#5-1-SetupAPI与CM" class="headerlink" title="5.1. SetupAPI与CM"></a><font style="color:rgb(79, 79, 79);">5.1. SetupAPI与CM</font></h3><ul>
+<li><strong><font style="color:rgba(0, 0, 0, 0.75);">SetupDiEnumDeviceInfo</font></strong><font style="color:rgba(0, 0, 0, 0.75);">和</font><strong><font style="color:rgba(0, 0, 0, 0.75);">SetupDiGetDeviceInterfaceDetail</font></strong><font style="color:rgba(0, 0, 0, 0.75);">都可以获取到设备实例句柄，供CM序列函数使用。</font></li>
+<li><strong><font style="color:rgba(0, 0, 0, 0.75);">SetupGet</font></strong><font style="color:rgba(0, 0, 0, 0.75);">获取的属性与CM_Get获取的属性基本相同。</font></li>
+</ul>
+<h3 id="5-2-DeviceIoControl与SetupAPI及CM序列函数"><a href="#5-2-DeviceIoControl与SetupAPI及CM序列函数" class="headerlink" title="5.2. DeviceIoControl与SetupAPI及CM序列函数"></a><font style="color:rgb(79, 79, 79);">5.2. DeviceIoControl与SetupAPI及CM序列函数</font></h3><ul>
+<li><strong><font style="color:rgba(0, 0, 0, 0.75);">DeviceIoControl</font></strong><font style="color:rgba(0, 0, 0, 0.75);">中的</font><strong><font style="color:rgba(0, 0, 0, 0.75);">IOCTL_USB_GET_NODE_CONNECTION_DRIVERKEY_NAME</font></strong><font style="color:rgba(0, 0, 0, 0.75);">可以获取设备驱动名，可以与设备信息集中的驱动名属性以及CM注册表的属性名相匹配。</font></li>
+<li><strong><font style="color:rgba(0, 0, 0, 0.75);">SetupDiGetDeviceInterfaceDetail</font></strong><font style="color:rgba(0, 0, 0, 0.75);">可以获取设备路径，可以供</font><strong><font style="color:rgba(0, 0, 0, 0.75);">CreateFile</font></strong><font style="color:rgba(0, 0, 0, 0.75);">打开然后通过</font><strong><font style="color:rgba(0, 0, 0, 0.75);">DeviceIoControl</font></strong><font style="color:rgba(0, 0, 0, 0.75);">的</font><strong><font style="color:rgba(0, 0, 0, 0.75);">IOCTL_STORAGE_GET_DEVICE_NUMBER</font></strong><font style="color:rgba(0, 0, 0, 0.75);">获取物理设备名。</font></li>
+</ul>
+<hr>
+<h1 id="SetupDiDestroyDeviceInfoList-函数-setupapi-h"><a href="#SetupDiDestroyDeviceInfoList-函数-setupapi-h" class="headerlink" title="SetupDiDestroyDeviceInfoList 函数 (setupapi.h)"></a><font style="color:rgba(0, 0, 0, 0.75);">SetupDiDestroyDeviceInfoList 函数 (setupapi.h)</font></h1><p><strong><font style="color:rgb(22, 22, 22);">SetupDiDestroyDeviceInfoList</font></strong><font style="color:rgb(22, 22, 22);"> </font><font style="color:rgb(22, 22, 22);">函数删除设备信息集并释放所有关联的内存。</font></p>
+<h2 id="语法"><a href="#语法" class="headerlink" title="语法"></a><font style="color:rgb(22, 22, 22);">语法</font></h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-function">WINSETUPAPI BOOL <span class="hljs-title">SetupDiDestroyDeviceInfoList</span><span class="hljs-params">(</span></span><br><span class="hljs-params"><span class="hljs-function">  [in] HDEVINFO DeviceInfoSet</span></span><br><span class="hljs-params"><span class="hljs-function">)</span></span>;<br></code></pre></td></tr></table></figure>
+
+<h2 id="参数"><a href="#参数" class="headerlink" title="参数"></a><font style="color:rgb(22, 22, 22);">参数</font></h2><p><code>[in] DeviceInfoSet</code></p>
+<p><font style="color:rgb(22, 22, 22);">要删除</font><font style="color:rgb(22, 22, 22);"> </font><a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows-hardware/drivers/install/device-information-sets">的设备信息的句</a><font style="color:rgb(22, 22, 22);"> </font><font style="color:rgb(22, 22, 22);">柄。</font></p>
+<h2 id="返回值"><a href="#返回值" class="headerlink" title="返回值"></a><font style="color:rgb(22, 22, 22);">返回值</font></h2><p><font style="color:rgb(22, 22, 22);">如果成功，函数将返回</font><font style="color:rgb(22, 22, 22);"> </font><strong><font style="color:rgb(22, 22, 22);">TRUE</font></strong><font style="color:rgb(22, 22, 22);"> </font><font style="color:rgb(22, 22, 22);">。 否则，它将返回</font><font style="color:rgb(22, 22, 22);"> </font><strong><font style="color:rgb(22, 22, 22);">FALSE</font></strong><font style="color:rgb(22, 22, 22);"> </font><font style="color:rgb(22, 22, 22);">，并且可以通过调用</font><font style="color:rgb(22, 22, 22);"> </font><a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows/win32/api/errhandlingapi/nf-errhandlingapi-getlasterror">GetLastError</a><font style="color:rgb(22, 22, 22);"> </font><font style="color:rgb(22, 22, 22);">来检索记录的错误。</font></p>
+<h2 id="要求"><a href="#要求" class="headerlink" title="要求"></a><font style="color:rgb(22, 22, 22);">要求</font></h2><table>
+<thead>
+<tr>
+<th align="left"><font style="color:rgb(22, 22, 22);"> </font></th>
+<th align="left"><font style="color:rgb(22, 22, 22);"> </font></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong><font style="color:rgb(22, 22, 22);">最低受支持的客户端</font></strong></td>
+<td align="left"><font style="color:rgb(22, 22, 22);">在 Microsoft Windows 2000 及更高版本的 Windows 中可用。</font></td>
+</tr>
+<tr>
+<td align="left"><strong><font style="color:rgb(22, 22, 22);">目标平台</font></strong></td>
+<td align="left"><font style="color:rgb(22, 22, 22);">桌面</font></td>
+</tr>
+<tr>
+<td align="left"><strong><font style="color:rgb(22, 22, 22);">标头</font></strong></td>
+<td align="left"><font style="color:rgb(22, 22, 22);">setupapi.h (包括 Setupapi.h)</font></td>
+</tr>
+<tr>
+<td align="left"><strong><font style="color:rgb(22, 22, 22);">Library</font></strong></td>
+<td align="left"><font style="color:rgb(22, 22, 22);">Setupapi.lib</font></td>
+</tr>
+<tr>
+<td align="left"><strong><font style="color:rgb(22, 22, 22);">DLL</font></strong></td>
+<td align="left"><font style="color:rgb(22, 22, 22);">Setupapi.dll</font></td>
+</tr>
+<tr>
+<td align="left"><strong><font style="color:rgb(22, 22, 22);">API 集</font></strong></td>
+<td align="left"><font style="color:rgb(22, 22, 22);">windows 8 中引入的 ext-ms-win-setupapi-classinstallers-l1-1-0 ()</font></td>
+</tr>
+</tbody></table>
+<h2 id="另请参阅"><a href="#另请参阅" class="headerlink" title="另请参阅"></a><font style="color:rgb(22, 22, 22);">另请参阅</font></h2><p><a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows/desktop/api/setupapi/nf-setupapi-setupdicreatedeviceinfolist">SetupDiCreateDeviceInfoList</a></p>
+<p><a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows/desktop/api/setupapi/nf-setupapi-setupdigetclassdevsw">SetupDiGetClassDevs</a></p>
+<hr>
+<h1 id="CM-Get-Device-ID-函数-cfgmgr32-h"><a href="#CM-Get-Device-ID-函数-cfgmgr32-h" class="headerlink" title="CM_Get_Device_ID 函数 (cfgmgr32.h)"></a>CM_Get_Device_ID 函数 (cfgmgr32.h)</h1><p><strong><font style="color:rgb(22, 22, 22);">CM_Get_Device_ID</font></strong><font style="color:rgb(22, 22, 22);">函数检索本地计算机上指定</font><a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows-hardware/drivers/">设备实例的设备实例</a><a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows-hardware/drivers/install/device-instance-ids">ID</a><font style="color:rgb(22, 22, 22);">。</font></p>
+<p>****<strong>备注</strong></p>
+<p><font style="color:rgb(22, 22, 22);">在 Windows Vista 及更高版本的 Windows 中，</font><font style="color:rgb(22, 22, 22);"> </font><a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows-hardware/drivers/install/unified-device-property-model--windows-vista-and-later-">统一设备属性模型</a><font style="color:rgb(22, 22, 22);"> </font><font style="color:rgb(22, 22, 22);">使用</font><font style="color:rgb(22, 22, 22);"> </font><a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows-hardware/drivers/install/devpkey-device-instanceid">DEVPKEY_Device_InstanceId</a><a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows-hardware/drivers/install/property-keys">属性键</a><font style="color:rgb(22, 22, 22);"> </font><font style="color:rgb(22, 22, 22);">来表示设备实例标识符。 有关详细信息</font><font style="color:rgb(22, 22, 22);"> </font><a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows-hardware/drivers/install/retrieving-a-device-instance-identifier">，请参阅检索设备实例标识符</a><font style="color:rgb(22, 22, 22);"> </font><font style="color:rgb(22, 22, 22);">。</font></p>
+<h2 id="语法-1"><a href="#语法-1" class="headerlink" title="语法"></a><font style="color:rgb(22, 22, 22);">语法</font></h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-function">CMAPI CONFIGRET <span class="hljs-title">CM_Get_Device_IDW</span><span class="hljs-params">(</span></span><br><span class="hljs-params"><span class="hljs-function">  [in]  DEVINST dnDevInst,</span></span><br><span class="hljs-params"><span class="hljs-function">  [out] PWSTR   Buffer,</span></span><br><span class="hljs-params"><span class="hljs-function">  [in]  ULONG   BufferLen,</span></span><br><span class="hljs-params"><span class="hljs-function">  [in]  ULONG   ulFlags</span></span><br><span class="hljs-params"><span class="hljs-function">)</span></span>;<br></code></pre></td></tr></table></figure>
+
+<h2 id="参数-1"><a href="#参数-1" class="headerlink" title="参数"></a><font style="color:rgb(22, 22, 22);">参数</font></h2><p><code>[in] dnDevInst</code></p>
+<p>绑定到本地计算机的调用方提供的设备实例句柄。</p>
+<p><code>[out] Buffer</code></p>
+<p>用于接收设备实例 ID 字符串的缓冲区的地址。 可以通过调用 <a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows/desktop/api/cfgmgr32/nf-cfgmgr32-cm_get_device_id_size">CM_Get_Device_ID_Size</a>，然后递增接收的值来获取所需的缓冲区大小，以便为字符串的终止 <strong>NULL</strong> 留出空间。</p>
+<p><code>[in] BufferLen</code></p>
+<p>由 <em>Buffer</em> 指定的缓冲区的调用方提供的长度（以字符为单位）。</p>
+<p><code>[in] ulFlags</code></p>
+<p>未使用，必须为零。</p>
+<h2 id="返回值-1"><a href="#返回值-1" class="headerlink" title="返回值"></a><font style="color:rgb(22, 22, 22);">返回值</font></h2><p><font style="color:rgb(22, 22, 22);">如果操作成功，函数将返回CR_SUCCESS。 否则，它将返回</font><font style="color:rgb(22, 22, 22);"> </font><em><font style="color:rgb(22, 22, 22);">Cfgmgr32.h</font></em><font style="color:rgb(22, 22, 22);"> </font><font style="color:rgb(22, 22, 22);">中定义的CR_前缀错误代码之一。</font></p>
+<h2 id="注解"><a href="#注解" class="headerlink" title="注解"></a><font style="color:rgb(22, 22, 22);">注解</font></h2><p><font style="color:rgb(22, 22, 22);">该函数将 NULL 终止符追加到提供的设备实例 ID 字符串，除非缓冲区太小而无法容纳该字符串。 在这种情况下， 函数提供缓冲区中容纳的标识符字符串，然后返回CR_BUFFER_SMALL。</font></p>
+<p><font style="color:rgb(22, 22, 22);">有关设备实例 ID 的信息，请参阅</font><font style="color:rgb(22, 22, 22);"> </font><a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows-hardware/drivers/install/device-identification-strings">设备标识字符串</a><font style="color:rgb(22, 22, 22);">。</font></p>
+<p><font style="color:rgb(22, 22, 22);">有关使用绑定到本地计算机的设备实例句柄的信息，请参阅</font><font style="color:rgb(22, 22, 22);"> </font><a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows/desktop/api/cfgmgr32/nf-cfgmgr32-cm_get_child">CM_Get_Child</a><font style="color:rgb(22, 22, 22);">。</font></p>
+<h2 id="要求-1"><a href="#要求-1" class="headerlink" title="要求"></a><font style="color:rgb(22, 22, 22);">要求</font></h2><table>
+<thead>
+<tr>
+<th align="left"><font style="color:rgb(22, 22, 22);"> </font></th>
+<th align="left"><font style="color:rgb(22, 22, 22);"> </font></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong><font style="color:rgb(22, 22, 22);">最低受支持的客户端</font></strong></td>
+<td align="left"><font style="color:rgb(22, 22, 22);">在 Microsoft Windows 2000 及更高版本的 Windows 中可用。</font></td>
+</tr>
+<tr>
+<td align="left"><strong><font style="color:rgb(22, 22, 22);">目标平台</font></strong></td>
+<td align="left"><font style="color:rgb(22, 22, 22);">通用</font></td>
+</tr>
+<tr>
+<td align="left"><strong><font style="color:rgb(22, 22, 22);">标头</font></strong></td>
+<td align="left"><font style="color:rgb(22, 22, 22);">cfgmgr32.h (包括 Cfgmgr32.h)</font></td>
+</tr>
+<tr>
+<td align="left"><strong><font style="color:rgb(22, 22, 22);">Library</font></strong></td>
+<td align="left"><font style="color:rgb(22, 22, 22);">Cfgmgr32.lib</font></td>
+</tr>
+</tbody></table>
+<h2 id="另请参阅-1"><a href="#另请参阅-1" class="headerlink" title="另请参阅"></a><font style="color:rgb(22, 22, 22);">另请参阅</font></h2><p><a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows/desktop/api/cfgmgr32/nf-cfgmgr32-cm_get_child">CM_Get_Child</a></p>
+<p><a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows/desktop/api/cfgmgr32/nf-cfgmgr32-cm_get_device_id_exw">CM_Get_Device_ID_Ex</a></p>
+<hr>
+<h1 id="CM-Get-Parent-函数-cfgmgr32-h"><a href="#CM-Get-Parent-函数-cfgmgr32-h" class="headerlink" title="CM_Get_Parent 函数 (cfgmgr32.h)"></a><font style="color:rgb(38, 38, 38);">CM_Get_Parent 函数 (cfgmgr32.h)</font></h1><p><strong><font style="color:rgb(22, 22, 22);">CM_Get_Parent</font></strong><font style="color:rgb(22, 22, 22);"> </font><font style="color:rgb(22, 22, 22);">函数获取指定设备节点的父节点的设备实例句柄， (本地计算机的设备树中的</font><font style="color:rgb(22, 22, 22);"> </font><a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows-hardware/drivers/">devnode</a><font style="color:rgb(22, 22, 22);">) 。</font></p>
+<p>****<strong>备注</strong></p>
+<p><font style="color:rgb(22, 22, 22);">在 Windows Vista 和更高版本的 Windows 中，</font><font style="color:rgb(22, 22, 22);"> </font><a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows-hardware/drivers/install/unified-device-property-model--windows-vista-and-later-">统一设备属性模型</a><font style="color:rgb(22, 22, 22);"> </font><font style="color:rgb(22, 22, 22);">使用</font><font style="color:rgb(22, 22, 22);"> </font><a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows-hardware/drivers/install/devpkey-device-parent">DEVPKEY_Device_Parent</a><a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows-hardware/drivers/install/property-keys">属性键</a><font style="color:rgb(22, 22, 22);"> </font><font style="color:rgb(22, 22, 22);">来表示设备父级。 有关详细信息</font><font style="color:rgb(22, 22, 22);"> </font><a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows-hardware/drivers/install/retrieving-device-relations">，请参阅检索设备关系</a><font style="color:rgb(22, 22, 22);"> </font><font style="color:rgb(22, 22, 22);">。</font></p>
+<h2 id="语法-2"><a href="#语法-2" class="headerlink" title="语法"></a><font style="color:rgb(22, 22, 22);">语法</font></h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-function">CMAPI CONFIGRET <span class="hljs-title">CM_Get_Parent</span><span class="hljs-params">(</span></span><br><span class="hljs-params"><span class="hljs-function">  [out] PDEVINST pdnDevInst,</span></span><br><span class="hljs-params"><span class="hljs-function">  [in]  DEVINST  dnDevInst,</span></span><br><span class="hljs-params"><span class="hljs-function">  [in]  ULONG    ulFlags</span></span><br><span class="hljs-params"><span class="hljs-function">)</span></span>;<br></code></pre></td></tr></table></figure>
+
+<h2 id="参数-2"><a href="#参数-2" class="headerlink" title="参数"></a><font style="color:rgb(22, 22, 22);">参数</font></h2><p><code>[out] pdnDevInst</code></p>
+<p>调用方提供的指向此函数检索的父节点的设备实例句柄的指针。 检索到的句柄绑定到本地计算机。</p>
+<p><code>[in] dnDevInst</code></p>
+<p>绑定到本地计算机的调用方提供的设备实例句柄。</p>
+<p><code>[in] ulFlags</code></p>
+<p>未使用，必须为零。</p>
+<h2 id="返回值-2"><a href="#返回值-2" class="headerlink" title="返回值"></a><font style="color:rgb(22, 22, 22);">返回值</font></h2><p><font style="color:rgb(22, 22, 22);">如果操作成功，函数将返回CR_SUCCESS。 否则，它将返回</font><font style="color:rgb(22, 22, 22);"> </font><em><font style="color:rgb(22, 22, 22);">Cfgmgr32.h</font></em><font style="color:rgb(22, 22, 22);"> </font><font style="color:rgb(22, 22, 22);">中定义的CR_前缀错误代码之一。</font></p>
+<h2 id="备注"><a href="#备注" class="headerlink" title="备注"></a><font style="color:rgb(22, 22, 22);">备注</font></h2><p><font style="color:rgb(22, 22, 22);">有关使用绑定到本地计算机的设备实例句柄的信息，请参阅</font><font style="color:rgb(22, 22, 22);"> </font><a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows/desktop/api/cfgmgr32/nf-cfgmgr32-cm_get_child">CM_Get_Child</a><font style="color:rgb(22, 22, 22);">。</font></p>
+<h2 id="要求-2"><a href="#要求-2" class="headerlink" title="要求"></a><font style="color:rgb(22, 22, 22);">要求</font></h2><table>
+<thead>
+<tr>
+<th align="left"><font style="color:rgb(22, 22, 22);"> </font></th>
+<th align="left"><font style="color:rgb(22, 22, 22);"> </font></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong><font style="color:rgb(22, 22, 22);">最低受支持的客户端</font></strong></td>
+<td align="left"><font style="color:rgb(22, 22, 22);">在 Microsoft Windows 2000 及更高版本的 Windows 中可用。</font></td>
+</tr>
+<tr>
+<td align="left"><strong><font style="color:rgb(22, 22, 22);">目标平台</font></strong></td>
+<td align="left"><font style="color:rgb(22, 22, 22);">通用</font></td>
+</tr>
+<tr>
+<td align="left"><strong><font style="color:rgb(22, 22, 22);">标头</font></strong></td>
+<td align="left"><font style="color:rgb(22, 22, 22);">cfgmgr32.h (包括 Cfgmgr32.h)</font></td>
+</tr>
+<tr>
+<td align="left"><strong><font style="color:rgb(22, 22, 22);">Library</font></strong></td>
+<td align="left"><font style="color:rgb(22, 22, 22);">Cfgmgr32.lib;Windows 10 上的 OneCoreUAP.lib</font></td>
+</tr>
+<tr>
+<td align="left"><strong><font style="color:rgb(22, 22, 22);">DLL</font></strong></td>
+<td align="left"><font style="color:rgb(22, 22, 22);">CfgMgr32.dll</font></td>
+</tr>
+</tbody></table>
+<h2 id="另请参阅-2"><a href="#另请参阅-2" class="headerlink" title="另请参阅"></a><font style="color:rgb(22, 22, 22);">另请参阅</font></h2><p><a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows/desktop/api/cfgmgr32/nf-cfgmgr32-cm_get_child">CM_Get_Child</a></p>
+<p><a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows/desktop/api/cfgmgr32/nf-cfgmgr32-cm_get_parent_ex">CM_Get_Parent_Ex</a></p>
+<hr>
+<h1 id="SetupDiGetDeviceInterfaceDetailW-函数-setupapi-h"><a href="#SetupDiGetDeviceInterfaceDetailW-函数-setupapi-h" class="headerlink" title="SetupDiGetDeviceInterfaceDetailW 函数 (setupapi.h)"></a><font style="color:rgb(38, 38, 38);">SetupDiGetDeviceInterfaceDetailW 函数 (setupapi.h)</font></h1><p><strong><font style="color:rgb(22, 22, 22);">SetupDiGetDeviceInterfaceDetail</font></strong><font style="color:rgb(22, 22, 22);"> </font><font style="color:rgb(22, 22, 22);">函数返回有关设备接口的详细信息。</font></p>
+<h2 id="语法-3"><a href="#语法-3" class="headerlink" title="语法"></a><font style="color:rgb(22, 22, 22);">语法</font></h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-function">WINSETUPAPI BOOL <span class="hljs-title">SetupDiGetDeviceInterfaceDetailW</span><span class="hljs-params">(</span></span><br><span class="hljs-params"><span class="hljs-function">  [in]            HDEVINFO                           DeviceInfoSet,</span></span><br><span class="hljs-params"><span class="hljs-function">  [in]            PSP_DEVICE_INTERFACE_DATA          DeviceInterfaceData,</span></span><br><span class="hljs-params"><span class="hljs-function">  [out, optional] PSP_DEVICE_INTERFACE_DETAIL_DATA_W DeviceInterfaceDetailData,</span></span><br><span class="hljs-params"><span class="hljs-function">  [in]            DWORD                              DeviceInterfaceDetailDataSize,</span></span><br><span class="hljs-params"><span class="hljs-function">  [out, optional] PDWORD                             RequiredSize,</span></span><br><span class="hljs-params"><span class="hljs-function">  [out, optional] PSP_DEVINFO_DATA                   DeviceInfoData</span></span><br><span class="hljs-params"><span class="hljs-function">)</span></span>;<br></code></pre></td></tr></table></figure>
+
+<h2 id="参数-3"><a href="#参数-3" class="headerlink" title="参数"></a><font style="color:rgb(22, 22, 22);">参数</font></h2><p><code>[in] DeviceInfoSet</code></p>
+<p>指向 <a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows-hardware/drivers/install/device-information-sets">设备信息集</a> 的指针，其中包含要检索其详细信息的接口。 此句柄通常由 <a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows/desktop/api/setupapi/nf-setupapi-setupdigetclassdevsw">SetupDiGetClassDevs</a> 返回。</p>
+<p><code>[in] DeviceInterfaceData</code></p>
+<p>指向 <a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows/desktop/api/setupapi/ns-setupapi-sp_device_interface_data">SP_DEVICE_INTERFACE_DATA</a> 结构的指针，该结构指定要检索其详细信息 <em>的 DeviceInfoSet</em> 中的接口。 此类型的指针通常由 <a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows/desktop/api/setupapi/nf-setupapi-setupdienumdeviceinterfaces">SetupDiEnumDeviceInterfaces</a> 返回。</p>
+<p><code>[out, optional] DeviceInterfaceDetailData</code></p>
+<p>指向 <a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows/win32/api/setupapi/ns-setupapi-sp_device_interface_detail_data_a">SP_DEVICE_INTERFACE_DETAIL_DATA</a> 结构的指针，用于接收有关指定接口的信息。 此参数是可选的，可以为 <strong>NULL</strong>。 如果 <em>DeviceInterfaceDetailSize</em> 为零，此参数必须为 <strong>NULL</strong>。 如果指定此参数，调用方必须在调用此函数之前将 <em>DeviceInterfaceDetailData.cbSize</em> 设置为 <strong>sizeof</strong> (SP_DEVICE_INTERFACE_DETAIL_DATA) 。 <strong>cbSize</strong> 成员始终包含数据结构的固定部分的大小，而不是反映末尾可变长度字符串的大小。</p>
+<p><code>[in] DeviceInterfaceDetailDataSize</code></p>
+<p><em>DeviceInterfaceDetailData</em> 缓冲区的大小。 缓冲区必须至少 <strong>(偏移量</strong> （ (SP_DEVICE_INTERFACE_DETAIL_DATA、 <strong>DevicePath</strong>) + <strong>size 为</strong> (TCHAR) ) 字节）才能包含结构的固定部分和单个 <strong>NULL</strong> 以终止空MULTI_SZ字符串。</p>
+<p>如果 <em>DeviceInterfaceDetailData</em> 为 NULL，此参数必须为 <strong>零</strong>。</p>
+<p><code>[out, optional] RequiredSize</code></p>
+<p>指向 DWORD 类型的变量的指针，该变量接收 <em>DeviceInterfaceDetailData</em> 缓冲区的所需大小。 此大小包括结构的固定部分的大小以及可变长度设备路径字符串所需的字节数。 此参数是可选的，可以为 <strong>NULL</strong>。</p>
+<p><code>[out, optional] DeviceInfoData</code></p>
+<p>指向缓冲区的指针，该缓冲区接收有关支持所请求接口的设备的信息。 调用方必须将 <em>DeviceInfoData.cbSize</em> 设置为 <strong>sizeof</strong> (SP_DEVINFO_DATA) 。 此参数是可选的，可以为 <strong>NULL</strong>。</p>
+<h2 id="返回值-3"><a href="#返回值-3" class="headerlink" title="返回值"></a><font style="color:rgb(22, 22, 22);">返回值</font></h2><p><font style="color:rgb(22, 22, 22);">如果函数完成且未出错，</font><strong><font style="color:rgb(22, 22, 22);">SetupDiGetDeviceInterfaceDetail</font></strong><font style="color:rgb(22, 22, 22);"> </font><font style="color:rgb(22, 22, 22);">返回</font><font style="color:rgb(22, 22, 22);"> </font><strong><font style="color:rgb(22, 22, 22);">TRUE</font></strong><font style="color:rgb(22, 22, 22);">。 如果函数完成时出现错误，则返回</font><font style="color:rgb(22, 22, 22);"> </font><strong><font style="color:rgb(22, 22, 22);">FALSE</font></strong><font style="color:rgb(22, 22, 22);"> </font><font style="color:rgb(22, 22, 22);">，并且可以通过调用</font><font style="color:rgb(22, 22, 22);"> </font><a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows/win32/api/errhandlingapi/nf-errhandlingapi-getlasterror">GetLastError</a><font style="color:rgb(22, 22, 22);"> </font><font style="color:rgb(22, 22, 22);">来检索失败的错误代码。</font></p>
+<h2 id="注解-1"><a href="#注解-1" class="headerlink" title="注解"></a><font style="color:rgb(22, 22, 22);">注解</font></h2><p><font style="color:rgb(22, 22, 22);">使用此函数获取接口的详细信息通常是一个两步过程：</font></p>
+<ol>
+<li><font style="color:rgb(22, 22, 22);">获取所需的缓冲区大小。 使用</font><font style="color:rgb(22, 22, 22);"> </font><strong><font style="color:rgb(22, 22, 22);">NULL</font></strong><em><font style="color:rgb(22, 22, 22);">DeviceInterfaceDetailData 指针、DeviceInterfaceDetailDataSize</font></em><font style="color:rgb(22, 22, 22);"> </font><font style="color:rgb(22, 22, 22);">为零和有效的 RequiredSize 变量调用</font><font style="color:rgb(22, 22, 22);"> </font><strong><font style="color:rgb(22, 22, 22);">SetupDiGetDeviceInterfaceDetail</font></strong><font style="color:rgb(22, 22, 22);">。</font><font style="color:rgb(22, 22, 22);"> </font><font style="color:rgb(22, 22, 22);">为了响应此类调用，此函数在</font><font style="color:rgb(22, 22, 22);"> </font><em><font style="color:rgb(22, 22, 22);">RequiredSize</font></em><font style="color:rgb(22, 22, 22);"> </font><font style="color:rgb(22, 22, 22);">处返回所需的缓冲区大小，并失败并返回ERROR_INSUFFICIENT_BUFFER</font><font style="color:rgb(22, 22, 22);"> </font><a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows/win32/api/errhandlingapi/nf-errhandlingapi-getlasterror">GetLastError</a><font style="color:rgb(22, 22, 22);"> </font><font style="color:rgb(22, 22, 22);">。</font></li>
+<li><font style="color:rgb(22, 22, 22);">分配适当大小的缓冲区，然后再次调用函数以获取接口详细信息。</font></li>
+</ol>
+<p><font style="color:rgb(22, 22, 22);">此函数返回的接口详细信息包含可传递给 Win32 函数（如</font><font style="color:rgb(22, 22, 22);"> </font><a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows/desktop/api/fileapi/nf-fileapi-createfilea">CreateFile）</a><font style="color:rgb(22, 22, 22);">的设备路径。 请勿尝试分析设备路径符号名称。 设备路径可以在系统启动之间重复使用。</font></p>
+<p><strong><font style="color:rgb(22, 22, 22);">SetupDiGetDeviceInterfaceDetail</font></strong><font style="color:rgb(22, 22, 22);"> </font><font style="color:rgb(22, 22, 22);">可用于仅获取</font><font style="color:rgb(22, 22, 22);"> </font><em><font style="color:rgb(22, 22, 22);">DeviceInfoData</font></em><font style="color:rgb(22, 22, 22);">。 如果接口存在，但</font><font style="color:rgb(22, 22, 22);"> </font><em><font style="color:rgb(22, 22, 22);">DeviceInterfaceDetailData</font></em><font style="color:rgb(22, 22, 22);"> </font><font style="color:rgb(22, 22, 22);">为</font><font style="color:rgb(22, 22, 22);"> </font><strong><font style="color:rgb(22, 22, 22);">NULL</font></strong><font style="color:rgb(22, 22, 22);">，则此函数将失败，</font><font style="color:rgb(22, 22, 22);"> </font><a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows/win32/api/errhandlingapi/nf-errhandlingapi-getlasterror">GetLastError</a><font style="color:rgb(22, 22, 22);"> </font><font style="color:rgb(22, 22, 22);">返回ERROR_INSUFFICIENT_BUFFER，并且</font><font style="color:rgb(22, 22, 22);"> </font><em><font style="color:rgb(22, 22, 22);">DeviceInfoData</font></em><font style="color:rgb(22, 22, 22);"> </font><font style="color:rgb(22, 22, 22);">结构将填充有关公开接口的设备的信息。</font></p>
+<p>****<strong>备注</strong></p>
+<p>setupapi.h 标头将 SetupDiGetDeviceInterfaceDetail 定义为别名，该别名根据 UNICODE 预处理器常量的定义自动选择此函数的 ANSI 或 Unicode 版本。 将非特定编码别名的使用与非非特定编码的代码混合使用可能会导致不匹配，从而导致编译或运行时错误。 有关详细信息，请参阅 <a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows/win32/intl/conventions-for-function-prototypes">函数原型的约定</a>。</p>
+<h2 id="要求-3"><a href="#要求-3" class="headerlink" title="要求"></a><font style="color:rgb(22, 22, 22);">要求</font></h2><table>
+<thead>
+<tr>
+<th align="left"><font style="color:rgb(22, 22, 22);"> </font></th>
+<th align="left"><font style="color:rgb(22, 22, 22);"> </font></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong><font style="color:rgb(22, 22, 22);">最低受支持的客户端</font></strong></td>
+<td align="left"><font style="color:rgb(22, 22, 22);">在 Microsoft Windows 2000 及更高版本的 Windows 中可用。</font></td>
+</tr>
+<tr>
+<td align="left"><strong><font style="color:rgb(22, 22, 22);">目标平台</font></strong></td>
+<td align="left"><font style="color:rgb(22, 22, 22);">桌面</font></td>
+</tr>
+<tr>
+<td align="left"><strong><font style="color:rgb(22, 22, 22);">标头</font></strong></td>
+<td align="left"><font style="color:rgb(22, 22, 22);">setupapi.h (包括 Setupapi.h)</font></td>
+</tr>
+<tr>
+<td align="left"><strong><font style="color:rgb(22, 22, 22);">Library</font></strong></td>
+<td align="left"><font style="color:rgb(22, 22, 22);">Setupapi.lib</font></td>
+</tr>
+<tr>
+<td align="left"><strong><font style="color:rgb(22, 22, 22);">API 集</font></strong></td>
+<td align="left"><font style="color:rgb(22, 22, 22);">Windows 10版本 10.0.1439 (3 中引入的 ext-ms-win-setupapi-classinstallers-l1-1-2)</font></td>
+</tr>
+</tbody></table>
+<h2 id="另请参阅-3"><a href="#另请参阅-3" class="headerlink" title="另请参阅"></a><font style="color:rgb(22, 22, 22);">另请参阅</font></h2><p><a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows/desktop/api/setupapi/nf-setupapi-setupdienumdeviceinterfaces">SetupDiEnumDeviceInterfaces</a></p>
+<p><a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows/desktop/api/setupapi/nf-setupapi-setupdigetclassdevsw">SetupDiGetClassDevs</a></p>
+<hr>
+<h1 id="setupDiEnumDeviceInterfaces-函数-setupapi-h"><a href="#setupDiEnumDeviceInterfaces-函数-setupapi-h" class="headerlink" title="setupDiEnumDeviceInterfaces 函数 (setupapi.h)"></a>setupDiEnumDeviceInterfaces 函数 (setupapi.h)</h1><p><strong><font style="color:rgb(22, 22, 22);">SetupDiEnumDeviceInterfaces</font></strong><font style="color:rgb(22, 22, 22);"> </font><font style="color:rgb(22, 22, 22);">函数枚举包含在设备信息集中的设备接口。</font></p>
+<h2 id="语法-4"><a href="#语法-4" class="headerlink" title="语法"></a><font style="color:rgb(22, 22, 22);">语法</font></h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-function">WINSETUPAPI BOOL <span class="hljs-title">SetupDiEnumDeviceInterfaces</span><span class="hljs-params">(</span></span><br><span class="hljs-params"><span class="hljs-function">  [in]           HDEVINFO                  DeviceInfoSet,</span></span><br><span class="hljs-params"><span class="hljs-function">  [in, optional] PSP_DEVINFO_DATA          DeviceInfoData,</span></span><br><span class="hljs-params"><span class="hljs-function">  [in]           <span class="hljs-type">const</span> GUID                *InterfaceClassGuid,</span></span><br><span class="hljs-params"><span class="hljs-function">  [in]           DWORD                     MemberIndex,</span></span><br><span class="hljs-params"><span class="hljs-function">  [out]          PSP_DEVICE_INTERFACE_DATA DeviceInterfaceData</span></span><br><span class="hljs-params"><span class="hljs-function">)</span></span>;<br></code></pre></td></tr></table></figure>
+
+<h2 id="参数-4"><a href="#参数-4" class="headerlink" title="参数"></a><font style="color:rgb(22, 22, 22);">参数</font></h2><p><code>[in] DeviceInfoSet</code></p>
+<p>指向包含要为其返回信息的设备接口的设备信息 <a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows-hardware/drivers/install/device-information-sets">集</a> 的指针。 此句柄通常由 <a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows/desktop/api/setupapi/nf-setupapi-setupdigetclassdevsw">SetupDiGetClassDevs</a> 返回。</p>
+<p><code>[in, optional] DeviceInfoData</code></p>
+<p>指向 <a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows/desktop/api/setupapi/ns-setupapi-sp_devinfo_data">SP_DEVINFO_DATA</a> 结构的指针，该结构指定 <em>DeviceInfoSet</em> 中的设备信息元素。 此参数是可选的，可以为 <strong>NULL</strong>。 如果指定此参数， <strong>SetupDiEnumDeviceInterfaces</strong> 会将枚举限制为指定设备支持的接口。 如果此参数为 <strong>NULL</strong>，则重复调用 <strong>SetupDiEnumDeviceInterfaces</strong> 将返回与 <em>DeviceInfoSet</em> 中的所有设备信息元素关联的接口的相关信息。 此指针通常由 <a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows/desktop/api/setupapi/nf-setupapi-setupdienumdeviceinfo">SetupDiEnumDeviceInfo</a> 返回。</p>
+<p><code>[in] InterfaceClassGuid</code></p>
+<p>指向 GUID 的指针，该 GUID 指定所请求接口的设备接口类。</p>
+<p><code>[in] MemberIndex</code></p>
+<p>设备信息集中接口列表中的从零开始的索引。 调用方应先调用此函数，并将 <em>MemberIndex</em> 设置为零，以获取第一个接口。 然后，重复递增 <em>MemberIndex</em> 并检索接口，直到此函数失败且 <a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows/win32/api/errhandlingapi/nf-errhandlingapi-getlasterror">GetLastError</a> 返回ERROR_NO_MORE_ITEMS。</p>
+<p>如果 <em>DeviceInfoData</em> 指定特定设备，则 <em>MemberIndex</em> 仅相对于该设备公开的接口。</p>
+<p><code>[out] DeviceInterfaceData</code></p>
+<p>指向调用方分配的缓冲区的指针，该缓冲区在成功返回时包含一个标识满足搜索参数的接口的已完成 <a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows/desktop/api/setupapi/ns-setupapi-sp_device_interface_data">SP_DEVICE_INTERFACE_DATA</a> 结构。 调用方必须设置 <em>DeviceInterfaceData</em>。在调用此函数之前，<strong>cbSize</strong> 为 <strong>sizeof</strong> (SP_DEVICE_INTERFACE_DATA) 。</p>
+<h2 id="返回值-4"><a href="#返回值-4" class="headerlink" title="返回值"></a><font style="color:rgb(22, 22, 22);">返回值</font></h2><p><font style="color:rgb(22, 22, 22);">如果函数完成且未出错，</font><strong><font style="color:rgb(22, 22, 22);">SetupDiEnumDeviceInterfaces</font></strong><font style="color:rgb(22, 22, 22);"> </font><font style="color:rgb(22, 22, 22);">将返回</font><font style="color:rgb(22, 22, 22);"> </font><strong><font style="color:rgb(22, 22, 22);">TRUE</font></strong><font style="color:rgb(22, 22, 22);">。 如果函数完成但出现错误，则返回</font><font style="color:rgb(22, 22, 22);"> </font><strong><font style="color:rgb(22, 22, 22);">FALSE</font></strong><font style="color:rgb(22, 22, 22);"> </font><font style="color:rgb(22, 22, 22);">，并且可以通过调用</font><font style="color:rgb(22, 22, 22);"> </font><a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows/win32/api/errhandlingapi/nf-errhandlingapi-getlasterror">GetLastError</a><font style="color:rgb(22, 22, 22);"> </font><font style="color:rgb(22, 22, 22);">来检索失败的错误代码。</font></p>
+<h2 id="注解-2"><a href="#注解-2" class="headerlink" title="注解"></a><font style="color:rgb(22, 22, 22);">注解</font></h2><p><font style="color:rgb(22, 22, 22);">重复调用此函数会返回不同设备接口</font><font style="color:rgb(22, 22, 22);"> </font><a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows/desktop/api/setupapi/ns-setupapi-sp_device_interface_data">的SP_DEVICE_INTERFACE_DATA</a><font style="color:rgb(22, 22, 22);"> </font><font style="color:rgb(22, 22, 22);">结构。 可以重复调用此函数来获取与特定设备信息元素关联或与所有设备信息元素关联的设备信息集中的接口的相关信息。</font></p>
+<p><em><font style="color:rgb(22, 22, 22);">DeviceInterfaceData</font></em><font style="color:rgb(22, 22, 22);"> </font><font style="color:rgb(22, 22, 22);">指向一个结构，该结构标识请求的设备接口。 若要获取有关接口的详细信息，请调用</font><font style="color:rgb(22, 22, 22);"> </font><a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows/desktop/api/setupapi/nf-setupapi-setupdigetdeviceinterfacedetaila">SetupDiGetDeviceInterfaceDetail</a><font style="color:rgb(22, 22, 22);">。 详细信息包括可传递给 Win32 函数的设备接口的名称，如Microsoft Windows SDK文档) 中所述的</font><font style="color:rgb(22, 22, 22);"> </font><a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows/desktop/api/fileapi/nf-fileapi-createfilea">CreateFile</a><font style="color:rgb(22, 22, 22);"> </font><font style="color:rgb(22, 22, 22);">(以获取接口的句柄。</font></p>
+<p><font style="color:rgb(22, 22, 22);">有关详细信息</font><font style="color:rgb(22, 22, 22);"> </font><a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows-hardware/drivers/install/overview-of-device-interface-classes">，请参阅设备接口类概述</a><font style="color:rgb(22, 22, 22);"> </font><font style="color:rgb(22, 22, 22);">。</font></p>
+<h2 id="要求-4"><a href="#要求-4" class="headerlink" title="要求"></a><font style="color:rgb(22, 22, 22);">要求</font></h2><table>
+<thead>
+<tr>
+<th align="left"><font style="color:rgb(22, 22, 22);"> </font></th>
+<th align="left"><font style="color:rgb(22, 22, 22);"> </font></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong><font style="color:rgb(22, 22, 22);">最低受支持的客户端</font></strong></td>
+<td align="left"><font style="color:rgb(22, 22, 22);">在 Microsoft Windows 2000 及更高版本的 Windows 中可用。</font></td>
+</tr>
+<tr>
+<td align="left"><strong><font style="color:rgb(22, 22, 22);">目标平台</font></strong></td>
+<td align="left"><font style="color:rgb(22, 22, 22);">桌面</font></td>
+</tr>
+<tr>
+<td align="left"><strong><font style="color:rgb(22, 22, 22);">标头</font></strong></td>
+<td align="left"><font style="color:rgb(22, 22, 22);">setupapi.h (包括 Setupapi.h)</font></td>
+</tr>
+<tr>
+<td align="left"><strong><font style="color:rgb(22, 22, 22);">Library</font></strong></td>
+<td align="left"><font style="color:rgb(22, 22, 22);">Setupapi.lib</font></td>
+</tr>
+<tr>
+<td align="left"><strong><font style="color:rgb(22, 22, 22);">DLL</font></strong></td>
+<td align="left"><font style="color:rgb(22, 22, 22);">Setupapi.dll</font></td>
+</tr>
+<tr>
+<td align="left"><strong><font style="color:rgb(22, 22, 22);">API 集</font></strong></td>
+<td align="left"><font style="color:rgb(22, 22, 22);">ext-ms-win-setupapi-classinstallers-l1-1-2 (在 Windows 10 版本 10.0.14393 中引入)</font></td>
+</tr>
+</tbody></table>
+<h2 id="另请参阅-4"><a href="#另请参阅-4" class="headerlink" title="另请参阅"></a><font style="color:rgb(22, 22, 22);">另请参阅</font></h2><p><a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows/desktop/api/setupapi/nf-setupapi-setupdienumdeviceinfo">SetupDiEnumDeviceInfo</a></p>
+<p><a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows/desktop/api/setupapi/nf-setupapi-setupdigetclassdevsw">SetupDiGetClassDevs</a></p>
+<p><a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows/desktop/api/setupapi/nf-setupapi-setupdigetdeviceinterfacedetaila">SetupDiGetDeviceInterfaceDetail</a></p>
+<hr>
+<h1 id="SP-DEVINFO-DATA-结构-setupapi-h"><a href="#SP-DEVINFO-DATA-结构-setupapi-h" class="headerlink" title="SP_DEVINFO_DATA 结构 (setupapi.h)"></a>SP_DEVINFO_DATA 结构 (setupapi.h)</h1><p><strong><font style="color:rgb(22, 22, 22);">SP_DEVINFO_DATA</font></strong><font style="color:rgb(22, 22, 22);">结构定义作为设备信息集成员的设备实例。</font></p>
+<h2 id="语法-5"><a href="#语法-5" class="headerlink" title="语法"></a><font style="color:rgb(22, 22, 22);">语法</font></h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-keyword">typedef</span> <span class="hljs-keyword">struct</span> <span class="hljs-title class_">_SP_DEVINFO_DATA</span> &#123;<br>  DWORD     cbSize;<br>  GUID      ClassGuid;<br>  DWORD     DevInst;<br>  ULONG_PTR Reserved;<br>&#125; SP_DEVINFO_DATA, *PSP_DEVINFO_DATA;<br></code></pre></td></tr></table></figure>
+
+<h2 id="成员"><a href="#成员" class="headerlink" title="成员"></a><font style="color:rgb(22, 22, 22);">成员</font></h2><p><code>cbSize</code></p>
+<p>SP_DEVINFO_DATA结构的大小（以字节为单位）。 有关更多信息，请参见下面的“备注”部分。</p>
+<p><code>ClassGuid</code></p>
+<p>设备的安装类的 GUID。</p>
+<p><code>DevInst</code></p>
+<p>设备实例的不透明句柄 (也称为 <a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows-hardware/drivers/">开发节点</a>) 的句柄。</p>
+<p>某些函数（如 <strong>SetupDi</strong><em>Xxx</em> 函数）采用整个SP_DEVINFO_DATA结构作为输入，以识别设备信息集中的设备。 其他函数（如 <strong>cm</strong>_<em>Xxx</em> 函数（如 <a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows/desktop/api/cfgmgr32/nf-cfgmgr32-cm_get_devnode_status">CM_Get_DevNode_Status</a>）将此 <strong>DevInst</strong> 句柄作为输入。</p>
+<p><code>Reserved</code></p>
+<p>保留。 仅限内部使用。</p>
+<h2 id="注解-3"><a href="#注解-3" class="headerlink" title="注解"></a><font style="color:rgb(22, 22, 22);">注解</font></h2><p><font style="color:rgb(22, 22, 22);">SP_DEVINFO_DATA结构标识设备信息集中的设备。 例如，当 Windows 向类安装程序和辅助安装程序发送</font><font style="color:rgb(22, 22, 22);"> </font><a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows-hardware/drivers/install/dif-installdevice">DIF_INSTALLDEVICE</a><font style="color:rgb(22, 22, 22);"> </font><font style="color:rgb(22, 22, 22);">请求时，它包括设备信息集的句柄和指向指定特定设备的SP_DEVINFO_DATA的指针。 除了 DIF 请求外，此结构还用于某些</font><font style="color:rgb(22, 22, 22);"> </font><strong><font style="color:rgb(22, 22, 22);">SetupDi</font></strong><em><font style="color:rgb(22, 22, 22);">Xxx</font></em><font style="color:rgb(22, 22, 22);"> </font><font style="color:rgb(22, 22, 22);">函数。</font></p>
+<p><font style="color:rgb(22, 22, 22);">采用 SP_DEVINFO_DATA 结构作为参数的</font><font style="color:rgb(22, 22, 22);"> </font><strong><font style="color:rgb(22, 22, 22);">SetupDi</font></strong><em><font style="color:rgb(22, 22, 22);">Xxx</font></em><font style="color:rgb(22, 22, 22);"> </font><font style="color:rgb(22, 22, 22);">函数验证所提供的结构的</font><font style="color:rgb(22, 22, 22);"> </font><strong><font style="color:rgb(22, 22, 22);">cbSize</font></strong><font style="color:rgb(22, 22, 22);"> </font><font style="color:rgb(22, 22, 22);">成员是否等于结构的大小（以字节为单位）。 如果未正确为输入参数设置</font><font style="color:rgb(22, 22, 22);"> </font><strong><font style="color:rgb(22, 22, 22);">cbSize</font></strong><font style="color:rgb(22, 22, 22);"> </font><font style="color:rgb(22, 22, 22);">成员，则函数将失败，并将错误代码设置为 ERROR_INVALID_PARAMETER。 如果未为输出参数正确设置</font><font style="color:rgb(22, 22, 22);"> </font><strong><font style="color:rgb(22, 22, 22);">cbSize</font></strong><font style="color:rgb(22, 22, 22);"> </font><font style="color:rgb(22, 22, 22);">成员，则函数将失败，并将错误代码设置为 ERROR_INVALID_USER_BUFFER。</font></p>
+<h2 id="要求-5"><a href="#要求-5" class="headerlink" title="要求"></a><font style="color:rgb(22, 22, 22);">要求</font></h2><table>
+<thead>
+<tr>
+<th align="left"><font style="color:rgb(22, 22, 22);"> </font></th>
+<th align="left"><font style="color:rgb(22, 22, 22);"> </font></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong><font style="color:rgb(22, 22, 22);">标头</font></strong></td>
+<td align="left"><font style="color:rgb(22, 22, 22);">setupapi.h (包括 Setupapi.h)</font></td>
+</tr>
+</tbody></table>
+<h2 id="另请参阅-5"><a href="#另请参阅-5" class="headerlink" title="另请参阅"></a><font style="color:rgb(22, 22, 22);">另请参阅</font></h2><p><a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows/desktop/api/setupapi/ns-setupapi-sp_devinfo_list_detail_data_a">SP_DEVINFO_LIST_DETAIL_DATA</a></p>
+<hr>
+<h1 id="SP-DEVICE-INTERFACE-DATA-结构-setupapi-h"><a href="#SP-DEVICE-INTERFACE-DATA-结构-setupapi-h" class="headerlink" title="SP_DEVICE_INTERFACE_DATA 结构(setupapi.h)"></a>SP_DEVICE_INTERFACE_DATA 结构(setupapi.h)</h1><p><strong><font style="color:rgb(22, 22, 22);">SP_DEVICE_INTERFACE_DATA</font></strong><font style="color:rgb(22, 22, 22);">结构定义设备信息集中的设备接口。</font></p>
+<h2 id="语法-6"><a href="#语法-6" class="headerlink" title="语法"></a><font style="color:rgb(22, 22, 22);">语法</font></h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-keyword">typedef</span> <span class="hljs-keyword">struct</span> <span class="hljs-title class_">_SP_DEVICE_INTERFACE_DATA</span> &#123;<br>  DWORD     cbSize;<br>  GUID      InterfaceClassGuid;<br>  DWORD     Flags;<br>  ULONG_PTR Reserved;<br>&#125; SP_DEVICE_INTERFACE_DATA, *PSP_DEVICE_INTERFACE_DATA;<br></code></pre></td></tr></table></figure>
+
+<h2 id="成员-1"><a href="#成员-1" class="headerlink" title="成员"></a><font style="color:rgb(22, 22, 22);">成员</font></h2><p><code>cbSize</code></p>
+<p>SP_DEVICE_INTERFACE_DATA结构的大小（以字节为单位）。 有关详细信息，请参见“备注”部分。</p>
+<p><code>InterfaceClassGuid</code></p>
+<p>设备接口所属类的 GUID。</p>
+<p><code>Flags</code></p>
+<p>可以是以下一项或多项：</p>
+<blockquote>
+<h4 id="SPINT-ACTIVE"><a href="#SPINT-ACTIVE" class="headerlink" title="SPINT_ACTIVE"></a>SPINT_ACTIVE</h4><p>接口处于活动状态 (启用) 。</p>
+<h4 id="SPINT-DEFAULT"><a href="#SPINT-DEFAULT" class="headerlink" title="SPINT_DEFAULT"></a>SPINT_DEFAULT</h4><p>接口是设备类的默认接口。</p>
+<h4 id="SPINT-REMOVED"><a href="#SPINT-REMOVED" class="headerlink" title="SPINT_REMOVED"></a>SPINT_REMOVED</h4><p>该接口已删除。</p>
+</blockquote>
+<p><code>Reserved</code></p>
+<p>保留。 请勿使用。</p>
+<h2 id="注解-4"><a href="#注解-4" class="headerlink" title="注解"></a><font style="color:rgb(22, 22, 22);">注解</font></h2><p><font style="color:rgb(22, 22, 22);">采用 SP_DEVICE_INTERFACE_DATA 结构的实例作为参数的 SetupAPI 函数验证所提供的结构的</font><font style="color:rgb(22, 22, 22);"> </font><strong><font style="color:rgb(22, 22, 22);">cbSize</font></strong><font style="color:rgb(22, 22, 22);"> </font><font style="color:rgb(22, 22, 22);">成员是否等于结构的大小（以字节为单位）。 如果未正确设置</font><font style="color:rgb(22, 22, 22);"> </font><strong><font style="color:rgb(22, 22, 22);">cbSize</font></strong><font style="color:rgb(22, 22, 22);"> </font><font style="color:rgb(22, 22, 22);">成员，该函数将失败，并将错误代码设置为 ERROR_INVALID_USER_BUFFER。</font></p>
+<h2 id="要求-6"><a href="#要求-6" class="headerlink" title="要求"></a><font style="color:rgb(22, 22, 22);">要求</font></h2><table>
+<thead>
+<tr>
+<th align="left"><font style="color:rgb(22, 22, 22);"> </font></th>
+<th align="left"><font style="color:rgb(22, 22, 22);"> </font></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong><font style="color:rgb(22, 22, 22);">标头</font></strong></td>
+<td align="left"><font style="color:rgb(22, 22, 22);">setupapi.h (包括 Setupapi.h)</font></td>
+</tr>
+</tbody></table>
+<h2 id="另请参阅-6"><a href="#另请参阅-6" class="headerlink" title="另请参阅"></a><font style="color:rgb(22, 22, 22);">另请参阅</font></h2><p><a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows/win32/api/setupapi/ns-setupapi-sp_device_interface_detail_data_a">SP_DEVICE_INTERFACE_DETAIL_DATA</a></p>
+<p><a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows/desktop/api/setupapi/nf-setupapi-setupdicreatedeviceinterfacea">SetupDiCreateDeviceInterface</a></p>
+<p><a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows/desktop/api/setupapi/nf-setupapi-setupdienumdeviceinterfaces">SetupDiEnumDeviceInterfaces</a></p>
+<p><a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows/desktop/api/setupapi/nf-setupapi-setupdigetdeviceinterfacealias">SetupDiGetDeviceInterfaceAlias</a></p>
+<p><a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows/desktop/api/setupapi/nf-setupapi-setupdiopendeviceinterfacea">SetupDiOpenDeviceInterface</a></p>
+<p><a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows/desktop/api/setupapi/nf-setupapi-setupdisetdeviceinterfacedefault">SetupDiSetDeviceInterfaceDefault</a></p>
+<hr>
+<h1 id="SP-DEVICE-INTERFACE-DETAIL-DATA-A-结构-setupapi-h"><a href="#SP-DEVICE-INTERFACE-DETAIL-DATA-A-结构-setupapi-h" class="headerlink" title="SP_DEVICE_INTERFACE_DETAIL_DATA_A 结构 (setupapi.h)"></a>SP_DEVICE_INTERFACE_DETAIL_DATA_A 结构 (setupapi.h)</h1><p><strong><font style="color:rgb(22, 22, 22);">SP_DEVICE_INTERFACE_DETAIL_DATA</font></strong><font style="color:rgb(22, 22, 22);"> 结构包含设备接口的路径。</font></p>
+<h2 id="语法-7"><a href="#语法-7" class="headerlink" title="语法"></a><font style="color:rgb(22, 22, 22);">语法</font></h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-keyword">typedef</span> <span class="hljs-keyword">struct</span> <span class="hljs-title class_">_SP_DEVICE_INTERFACE_DETAIL_DATA_A</span> &#123;<br>  DWORD cbSize;<br>  CHAR  DevicePath[ANYSIZE_ARRAY];<br>&#125; SP_DEVICE_INTERFACE_DETAIL_DATA_A, *PSP_DEVICE_INTERFACE_DETAIL_DATA_A;<br></code></pre></td></tr></table></figure>
+
+<h2 id="成员-2"><a href="#成员-2" class="headerlink" title="成员"></a><font style="color:rgb(22, 22, 22);">成员</font></h2><p><code>cbSize</code></p>
+<p>SP_DEVICE_INTERFACE_DETAIL_DATA结构的大小（以字节为单位）。 有关更多信息，请参见下面的“备注”部分。</p>
+<p><code>DevicePath[ANYSIZE_ARRAY]</code></p>
+<p>包含设备接口路径的以 NULL 结尾的字符串。 此<font style="color:rgb(22, 22, 22);">路径可以传递给 Win32 函数，如 </font><a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows/desktop/api/fileapi/nf-fileapi-createfilea">CreateFile</a><font style="color:rgb(22, 22, 22);">。</font></p>
+<h2 id="注解-5"><a href="#注解-5" class="headerlink" title="注解"></a><font style="color:rgb(22, 22, 22);">注解</font></h2><p><font style="color:rgb(22, 22, 22);">SP_DEVICE_INTERFACE_DETAIL_DATA结构标识设备信息集中设备接口的路径。</font></p>
+<p><font style="color:rgb(22, 22, 22);">采用 SP_DEVICE_INTERFACE_DETAIL_DATA 结构作为参数的</font><font style="color:rgb(22, 22, 22);"> </font><strong><font style="color:rgb(22, 22, 22);">SetupDi</font></strong><em><font style="color:rgb(22, 22, 22);">Xxx</font></em><font style="color:rgb(22, 22, 22);"> </font><font style="color:rgb(22, 22, 22);">函数验证所提供的结构的</font><font style="color:rgb(22, 22, 22);"> </font><strong><font style="color:rgb(22, 22, 22);">cbSize</font></strong><font style="color:rgb(22, 22, 22);"> </font><font style="color:rgb(22, 22, 22);">成员是否等于结构的大小（以字节为单位）。 如果未为输入参数正确设置</font><font style="color:rgb(22, 22, 22);"> </font><strong><font style="color:rgb(22, 22, 22);">cbSize</font></strong><font style="color:rgb(22, 22, 22);"> </font><font style="color:rgb(22, 22, 22);">成员，该函数将失败，并将错误代码设置为 ERROR_INVALID_PARAMETER。 如果未为输出参数正确设置</font><font style="color:rgb(22, 22, 22);"> </font><strong><font style="color:rgb(22, 22, 22);">cbSize</font></strong><font style="color:rgb(22, 22, 22);"> </font><font style="color:rgb(22, 22, 22);">成员，则函数将失败，并将错误代码设置为 ERROR_INVALID_USER_BUFFER。</font></p>
+<p>****<strong>备注</strong></p>
+<p><font style="color:rgb(22, 22, 22);">setupapi.h 标头将 SP_DEVICE_INTERFACE_DETAIL_DATA 定义为别名，该别名根据 UNICODE 预处理器常量的定义自动选择此函数的 ANSI 或 Unicode 版本。 将非特定编码别名与非非特定编码的代码混合使用可能会导致不匹配，从而导致编译或运行时错误。 有关详细信息，请参阅</font><font style="color:rgb(22, 22, 22);"> </font><a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows/win32/intl/conventions-for-function-prototypes">函数原型的约定</a><font style="color:rgb(22, 22, 22);">。</font></p>
+<h2 id="要求-7"><a href="#要求-7" class="headerlink" title="要求"></a><font style="color:rgb(22, 22, 22);">要求</font></h2><table>
+<thead>
+<tr>
+<th align="left"><font style="color:rgb(22, 22, 22);"> </font></th>
+<th align="left"><font style="color:rgb(22, 22, 22);"> </font></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong><font style="color:rgb(22, 22, 22);">标头</font></strong></td>
+<td align="left"><font style="color:rgb(22, 22, 22);">setupapi.h (包括 Setupapi.h)</font></td>
+</tr>
+</tbody></table>
+<h2 id="另请参阅-7"><a href="#另请参阅-7" class="headerlink" title="另请参阅"></a><font style="color:rgb(22, 22, 22);">另请参阅</font></h2><p><a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows/desktop/api/setupapi/nf-setupapi-setupdigetdeviceinterfacedetaila">SetupDiGetDeviceInterfaceDetail</a></p>
+<hr>
+<h1 id="SetupDiGetClassDevs-函数-setupapi-h"><a href="#SetupDiGetClassDevs-函数-setupapi-h" class="headerlink" title="SetupDiGetClassDevs 函数 (setupapi.h)"></a>SetupDiGetClassDevs 函数 (setupapi.h)</h1><p><strong><font style="color:rgb(22, 22, 22);">SetupDiGetClassDevs</font></strong><font style="color:rgb(22, 22, 22);"> </font><font style="color:rgb(22, 22, 22);">函数返回包含本地计算机请求的设备信息元素的设备信息</font><a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows-hardware/drivers/install/device-information-sets">集</a><font style="color:rgb(22, 22, 22);">的句柄。</font></p>
+<h2 id="语法-8"><a href="#语法-8" class="headerlink" title="语法"></a><font style="color:rgb(22, 22, 22);">语法</font></h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-function">WINSETUPAPI HDEVINFO <span class="hljs-title">SetupDiGetClassDevsW</span><span class="hljs-params">(</span></span><br><span class="hljs-params"><span class="hljs-function">  [in, optional] <span class="hljs-type">const</span> GUID *ClassGuid,</span></span><br><span class="hljs-params"><span class="hljs-function">  [in, optional] PCWSTR     Enumerator,</span></span><br><span class="hljs-params"><span class="hljs-function">  [in, optional] HWND       hwndParent,</span></span><br><span class="hljs-params"><span class="hljs-function">  [in]           DWORD      Flags</span></span><br><span class="hljs-params"><span class="hljs-function">)</span></span>;<br></code></pre></td></tr></table></figure>
+
+<h2 id="参数-5"><a href="#参数-5" class="headerlink" title="参数"></a><font style="color:rgb(22, 22, 22);">参数</font></h2><p><code>[in, optional] ClassGuid</code></p>
+<p>指向<a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows-hardware/drivers/install/overview-of-device-setup-classes">设备安装类或设备</a><a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows-hardware/drivers/install/overview-of-device-interface-classes">接口类</a>的 GUID 的指针。 此指针是可选的，可以为 <strong>NULL</strong>。 有关如何设置 <em>ClassGuid</em> 的详细信息，请参阅以下 <strong>“备注”</strong> 部分。</p>
+<p><code>[in, optional] Enumerator</code></p>
+<p>指向以 NULL 结尾的字符串的指针，该字符串指定：</p>
+<ul>
+<li>即插即用 (PnP) <a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows-hardware/drivers/">枚举器的</a>标识符 (ID) 。 此 ID 可以是值的全局唯一标识符 (GUID) 或符号名称。 例如，“PCI”可用于指定 PCI PnP 值。 PnP 值的其他符号名称示例包括“USB”、“PCMCIA”和“SCSI”。</li>
+<li>PnP <a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows-hardware/drivers/install/device-instance-ids">设备实例 ID</a>。 指定 PnP 设备实例 ID 时，必须在 Flags 参数中设置DIGCF_DEVICEINTERFACE。</li>
+</ul>
+<p>此指针是可选的，可以为 <strong>NULL</strong>。 如果未使用 <em>枚举</em> 值来选择设备，请将 <em>枚举器</em> 设置为 <strong>NULL</strong></p>
+<p>有关如何设置 <em>枚举器</em> 值的详细信息，请参阅以下 <strong>“备注”</strong> 部分。</p>
+<p><code>[in, optional] hwndParent</code></p>
+<p>顶级窗口的句柄，用于与在设备信息集中安装设备实例关联的用户界面。 此句柄是可选的，可以为 <strong>NULL</strong>。</p>
+<p><code>[in] Flags</code></p>
+<p>DWORD 类型的变量，指定用于筛选添加到设备信息集的设备信息元素的控制选项。 此参数可以是零个或多个以下标志的按位 OR。 有关组合这些标志的详细信息，请参阅以下 <strong>“备注”</strong> 部分。</p>
+<blockquote>
+<h4 id="DIGCF-ALLCLASSES"><a href="#DIGCF-ALLCLASSES" class="headerlink" title="DIGCF_ALLCLASSES"></a>DIGCF_ALLCLASSES</h4><p>返回所有设备安装类或所有设备接口类的已安装设备的列表。</p>
+<h4 id="DIGCF-DEVICEINTERFACE"><a href="#DIGCF-DEVICEINTERFACE" class="headerlink" title="DIGCF_DEVICEINTERFACE"></a>DIGCF_DEVICEINTERFACE</h4><p>返回支持指定设备接口类的设备接口的设备。 如果 <em>Enumerator</em> 参数指定<a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows-hardware/drivers/install/device-instance-ids">设备实例 ID</a>，则必须在 <em>Flags</em> 参数中设置此标志。</p>
+<h4 id="DIGCF-DEFAULT"><a href="#DIGCF-DEFAULT" class="headerlink" title="DIGCF_DEFAULT"></a>DIGCF_DEFAULT</h4><p>对于指定的设备接口类，仅返回与系统默认设备接口关联的设备（如果已设置）。</p>
+<h4 id="DIGCF-PRESENT"><a href="#DIGCF-PRESENT" class="headerlink" title="DIGCF_PRESENT"></a>DIGCF_PRESENT</h4><p>仅返回系统中当前存在的设备。</p>
+<h4 id="DIGCF-PROFILE"><a href="#DIGCF-PROFILE" class="headerlink" title="DIGCF_PROFILE"></a>DIGCF_PROFILE</h4><p>仅返回属于当前硬件配置文件的设备。</p>
+</blockquote>
+<h2 id="返回值-5"><a href="#返回值-5" class="headerlink" title="返回值"></a><font style="color:rgb(22, 22, 22);">返回值</font></h2><p><font style="color:rgb(22, 22, 22);">如果操作成功，</font><font style="color:rgb(22, 22, 22);"> </font><strong><font style="color:rgb(22, 22, 22);">SetupDiGetClassDevs</font></strong><font style="color:rgb(22, 22, 22);"> </font><font style="color:rgb(22, 22, 22);">将返回</font><font style="color:rgb(22, 22, 22);"> </font><a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows-hardware/drivers/install/device-information-sets">设备信息集</a><font style="color:rgb(22, 22, 22);"> </font><font style="color:rgb(22, 22, 22);">的句柄，该句柄包含与所提供的参数匹配的所有已安装设备。 如果操作失败，函数将返回INVALID_HANDLE_VALUE。 要获得更多的错误信息，请调用 GetLastError。</font></p>
+<h2 id="注解-6"><a href="#注解-6" class="headerlink" title="注解"></a><font style="color:rgb(22, 22, 22);">注解</font></h2><p><font style="color:rgb(22, 22, 22);">当不再需要</font><font style="color:rgb(22, 22, 22);"> </font><a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows/desktop/api/setupapi/nf-setupapi-setupdidestroydeviceinfolist">SetupDiDestroyDeviceInfoList</a><font style="color:rgb(22, 22, 22);"> </font><font style="color:rgb(22, 22, 22);">时，</font><strong><font style="color:rgb(22, 22, 22);">SetupDiGetClassDevs</font></strong><font style="color:rgb(22, 22, 22);"> </font><font style="color:rgb(22, 22, 22);">的调用方必须删除返回的设备信息集。</font></p>
+<p><font style="color:rgb(22, 22, 22);">调用</font><font style="color:rgb(22, 22, 22);"> </font><a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows/desktop/api/setupapi/nf-setupapi-setupdigetclassdevsexa">SetupDiGetClassDevsEx</a><font style="color:rgb(22, 22, 22);"> </font><font style="color:rgb(22, 22, 22);">以检索远程计算机上的类的设备。</font></p>
+<h3 id="设备安装程序类控制选项"><a href="#设备安装程序类控制选项" class="headerlink" title="设备安装程序类控制选项"></a><font style="color:rgb(22, 22, 22);">设备安装程序类控制选项</font></h3><p><font style="color:rgb(22, 22, 22);">使用以下筛选选项来控制</font><font style="color:rgb(22, 22, 22);"> </font><strong><font style="color:rgb(22, 22, 22);">SetupDiGetClassDevs</font></strong><font style="color:rgb(22, 22, 22);"> </font><font style="color:rgb(22, 22, 22);">是返回所有设备安装类的设备，还是仅返回指定设备安装程序类的设备：</font></p>
+<ul>
+<li><font style="color:rgb(22, 22, 22);">若要返回所有设备安装类的设备，请设置DIGCF_ALLCLASSES标志，并将</font><font style="color:rgb(22, 22, 22);"> </font><em><font style="color:rgb(22, 22, 22);">ClassGuid</font></em><font style="color:rgb(22, 22, 22);"> </font><font style="color:rgb(22, 22, 22);">参数设置为</font><font style="color:rgb(22, 22, 22);"> </font><strong><font style="color:rgb(22, 22, 22);">NULL</font></strong><font style="color:rgb(22, 22, 22);">。</font></li>
+<li><font style="color:rgb(22, 22, 22);">若要仅返回特定设备安装类的设备，请不要设置DIGCF_ALLCLASSES，并使用</font><font style="color:rgb(22, 22, 22);"> </font><em><font style="color:rgb(22, 22, 22);">ClassGuid</font></em><font style="color:rgb(22, 22, 22);"> </font><font style="color:rgb(22, 22, 22);">提供设备安装类的 GUID。</font></li>
+</ul>
+<p><font style="color:rgb(22, 22, 22);">此外，可以结合使用以下筛选选项来进一步限制返回的设备：</font></p>
+<ul>
+<li><font style="color:rgb(22, 22, 22);">若要仅返回系统中存在的设备，请设置DIGCF_PRESENT标志。</font></li>
+<li><font style="color:rgb(22, 22, 22);">若要仅返回属于当前硬件配置文件的设备，请设置DIGCF_PROFILE标志。</font></li>
+<li><font style="color:rgb(22, 22, 22);">若要仅返回特定 PnP</font><font style="color:rgb(22, 22, 22);"> </font><a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows-hardware/drivers/">枚举器</a><font style="color:rgb(22, 22, 22);">的设备，请使用</font><font style="color:rgb(22, 22, 22);"> </font><em><font style="color:rgb(22, 22, 22);">Enumerator</font></em><font style="color:rgb(22, 22, 22);"> </font><font style="color:rgb(22, 22, 22);">参数提供枚举器的 GUID 或符号名称</font><em><font style="color:rgb(22, 22, 22);">。</font>__<font style="color:rgb(22, 22, 22);"> </font></em><font style="color:rgb(22, 22, 22);">如果</font><font style="color:rgb(22, 22, 22);"> </font><em><font style="color:rgb(22, 22, 22);">Enumerator</font></em><font style="color:rgb(22, 22, 22);"> </font><font style="color:rgb(22, 22, 22);">为</font><font style="color:rgb(22, 22, 22);"> </font><strong><font style="color:rgb(22, 22, 22);">NULL</font></strong><font style="color:rgb(22, 22, 22);">，</font><font style="color:rgb(22, 22, 22);"> </font><strong><font style="color:rgb(22, 22, 22);">SetupDiGetClassDevs</font></strong><font style="color:rgb(22, 22, 22);"> </font><font style="color:rgb(22, 22, 22);">将返回所有 PnP 枚举器的设备。</font></li>
+</ul>
+<h3 id="设备接口类控制选项"><a href="#设备接口类控制选项" class="headerlink" title="设备接口类控制选项"></a><font style="color:rgb(22, 22, 22);">设备接口类控制选项</font></h3><p><font style="color:rgb(22, 22, 22);">使用以下筛选选项来控制</font><font style="color:rgb(22, 22, 22);"> </font><strong><font style="color:rgb(22, 22, 22);">SetupDiGetClassDevs</font></strong><font style="color:rgb(22, 22, 22);"> </font><font style="color:rgb(22, 22, 22);">是返回支持任何设备接口类的设备还是仅返回支持指定设备接口类的设备：</font></p>
+<ul>
+<li><font style="color:rgb(22, 22, 22);">若要返回支持任何类的设备接口的设备，请设置 DIGCF_DEVICEINTERFACE 标志，设置 DIGCF_ALLCLASSES 标志，然后将</font><font style="color:rgb(22, 22, 22);"> </font><em><font style="color:rgb(22, 22, 22);">ClassGuid</font></em><font style="color:rgb(22, 22, 22);"> </font><font style="color:rgb(22, 22, 22);">设置为</font><font style="color:rgb(22, 22, 22);"> </font><strong><font style="color:rgb(22, 22, 22);">NULL</font></strong><font style="color:rgb(22, 22, 22);">。 函数向设备信息集添加表示此类设备的设备信息元素，然后向设备信息元素添加包含设备支持的所有设备接口的设备接口列表。</font></li>
+<li><font style="color:rgb(22, 22, 22);">若要仅返回支持指定类的设备接口的设备，请设置 DIGCF_DEVICEINTERFACE 标志并使用</font><font style="color:rgb(22, 22, 22);"> </font><em><font style="color:rgb(22, 22, 22);">ClassGuid</font></em><font style="color:rgb(22, 22, 22);"> </font><font style="color:rgb(22, 22, 22);">参数提供设备接口类的类 GUID。 函数向设备信息集添加表示此类设备的设备信息元素，然后将指定类的设备接口添加到该设备信息元素的设备接口列表中。</font></li>
+</ul>
+<p><font style="color:rgb(22, 22, 22);">此外，还可以使用以下筛选选项来控制</font><font style="color:rgb(22, 22, 22);"> </font><strong><font style="color:rgb(22, 22, 22);">SetupDiGetClassDevs</font></strong><font style="color:rgb(22, 22, 22);"> </font><font style="color:rgb(22, 22, 22);">是否仅返回支持设备接口类的系统默认接口的设备：</font></p>
+<ul>
+<li><font style="color:rgb(22, 22, 22);">若要仅返回支持系统默认接口的设备（如果已设置），请为指定的设备接口类设置DIGCF_DEVICEINTERFACE标志，设置DIGCF_DEFAULT标志，并使用</font><font style="color:rgb(22, 22, 22);"> </font><em><font style="color:rgb(22, 22, 22);">ClassGuid</font></em><font style="color:rgb(22, 22, 22);"> </font><font style="color:rgb(22, 22, 22);">提供设备接口类的类 GUID。 函数将表示此类设备的设备信息元素添加到设备信息集，然后将系统默认接口添加到该设备信息元素的设备接口列表。</font></li>
+<li><font style="color:rgb(22, 22, 22);">若要返回支持未指定设备接口类的系统默认接口的设备，请设置DIGCF_DEVICEINTERFACE标志，设置DIGCF_ALLCLASSES标志，设置DIGCF_DEFAULT标志，并将</font><font style="color:rgb(22, 22, 22);"> </font><em><font style="color:rgb(22, 22, 22);">ClassGuid</font></em><font style="color:rgb(22, 22, 22);"> </font><font style="color:rgb(22, 22, 22);">设置为</font><font style="color:rgb(22, 22, 22);"> </font><strong><font style="color:rgb(22, 22, 22);">NULL</font></strong><font style="color:rgb(22, 22, 22);">。 函数将表示此类设备的设备信息元素添加到设备信息集，然后将系统默认接口添加到该设备信息元素的设备接口列表。</font></li>
+</ul>
+<p><font style="color:rgb(22, 22, 22);">还可以将以下选项与其他选项结合使用，以进一步限制返回的设备：</font></p>
+<ul>
+<li><font style="color:rgb(22, 22, 22);">若要仅返回系统中存在的设备，请设置DIGCF_PRESENT标志。</font></li>
+<li><font style="color:rgb(22, 22, 22);">若要仅返回属于当前硬件配置文件的设备，请设置DIGCF_PROFILE标志。</font></li>
+<li><font style="color:rgb(22, 22, 22);">若要仅返回特定设备，请设置 DIGCF_DEVICEINTERFACE 标志，并使用</font><font style="color:rgb(22, 22, 22);"> </font><em><font style="color:rgb(22, 22, 22);">Enumerator</font></em><font style="color:rgb(22, 22, 22);"> </font><font style="color:rgb(22, 22, 22);">参数提供设备的</font><a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows-hardware/drivers/install/device-instance-ids">设备实例 ID</a><em><font style="color:rgb(22, 22, 22);">。</font>__<font style="color:rgb(22, 22, 22);"> </font></em><font style="color:rgb(22, 22, 22);">若要包括所有可能的设备，请将</font><em><font style="color:rgb(22, 22, 22);">枚举器</font></em><font style="color:rgb(22, 22, 22);">设置为</font><font style="color:rgb(22, 22, 22);"> </font><strong><font style="color:rgb(22, 22, 22);">NULL</font></strong><font style="color:rgb(22, 22, 22);">。</font></li>
+</ul>
+<h4 id="示例"><a href="#示例" class="headerlink" title="示例"></a><font style="color:rgb(22, 22, 22);">示例</font></h4><p><font style="color:rgb(22, 22, 22);">下面是如何使用</font><font style="color:rgb(22, 22, 22);"> </font><strong><font style="color:rgb(22, 22, 22);">SetupDiGetClassDevs</font></strong><font style="color:rgb(22, 22, 22);"> </font><font style="color:rgb(22, 22, 22);">函数的一些示例。</font></p>
+<p><strong><font style="color:rgb(22, 22, 22);">示例 1：</font>****<font style="color:rgb(22, 22, 22);"> </font></strong><font style="color:rgb(22, 22, 22);">生成系统中所有设备的列表，包括当前不存在的设备。</font></p>
+<p>复制</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plain">Handle = SetupDiGetClassDevs(NULL, NULL, NULL, DIGCF_ALLCLASSES);<br></code></pre></td></tr></table></figure>
+
+<p><strong><font style="color:rgb(22, 22, 22);">示例 2：</font>****<font style="color:rgb(22, 22, 22);"> </font></strong><font style="color:rgb(22, 22, 22);">生成系统中存在的所有设备的列表。</font></p>
+<p>复制</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plain">Handle = SetupDiGetClassDevs(NULL, NULL, NULL, DIGCF_ALLCLASSES | DIGCF_PRESENT);<br></code></pre></td></tr></table></figure>
+
+<p><strong><font style="color:rgb(22, 22, 22);">示例 3：</font>****<font style="color:rgb(22, 22, 22);"> </font></strong><font style="color:rgb(22, 22, 22);">从网络适配器设备</font><font style="color:rgb(22, 22, 22);"> </font><a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows-hardware/drivers/install/system-defined-device-setup-classes-available-to-vendors">安装程序类</a><font style="color:rgb(22, 22, 22);">生成系统中存在的所有设备的列表。</font></p>
+<p>复制</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plain">Handle = SetupDiGetClassDevs(&amp;GUID_DEVCLASS_NET, NULL, NULL, DIGCF_PRESENT);<br></code></pre></td></tr></table></figure>
+
+<p><strong><font style="color:rgb(22, 22, 22);">示例 4：</font>****<font style="color:rgb(22, 22, 22);"> </font></strong><font style="color:rgb(22, 22, 22);">生成系统中已从存储卷设备接口类启用接口的所有</font><font style="color:rgb(22, 22, 22);"> </font><a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows-hardware/drivers/install/overview-of-device-interface-classes">设备</a><font style="color:rgb(22, 22, 22);">的列表。</font></p>
+<p>复制</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plain">Handle = SetupDiGetClassDevs(&amp;GUID_DEVINTERFACE_VOLUME, NULL, NULL, DIGCF_PRESENT | DIGCF_DEVICEINTERFACE);<br></code></pre></td></tr></table></figure>
+
+<p><strong><font style="color:rgb(22, 22, 22);">示例 5：</font>****<font style="color:rgb(22, 22, 22);"> </font></strong><font style="color:rgb(22, 22, 22);">生成系统中存在但不属于任何已知</font><font style="color:rgb(22, 22, 22);"> </font><a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows-hardware/drivers/install/system-defined-device-setup-classes-available-to-vendors">设备安装程序类的所有设备</a><font style="color:rgb(22, 22, 22);"> </font><font style="color:rgb(22, 22, 22);">的列表，这些设备 (Windows Vista 和更高版本的 Windows) 。</font></p>
+<p><strong><font style="color:rgb(22, 22, 22);">注意</font></strong><font style="color:rgb(22, 22, 22);"> </font><font style="color:rgb(22, 22, 22);">不能将</font><font style="color:rgb(22, 22, 22);"> </font><em><font style="color:rgb(22, 22, 22);">ClassGuid</font></em><font style="color:rgb(22, 22, 22);"> </font><font style="color:rgb(22, 22, 22);">参数设置为GUID_DEVCLASS_UNKNOWN以检测具有未知安装类的设备。 相反，必须遵循此示例。</font></p>
+<p><font style="color:rgb(22, 22, 22);"> </font></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><code class="hljs plain">DeviceInfoSet = SetupDiGetClassDevs(<br>                                    NULL,<br>                                    NULL,<br>                                    NULL,<br>                                    DIGCF_ALLCLASSES | DIGCF_PRESENT);<br><br>ZeroMemory(&amp;DeviceInfoData, sizeof(SP_DEVINFO_DATA));<br>DeviceInfoData.cbSize = sizeof(SP_DEVINFO_DATA);<br>DeviceIndex = 0;<br>    <br>while (SetupDiEnumDeviceInfo(<br>                             DeviceInfoSet,<br>                             DeviceIndex,<br>                             &amp;DeviceInfoData)) &#123;<br>    DeviceIndex++;<br><br>    if (!SetupDiGetDeviceProperty(<br>                                  DeviceInfoSet,<br>                                  &amp;DeviceInfoData,<br>                                  &amp;DEVPKEY_Device_Class,<br>                                  &amp;PropType,<br>                                  (PBYTE)&amp;DevGuid,<br>                                  sizeof(GUID),<br>                                  &amp;Size,<br>                                  0) || PropType != DEVPROP_TYPE_GUID) &#123;<br><br>        Error = GetLastError();<br><br>        if (Error == ERROR_NOT_FOUND) &#123;<br>            \\<br>            \\ This device has an unknown device setup class.<br>            \\<br>            &#125;<br>        &#125;                 <br>    &#125;<br><br>if (DeviceInfoSet) &#123;<br>    SetupDiDestroyDeviceInfoList(DeviceInfoSet);<br>    &#125;<br></code></pre></td></tr></table></figure>
+
+<p>****<strong>备注</strong></p>
+<p><font style="color:rgb(22, 22, 22);">setupapi.h 标头将 SetupDiGetClassDevs 定义为别名，该别名根据 UNICODE 预处理器常量的定义自动选择此函数的 ANSI 或 Unicode 版本。 将非特定编码别名与非非特定编码的代码混合使用可能会导致不匹配，从而导致编译或运行时错误。 有关详细信息，请参阅</font><font style="color:rgb(22, 22, 22);"> </font><a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows/win32/intl/conventions-for-function-prototypes">函数原型的约定</a><font style="color:rgb(22, 22, 22);">。</font></p>
+<h2 id="要求-8"><a href="#要求-8" class="headerlink" title="要求"></a><font style="color:rgb(22, 22, 22);">要求</font></h2><table>
+<thead>
+<tr>
+<th align="left"><font style="color:rgb(22, 22, 22);"> </font></th>
+<th align="left"><font style="color:rgb(22, 22, 22);"> </font></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong><font style="color:rgb(22, 22, 22);">最低受支持的客户端</font></strong></td>
+<td align="left"><font style="color:rgb(22, 22, 22);">在 Microsoft Windows 2000 及更高版本的 Windows 中可用。</font></td>
+</tr>
+<tr>
+<td align="left"><strong><font style="color:rgb(22, 22, 22);">目标平台</font></strong></td>
+<td align="left"><font style="color:rgb(22, 22, 22);">DesktopFor universal，call CM_Get_Device_ID_ListFor universal，call CM_Get_Device_Interface_List</font></td>
+</tr>
+<tr>
+<td align="left"><strong><font style="color:rgb(22, 22, 22);">标头</font></strong></td>
+<td align="left"><font style="color:rgb(22, 22, 22);">setupapi.h (包括 SetupAPI.h)</font></td>
+</tr>
+<tr>
+<td align="left"><strong><font style="color:rgb(22, 22, 22);">Library</font></strong></td>
+<td align="left"><font style="color:rgb(22, 22, 22);">SetupAPI.lib</font></td>
+</tr>
+<tr>
+<td align="left"><strong><font style="color:rgb(22, 22, 22);">DLL</font></strong></td>
+<td align="left"><font style="color:rgb(22, 22, 22);">SetupAPI.dll</font></td>
+</tr>
+<tr>
+<td align="left"><strong><font style="color:rgb(22, 22, 22);">API 集</font></strong></td>
+<td align="left"><font style="color:rgb(22, 22, 22);">windows 8 中引入的 ext-ms-win-setupapi-classinstallers-l1-1-0 ()</font></td>
+</tr>
+</tbody></table>
+<h2 id="另请参阅-8"><a href="#另请参阅-8" class="headerlink" title="另请参阅"></a><font style="color:rgb(22, 22, 22);">另请参阅</font></h2><p><a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows-hardware/drivers/install/device-information-sets">设备信息集</a></p>
+<p><a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows-hardware/drivers/install/device-instance-ids">设备实例 ID</a></p>
+<p><a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows/desktop/api/setupapi/nf-setupapi-setupdicreatedeviceinfolist">SetupDiCreateDeviceInfoList</a></p>
+<p><a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows/desktop/api/setupapi/nf-setupapi-setupdidestroydeviceinfolist">SetupDiDestroyDeviceInfoList</a></p>
+<p><a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows/desktop/api/setupapi/nf-setupapi-setupdienumdeviceinterfaces">SetupDiEnumDeviceInterfaces</a></p>
+<p><a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows/desktop/api/setupapi/nf-setupapi-setupdigetclassdevsexa">SetupDiGetClassDevsEx</a></p>
+<hr>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/Win32-API/" class="category-chain-item">Win32_API</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/USB/" class="print-no-link">#USB</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>【NOTE】遍历Windows_USB设备树</div>
+      <div>https://zytpca.github.io/2023/11/20/Win32_Api/【NOTE】遍历Windows_USB设备树/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>Insomniac</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2023年11月20日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2023/11/20/Win32_Api/ReactOS/" title="ReactOS">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">ReactOS</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2023/11/20/Win32_Api/VirtualAlloc%E5%87%BD%E6%95%B0%E4%BD%BF%E7%94%A8%E6%80%BB%E7%BB%93/" title="VirtualAlloc函数使用总结">
+                        <span class="hidden-mobile">VirtualAlloc函数使用总结</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+  
+  
+    <article id="comments" lazyload>
+      
+  <div id="valine"></div>
+  <script type="text/javascript">
+    Fluid.utils.loadComments('#valine', function() {
+      Fluid.utils.createScript('https://lib.baomitu.com/valine/1.5.1/Valine.min.js', function() {
+        var options = Object.assign(
+          {"appId":"ZDiOGqAWSCAU9bUYDktIk21c-gzGzoHsz","appKey":"JShbv4TgfpvIvvrRl7GFc57n","path":"window.location.pathname","placeholder":null,"avatar":"retro","meta":["nick","mail","link"],"requiredFields":[],"pageSize":10,"lang":"zh-CN","highlight":false,"recordIP":false,"serverURLs":"https://zdiogqaw.lc-cn-n1-shared.com","emojiCDN":null,"emojiMaps":null,"enableQQ":false},
+          {
+            el: "#valine",
+            path: window.location.pathname
+          }
+        )
+        new Valine(options);
+        Fluid.utils.waitElementVisible('#valine .vcontent', () => {
+          var imgSelector = '#valine .vcontent img:not(.vemoji)';
+          Fluid.plugins.imageCaption(imgSelector);
+          Fluid.plugins.fancyBox(imgSelector);
+        })
+      });
+    });
+  </script>
+  <noscript>Please enable JavaScript to view the comments</noscript>
+
+
+    </article>
+  
+
+
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

@@ -1,0 +1,784 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="Insomniac">
+  <meta name="keywords" content="keywords">
+  
+    <meta name="description" content="转自：https:&#x2F;&#x2F;blog.csdn.net&#x2F;fengyishang&#x2F;article&#x2F;details&#x2F;46440135  windows下获取cpu 使用率的方法大概有以下这三种:  windows 自带的API ，一般包含在头文件windows.h中 Performance Data Helper （PDH），性能数据助手 Windows Management Instrumentatio">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Windows下使用PDH获取CPU使用率">
+<meta property="og:url" content="https://zytpca.github.io/2024/03/05/Win32_Api/Windows%E4%B8%8B%E4%BD%BF%E7%94%A8PDH%E8%8E%B7%E5%8F%96CPU%E4%BD%BF%E7%94%A8%E7%8E%87/index.html">
+<meta property="og:site_name" content="Insomnia_">
+<meta property="og:description" content="转自：https:&#x2F;&#x2F;blog.csdn.net&#x2F;fengyishang&#x2F;article&#x2F;details&#x2F;46440135  windows下获取cpu 使用率的方法大概有以下这三种:  windows 自带的API ，一般包含在头文件windows.h中 Performance Data Helper （PDH），性能数据助手 Windows Management Instrumentatio">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://zytpca.github.io/2024/03/05/Win32_Api/Windows%E4%B8%8B%E4%BD%BF%E7%94%A8PDH%E8%8E%B7%E5%8F%96CPU%E4%BD%BF%E7%94%A8%E7%8E%87/image-0.jpeg">
+<meta property="og:image" content="https://zytpca.github.io/2024/03/05/Win32_Api/Windows%E4%B8%8B%E4%BD%BF%E7%94%A8PDH%E8%8E%B7%E5%8F%96CPU%E4%BD%BF%E7%94%A8%E7%8E%87/image-1.jpeg">
+<meta property="og:image" content="https://zytpca.github.io/2024/03/05/Win32_Api/Windows%E4%B8%8B%E4%BD%BF%E7%94%A8PDH%E8%8E%B7%E5%8F%96CPU%E4%BD%BF%E7%94%A8%E7%8E%87/image-2.jpeg">
+<meta property="og:image" content="https://zytpca.github.io/2024/03/05/Win32_Api/Windows%E4%B8%8B%E4%BD%BF%E7%94%A8PDH%E8%8E%B7%E5%8F%96CPU%E4%BD%BF%E7%94%A8%E7%8E%87/image-3.jpeg">
+<meta property="og:image" content="https://zytpca.github.io/2024/03/05/Win32_Api/Windows%E4%B8%8B%E4%BD%BF%E7%94%A8PDH%E8%8E%B7%E5%8F%96CPU%E4%BD%BF%E7%94%A8%E7%8E%87/image-4.jpeg">
+<meta property="og:image" content="https://zytpca.github.io/2024/03/05/Win32_Api/Windows%E4%B8%8B%E4%BD%BF%E7%94%A8PDH%E8%8E%B7%E5%8F%96CPU%E4%BD%BF%E7%94%A8%E7%8E%87/image-5.jpeg">
+<meta property="article:published_time" content="2024-03-05T02:50:50.000Z">
+<meta property="article:modified_time" content="2025-04-24T07:37:50.586Z">
+<meta property="article:author" content="Insomniac">
+<meta property="article:tag" content="keywords">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://zytpca.github.io/2024/03/05/Win32_Api/Windows%E4%B8%8B%E4%BD%BF%E7%94%A8PDH%E8%8E%B7%E5%8F%96CPU%E4%BD%BF%E7%94%A8%E7%8E%87/image-0.jpeg">
+  
+  
+  
+  <title>Windows下使用PDH获取CPU使用率 - Insomnia_</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"zytpca.github.io","root":"/","version":"1.9.8","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Insomniac&#39;s Blog</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="Windows下使用PDH获取CPU使用率"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2024-03-05 10:50" pubdate>
+          2024年3月5日 上午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          1.7k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          15 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">Windows下使用PDH获取CPU使用率</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <blockquote>
+<p><font style="color:rgb(79, 79, 79);">转自：</font><a href="about:blank">https://blog.csdn.net/fengyishang/article/details/46440135</a></p>
+</blockquote>
+<p>windows下获取cpu 使用率的方法大概有以下这三种:</p>
+<ol>
+<li>windows 自带的API ，一般包含在头文件windows.h中</li>
+<li>Performance Data Helper （PDH），性能数据助手</li>
+<li>Windows Management Instrumentation（WMI），windows管理规范</li>
+</ol>
+<p>其他两种方法网上都有相应的例子，读者感兴趣可以自行查阅，这里介绍一下使用pdh库来获取系统性能数据（以cpu使用率为例）的方法。</p>
+<p>根据pdh使用的<a target="_blank" rel="noopener" href="https://msdn.microsoft.com/en-us/library/windows/desktop/aa373214%28v=vs.85%29.aspx">官方文档</a>，使用pdh 库获取性能数据需要执行以下几个步骤：</p>
+<ol>
+<li>创建查询（Create a query）</li>
+<li>添加查询到计数器（Add counters to the query）</li>
+<li>收集性能数据（Collect the performance data）</li>
+<li>显示性能数据（Display the performance data）</li>
+<li>关闭查询（Close the query）</li>
+</ol>
+<h2 id="创建查询"><a href="#创建查询" class="headerlink" title="创建查询"></a><font style="color:rgb(79, 79, 79);">创建查询</font></h2><p>在使用pdh 库之前，我们需要包含相应的头文件和加载相应的库：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;Pdh.h&gt;</span></span><br>...<br><span class="hljs-meta">#<span class="hljs-keyword">pragma</span> comment(lib,<span class="hljs-string">&quot;pdh.lib&quot;</span>)</span><br></code></pre></td></tr></table></figure>
+
+<p><font style="color:rgb(79, 79, 79);">创建查询使用函数是PdhOpenQuery，我们看一下官方文档对于这个函数的</font><a target="_blank" rel="noopener" href="https://msdn.microsoft.com/en-us/library/windows/desktop/aa372652%28v=vs.85%29.aspx"><font style="color:rgb(78, 161, 219);">定义</font></a><font style="color:rgb(79, 79, 79);">。</font></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-function">PDH_STATUS <span class="hljs-title">PdhOpenQuery</span><span class="hljs-params">(</span></span><br><span class="hljs-params"><span class="hljs-function">    _In_  LPCTSTR    szDataSource,</span></span><br><span class="hljs-params"><span class="hljs-function">    _In_  DWORD_PTR  dwUserData,</span></span><br><span class="hljs-params"><span class="hljs-function">    _Out_ PDH_HQUERY *phQuery</span></span><br><span class="hljs-params"><span class="hljs-function">)</span></span>;<br></code></pre></td></tr></table></figure>
+
+<ul>
+<li><code>szDataSource </code><br>该参数用来指定日志文件的名字以获取性能数据，一般设置成NULL，表示实时获取数据。</li>
+<li><code>dwUserData </code><br>和查询相关的值，不特别指定一般也是NULL。</li>
+<li><code>phQuery </code><br>用于查询的句柄，这个稍后会用到。</li>
+</ul>
+<p><font style="color:rgb(79, 79, 79);">好了，接下来就开始查询：</font></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs cpp">HQUERY query;<br>PDH_STATUS status = <span class="hljs-built_in">PdhOpenQuery</span>(<span class="hljs-literal">NULL</span>, <span class="hljs-literal">NULL</span>, &amp;query);<br></code></pre></td></tr></table></figure>
+
+<p><font style="color:rgb(79, 79, 79);">需要注意的是，如果执行成功，则PdhOpenQuery返回</font><strong><font style="color:rgb(79, 79, 79);">ERROR_SUCCESS</font></strong><font style="color:rgb(79, 79, 79);">，我们可以写个判读语句判读是否执行成功。</font></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-keyword">if</span> (status != ERROR_SUCCESS)<br>    cout &lt;&lt; <span class="hljs-string">&quot;Open Query Error&quot;</span> &lt;&lt; endl;<br></code></pre></td></tr></table></figure>
+
+<h2 id="添加查询到计数器"><a href="#添加查询到计数器" class="headerlink" title="添加查询到计数器"></a><font style="color:rgb(79, 79, 79);">添加查询到计数器</font></h2><p><font style="color:rgb(79, 79, 79);">查看文档，对应的函数为 PdhAddCounter，先看一下函数原型。</font></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-function">PDH_STATUS <span class="hljs-title">PdhAddCounter</span><span class="hljs-params">(</span></span><br><span class="hljs-params"><span class="hljs-function">  _In_  PDH_HQUERY   hQuery,</span></span><br><span class="hljs-params"><span class="hljs-function">  _In_  LPCTSTR      szFullCounterPath,</span></span><br><span class="hljs-params"><span class="hljs-function">  _In_  DWORD_PTR    dwUserData,</span></span><br><span class="hljs-params"><span class="hljs-function">  _Out_ PDH_HCOUNTER *phCounter</span></span><br><span class="hljs-params"><span class="hljs-function">)</span></span>;<br></code></pre></td></tr></table></figure>
+
+<p><font style="color:rgb(79, 79, 79);">使用该函数我们可以添加query到计数器中，注意第二个参数，这表示还需要一个完整的</font><strong><font style="color:rgb(79, 79, 79);">计数器路径</font></strong><font style="color:rgb(79, 79, 79);">（szFullCounterPath），这个计数器路径怎么写，文档中也给出了几种方法，我们这里介绍</font><strong><font style="color:rgb(79, 79, 79);">字符串方法</font></strong><font style="color:rgb(79, 79, 79);">。</font></p>
+<p><font style="color:rgb(79, 79, 79);">这种方法直接指定计数器路径为一个字符串，如果总是监视同一个计数器，并且你对计数器路径的的格式和语法比较熟悉，那用这个方法比较合适。</font></p>
+<p><font style="color:rgb(79, 79, 79);">计数器路径的格式如下：</font></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plain">\\Computer\PerfObject(ParentInstance/ObjectInstance#InstanceIndex)\Counter<br></code></pre></td></tr></table></figure>
+
+<p><font style="color:rgb(79, 79, 79);">看了一头雾水是不是？参照官方文档我们一点一点解释。</font></p>
+<ul>
+<li><code>Computer</code><br>这个指目标机器的名字或者ip地址，如果是获取本机数据，则可以省略。</li>
+<li><code>PerfObject</code><br>这个指的是要查询的性能对象，这个性能对象可以是硬件（比如处理器，磁盘，内存），也可以是系统对象（比如进程，线程）</li>
+<li><code>ParentInstance/ObjectInstance#InstanceIndex</code> <font style="color:rgb(79, 79, 79);"><br></font><font style="color:rgb(79, 79, 79);">如果查询的对象存在多实例，路径中就包含这三者。<br></font><font style="color:rgb(79, 79, 79);">举个例子，进程和线程就是多实例对象，因为同一时间能运行多个进程或线程。<br></font><font style="color:rgb(79, 79, 79);">那么如果一个对象有多实例，计数器路径就必须指定到某一个对象实例。</font></li>
+</ul>
+<p><font style="color:rgb(79, 79, 79);">说的再详细点，假设我们要监控Explorer，那格式就是：</font></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plain">(Explorer)<br></code></pre></td></tr></table></figure>
+
+<p><font style="color:rgb(79, 79, 79);">如果要监控该进程下的某个子线程，那格式就是：</font></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plain">(Explorer/0)<br></code></pre></td></tr></table></figure>
+
+<p><font style="color:rgb(79, 79, 79);">如果该进程下的子线程名字都一样，则通过#符号来区分开，需要注意的是，子线程的索引从0开始，但是查询第一个子线程不要写#0，直接写线程名字，从第二个子线程开始才是#1，那么第三个子线程就是#2，以此类推。</font></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plain">(Explorer/0#1)<br></code></pre></td></tr></table></figure>
+
+<ul>
+<li><code>Counter</code> <font style="color:#8A8F8D;"><br></font>最后就是这个Counter，这就是你想要查询的计数器。</li>
+</ul>
+<p><font style="color:rgb(79, 79, 79);">最终这个格式是什么样子的呢，我们这里要查询的是CPU 的使用率，那就得知道某一刻CPU总的使用时间，格式如下：</font></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plain">\Processor Information(_Total)\% Processor Time<br></code></pre></td></tr></table></figure>
+
+<p><font style="color:rgb(79, 79, 79);">注意% 和Processor 之间有个空格，对于反斜杠’\’，我们要写两次用来转义，实际代码如下。</font></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs cpp">HCOUNTER counter;<br><br>status = <span class="hljs-built_in">PdhAddCounter</span>(query, <span class="hljs-built_in">LPCSTR</span>(<span class="hljs-string">&quot;\\Processor Information(_Total)\\% Processor Time&quot;</span>), <span class="hljs-literal">NULL</span>, &amp;counter);<br><br><span class="hljs-keyword">if</span> (status != ERROR_SUCCESS)<br>&#123;<br>    <span class="hljs-comment">//...</span><br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p><font style="color:rgb(79, 79, 79);">那对于cpu使用率是这种格式，那其他性能计数器是什么格式呢？凭空捏造可造不出来！</font></p>
+<p><font style="color:rgb(79, 79, 79);">其实，对于windows系统，我们打开</font><strong><font style="color:rgb(79, 79, 79);">性能监视器</font></strong><font style="color:rgb(79, 79, 79);">就可以看到，运行窗口输入”perfmon.msc”，如图：</font></p>
+<p><img src="/2024/03/05/Win32_Api/Windows%E4%B8%8B%E4%BD%BF%E7%94%A8PDH%E8%8E%B7%E5%8F%96CPU%E4%BD%BF%E7%94%A8%E7%8E%87/image-0.jpeg" srcset="/img/loading.gif" lazyload></p>
+<p><font style="color:rgb(79, 79, 79);">点击</font><strong><font style="color:rgb(79, 79, 79);">确定</font></strong><font style="color:rgb(79, 79, 79);">就可以看到本机系统的</font><strong><font style="color:rgb(79, 79, 79);">性能监视器</font></strong><font style="color:rgb(79, 79, 79);">：</font></p>
+<p><img src="/2024/03/05/Win32_Api/Windows%E4%B8%8B%E4%BD%BF%E7%94%A8PDH%E8%8E%B7%E5%8F%96CPU%E4%BD%BF%E7%94%A8%E7%8E%87/image-1.jpeg" srcset="/img/loading.gif" lazyload></p>
+<p><font style="color:rgb(79, 79, 79);">在性能监视器页面，当前显示的是”% Processor Time”,也就是cpu的使用时间，那假如要看内存应该怎么操作？</font></p>
+<p><font style="color:rgb(79, 79, 79);">首先，图表页面右击，选择</font><strong><font style="color:rgb(79, 79, 79);">添加计数器</font></strong></p>
+<p><img src="/2024/03/05/Win32_Api/Windows%E4%B8%8B%E4%BD%BF%E7%94%A8PDH%E8%8E%B7%E5%8F%96CPU%E4%BD%BF%E7%94%A8%E7%8E%87/image-2.jpeg" srcset="/img/loading.gif" lazyload></p>
+<p><font style="color:rgb(79, 79, 79);">然后显示如图页面，从下面的列表中找到</font><strong><font style="color:rgb(79, 79, 79);">Memory</font></strong><font style="color:rgb(79, 79, 79);">，然后选择</font><strong><font style="color:rgb(79, 79, 79);">Available MBytes</font></strong><font style="color:rgb(79, 79, 79);">，这表示可用内存（单位：MB），然后点击添加，这样我们就添加了</font><strong><font style="color:rgb(79, 79, 79);">可用内存</font></strong><font style="color:rgb(79, 79, 79);">的计数器。</font></p>
+<p><img src="/2024/03/05/Win32_Api/Windows%E4%B8%8B%E4%BD%BF%E7%94%A8PDH%E8%8E%B7%E5%8F%96CPU%E4%BD%BF%E7%94%A8%E7%8E%87/image-3.jpeg" srcset="/img/loading.gif" lazyload></p>
+<p><font style="color:rgb(79, 79, 79);">然后，刚才的监视器页面就多了一条计数器，看到没？</font></p>
+<p><img src="/2024/03/05/Win32_Api/Windows%E4%B8%8B%E4%BD%BF%E7%94%A8PDH%E8%8E%B7%E5%8F%96CPU%E4%BD%BF%E7%94%A8%E7%8E%87/image-4.jpeg" srcset="/img/loading.gif" lazyload></p>
+<p><font style="color:rgb(79, 79, 79);">但这还只是图形化的计数器，我们要的是具体的计数器路径呀？<br></font><font style="color:rgb(79, 79, 79);">别急，在对应的”Available MBytes”上右击—&gt;属性，就能看到对应的计数器路径了，怎么样，是不是很方便？</font></p>
+<p><img src="/2024/03/05/Win32_Api/Windows%E4%B8%8B%E4%BD%BF%E7%94%A8PDH%E8%8E%B7%E5%8F%96CPU%E4%BD%BF%E7%94%A8%E7%8E%87/image-5.jpeg" srcset="/img/loading.gif" lazyload></p>
+<p><font style="color:rgb(79, 79, 79);">知道对应的计数器路径，我们在代码中就可以使用了。</font></p>
+<h2 id="收集性能数据"><a href="#收集性能数据" class="headerlink" title="收集性能数据"></a><font style="color:rgb(79, 79, 79);">收集性能数据</font></h2><p><font style="color:rgb(79, 79, 79);">将query 添加到计数器之后，我们就要开始收集性能数据了，相应函数：</font></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-function">PDH_STATUS <span class="hljs-title">PdhCollectQueryData</span><span class="hljs-params">(</span></span><br><span class="hljs-params"><span class="hljs-function">  _Inout_ PDH_HQUERY hQuery</span></span><br><span class="hljs-params"><span class="hljs-function">)</span></span>;<br></code></pre></td></tr></table></figure>
+
+<p><font style="color:rgb(79, 79, 79);">需要注意的是，大部分像使用率这样的计数器，需要收集两份样本，中间用Sleep()函数间隔1s 或者更久。</font></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-built_in">PdhCollectQueryData</span>(query);<br><br><span class="hljs-built_in">Sleep</span>(<span class="hljs-number">1000</span>);<br><br><span class="hljs-built_in">PdhCollectQueryData</span>(query);<br></code></pre></td></tr></table></figure>
+
+<h2 id="显示性能数据"><a href="#显示性能数据" class="headerlink" title="显示性能数据"></a><font style="color:rgb(79, 79, 79);">显示性能数据</font></h2><p><font style="color:rgb(79, 79, 79);">收集完数据之后，就要将数据显示出来了，函数如下：</font></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-function">PDH_STATUS <span class="hljs-title">PdhGetFormattedCounterValue</span><span class="hljs-params">(</span></span><br><span class="hljs-params"><span class="hljs-function">  _In_  PDH_HCOUNTER          hCounter,</span></span><br><span class="hljs-params"><span class="hljs-function">  _In_  DWORD                 dwFormat,</span></span><br><span class="hljs-params"><span class="hljs-function">  _Out_ LPDWORD               lpdwType,</span></span><br><span class="hljs-params"><span class="hljs-function">  _Out_ PPDH_FMT_COUNTERVALUE pValue</span></span><br><span class="hljs-params"><span class="hljs-function">)</span></span>;<br></code></pre></td></tr></table></figure>
+
+<p><font style="color:rgb(79, 79, 79);">各个参数可以查阅官方文档，我们这里获取CPU的使用率。</font></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs cpp">PDH_FMT_COUNTERVALUE pdhValue;<br>DWORD dwValue;<br><br>status = <span class="hljs-built_in">PdhGetFormattedCounterValue</span>(counter, PDH_FMT_DOUBLE | PDH_FMT_NOCAP100, &amp;dwValue, &amp;pdhValue);<br><br><span class="hljs-keyword">if</span> (status != ERROR_SUCCESS)<br>&#123;<br>    <span class="hljs-comment">//...</span><br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p><font style="color:rgb(79, 79, 79);">对于第二个参数，一般情况下我们使用PDH_FMT_DOUBLE，但是对于计数对象是处理器，我们还需要考虑要不要</font><strong><font style="color:rgb(79, 79, 79);">PDH_FMT_NOCAP100</font></strong><font style="color:rgb(79, 79, 79);">。</font></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs plain">如果设置本标记，则计数器的百分比数值的上限可以大于100，例如：多个处理器的使用率。<br><br>如果不设置本标记，则计数器的百分比数值的上限为100。<br></code></pre></td></tr></table></figure>
+
+<p><font style="color:rgb(79, 79, 79);">现在，我们可以获取cpu 的使用率了。</font></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs cpp">cout &lt;&lt; pdhValue.doubleValue &lt;&lt; endl;<br></code></pre></td></tr></table></figure>
+
+<h2 id="关闭查询"><a href="#关闭查询" class="headerlink" title="关闭查询"></a><font style="color:rgb(79, 79, 79);">关闭查询</font></h2><p><font style="color:rgb(79, 79, 79);">既然打开了查询，那最后就要关闭查询。</font></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-built_in">PdhCloseQuery</span>(query);<br></code></pre></td></tr></table></figure>
+
+<p><font style="color:rgb(79, 79, 79);">最后照例，放上程序源码（windows8.1 + visual studio2013）。</font></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-meta">#<span class="hljs-keyword">pragma</span> comment(lib,<span class="hljs-string">&quot;pdh.lib&quot;</span>)</span><br><br><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;iostream&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;Pdh.h&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;PdhMsg.h&gt;</span></span><br><br><span class="hljs-keyword">using</span> <span class="hljs-keyword">namespace</span> std;<br><br><br><span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">(<span class="hljs-type">int</span> argc, <span class="hljs-type">char</span> **argv)</span></span><br><span class="hljs-function"></span>&#123;<br>    HQUERY query;<br>    PDH_STATUS status = <span class="hljs-built_in">PdhOpenQuery</span>(<span class="hljs-literal">NULL</span>, <span class="hljs-literal">NULL</span>, &amp;query);<br><br>    <span class="hljs-keyword">if</span> (status != ERROR_SUCCESS)<br>        cout &lt;&lt; <span class="hljs-string">&quot;Open Query Error&quot;</span> &lt;&lt; endl;<br><br>    HCOUNTER counter;<br>    status = <span class="hljs-built_in">PdhAddCounter</span>(query, <span class="hljs-built_in">LPCSTR</span>(<span class="hljs-string">&quot;\\Processor Information(_Total)\\% Processor Time&quot;</span>), <span class="hljs-literal">NULL</span>, &amp;counter);<br><br>    <span class="hljs-keyword">if</span> (status != ERROR_SUCCESS)<br>        cout &lt;&lt; <span class="hljs-string">&quot;Add Counter Error&quot;</span> &lt;&lt; endl;<br><br>    <span class="hljs-built_in">PdhCollectQueryData</span>(query);<br><br>    <span class="hljs-built_in">Sleep</span>(<span class="hljs-number">1000</span>);<br><br>    <span class="hljs-built_in">PdhCollectQueryData</span>(query);<br><br>    PDH_FMT_COUNTERVALUE pdhValue;<br>    DWORD dwValue;<br><br>    status = <span class="hljs-built_in">PdhGetFormattedCounterValue</span>(counter, PDH_FMT_DOUBLE, &amp;dwValue, &amp;pdhValue);<br><br>    <span class="hljs-keyword">if</span> (status != ERROR_SUCCESS)<br>        cout &lt;&lt; <span class="hljs-string">&quot;Get Value Error&quot;</span> &lt;&lt; endl;<br><br>    cout &lt;&lt; pdhValue.doubleValue &lt;&lt; endl;<br><br>    <span class="hljs-built_in">PdhCloseQuery</span>(query);<br><br>    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/Win32-API/" class="category-chain-item">Win32_API</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>Windows下使用PDH获取CPU使用率</div>
+      <div>https://zytpca.github.io/2024/03/05/Win32_Api/Windows下使用PDH获取CPU使用率/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>Insomniac</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2024年3月5日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2024/04/10/Win32_Api/%E3%80%90NOTE%E3%80%91Windows%E7%9A%84%E7%A3%81%E7%9B%98%E6%93%8D%E4%BD%9C/" title="【NOTE】Windows的磁盘操作">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">【NOTE】Windows的磁盘操作</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2024/03/05/Win32_Api/FlushFileBuffers_FILE_FLAG_WRITE_THROUGH_FILE_FLAG_NO_BUFFERING/" title="FlushFileBuffers\FILE_FLAG_WRITE_THROUGH\FILE_FLAG_NO_BUFFERING">
+                        <span class="hidden-mobile">FlushFileBuffers\FILE_FLAG_WRITE_THROUGH\FILE_FLAG_NO_BUFFERING</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+  
+  
+    <article id="comments" lazyload>
+      
+  <div id="valine"></div>
+  <script type="text/javascript">
+    Fluid.utils.loadComments('#valine', function() {
+      Fluid.utils.createScript('https://lib.baomitu.com/valine/1.5.1/Valine.min.js', function() {
+        var options = Object.assign(
+          {"appId":"ZDiOGqAWSCAU9bUYDktIk21c-gzGzoHsz","appKey":"JShbv4TgfpvIvvrRl7GFc57n","path":"window.location.pathname","placeholder":null,"avatar":"retro","meta":["nick","mail","link"],"requiredFields":[],"pageSize":10,"lang":"zh-CN","highlight":false,"recordIP":false,"serverURLs":"https://zdiogqaw.lc-cn-n1-shared.com","emojiCDN":null,"emojiMaps":null,"enableQQ":false},
+          {
+            el: "#valine",
+            path: window.location.pathname
+          }
+        )
+        new Valine(options);
+        Fluid.utils.waitElementVisible('#valine .vcontent', () => {
+          var imgSelector = '#valine .vcontent img:not(.vemoji)';
+          Fluid.plugins.imageCaption(imgSelector);
+          Fluid.plugins.fancyBox(imgSelector);
+        })
+      });
+    });
+  </script>
+  <noscript>Please enable JavaScript to view the comments</noscript>
+
+
+    </article>
+  
+
+
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

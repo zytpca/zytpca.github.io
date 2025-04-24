@@ -1,0 +1,697 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="Insomniac">
+  <meta name="keywords" content="keywords">
+  
+    <meta name="description" content="写这篇文章源于本人在开发过程中遇到向某个进程发送消息失败而起。 一、用户界面特权隔离在早期的Windows操作系统中，在同一用户下运行的所有进程有着相同的安全等级，拥有相同的权限。例如，一个进程可以自由地发送一个Windows消息到另外一个进程的窗口。从Windows Vista开始，当然也包括Windows 7、Windows 10，对于某些Windows消息，这一方式再也行不通了。进程(或者其">
+<meta property="og:type" content="article">
+<meta property="og:title" content="用户界面特权隔离">
+<meta property="og:url" content="https://zytpca.github.io/2023/11/15/Win32_Api/%E7%94%A8%E6%88%B7%E7%95%8C%E9%9D%A2%E7%89%B9%E6%9D%83%E9%9A%94%E7%A6%BB/index.html">
+<meta property="og:site_name" content="Insomnia_">
+<meta property="og:description" content="写这篇文章源于本人在开发过程中遇到向某个进程发送消息失败而起。 一、用户界面特权隔离在早期的Windows操作系统中，在同一用户下运行的所有进程有着相同的安全等级，拥有相同的权限。例如，一个进程可以自由地发送一个Windows消息到另外一个进程的窗口。从Windows Vista开始，当然也包括Windows 7、Windows 10，对于某些Windows消息，这一方式再也行不通了。进程(或者其">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://zytpca.github.io/2023/11/15/Win32_Api/%E7%94%A8%E6%88%B7%E7%95%8C%E9%9D%A2%E7%89%B9%E6%9D%83%E9%9A%94%E7%A6%BB/image-0.png">
+<meta property="article:published_time" content="2023-11-15T01:26:00.000Z">
+<meta property="article:modified_time" content="2025-04-24T06:50:13.582Z">
+<meta property="article:author" content="Insomniac">
+<meta property="article:tag" content="keywords">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://zytpca.github.io/2023/11/15/Win32_Api/%E7%94%A8%E6%88%B7%E7%95%8C%E9%9D%A2%E7%89%B9%E6%9D%83%E9%9A%94%E7%A6%BB/image-0.png">
+  
+  
+  
+  <title>用户界面特权隔离 - Insomnia_</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"zytpca.github.io","root":"/","version":"1.9.8","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Insomniac&#39;s Blog</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="用户界面特权隔离"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2023-11-15 09:26" pubdate>
+          2023年11月15日 上午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          1.2k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          11 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">用户界面特权隔离</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <p>写这篇文章源于本人在开发过程中遇到向某个进程发送消息失败而起。</p>
+<h2 id="一、用户界面特权隔离"><a href="#一、用户界面特权隔离" class="headerlink" title="一、用户界面特权隔离"></a>一、用户界面特权隔离</h2><p>在早期的Windows操作系统中，在同一用户下运行的所有进程有着相同的安全等级，拥有相同的权限。例如，一个进程可以自由地发送一个Windows消息到另外一个进程的窗口。从Windows Vista开始，当然也包括Windows 7、Windows 10，对于某些Windows消息，这一方式再也行不通了。进程(或者其他的对象)开始拥有一个新的属性——特权等级(Privilege Level)。一个特权等级较低的进程不再可以向一个特权等级较高的进程发送消息，虽然他们在相同的用户权限下运行。这就是所谓的用户界面特权隔离(User Interface Privilege Isolation ，UIPI)。</p>
+<p>引入UIPI的最大目的是为了防止恶意程序发送消息给那些拥有较高权限的窗口，以对其进行攻击，从而获取较高的权限等等。在计算机系统中，这是一种维护系统安全的合适方式。</p>
+<h2 id="二、UIPI的运行机制"><a href="#二、UIPI的运行机制" class="headerlink" title="二、UIPI的运行机制"></a>二、UIPI的运行机制</h2><p>在Windows 7中，当UAC(User Account Control)启用的时候，UIPI的运行可以得到最明显的体现。在UAC中，当一个管理员用户登录系统后，操作系统会创建两个令牌对象(Token Object)：一个是管理员令牌，拥有大多数特权(类似于Windows Vista之前的System中的用户)，而另一个是经过过滤后的简化版本，只拥有普通用户的权限。</p>
+<p>默认情况下，以普通用户权限启动的进程拥有普通特权等级【UIPI的等级划分为低等级(low)，普通(normal)，高等级(high)，系统(system)】。同样的，以管理员权限运行的进程，例如，用户右键单击选择“以管理员身份运行”或者是通过添加“runas”参数调用ShellExecute运行的进程，这样的进程就相应地拥有一个较高(high)的特权等级。</p>
+<p>这将导致系统会运行两种不同类型、不同特权等级的进程(当然，从技术上讲这两个进程都是在同一用户下)。我们可以使用Windows Sysinternals工具集中的进程浏览器(Process Explorer)查看各个进程的特权等级。</p>
+<p><img src="/2023/11/15/Win32_Api/%E7%94%A8%E6%88%B7%E7%95%8C%E9%9D%A2%E7%89%B9%E6%9D%83%E9%9A%94%E7%A6%BB/image-0.png" srcset="/img/loading.gif" lazyload></p>
+<p>所以，当你发现你的进程之间Windows消息通信发生问题时，不妨使用进程浏览器查看一下两个进程之间是否有合适的特权等级。</p>
+<h2 id="三、UIPI所带来的限制"><a href="#三、UIPI所带来的限制" class="headerlink" title="三、UIPI所带来的限制"></a>三、UIPI所带来的限制</h2><p>正如我们前文所说，等级的划分，是为了防止以下犯上。所以，有了用户界面特权隔离，一个运行在较低特权等级的应用程序的行为就受到了诸多限制，它不可以进行如下操作：</p>
+<ul>
+<li>验证由较高特权等级进程创建的窗口句柄</li>
+<li>通过调用SendMessage和PostMessage向由较高特权等级进程创建的窗口发送Windows消息</li>
+<li>使用线程钩子处理较高特权等级进程</li>
+<li>使用普通钩子(SetWindowsHookEx)监视较高特权等级进程</li>
+<li>向一个较高特权等级进程执行DLL注入</li>
+</ul>
+<p>但是，一些特殊Windows消息是被容许的，因为这些消息对进程的安全性没有太大影响。这些Windows消息包括：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-number">0x000</span> - WM_NULL<br><span class="hljs-number">0x003</span> - WM_MOVE<br><span class="hljs-number">0x005</span> - WM_SIZE<br><span class="hljs-number">0x00D</span> - WM_GETTEXT<br><span class="hljs-number">0x00E</span> - WM_GETTEXTLENGTH<br><span class="hljs-number">0x033</span> - WM_GETHOTKEY<br><span class="hljs-number">0x07F</span> - WM_GETICON<br><span class="hljs-number">0x305</span> - WM_RENDERFORMAT<br><span class="hljs-number">0x308</span> - WM_DRAWCLIPBOARD<br><span class="hljs-number">0x30D</span> - WM_CHANGECBCHAIN<br><span class="hljs-number">0x31A</span> - WM_THEMECHANGED<br><span class="hljs-number">0x313</span>, <span class="hljs-number">0x31B</span> (WM_???)<br></code></pre></td></tr></table></figure>
+
+<h2 id="四、修复UIPI问题"><a href="#四、修复UIPI问题" class="headerlink" title="四、修复UIPI问题"></a>四、修复UIPI问题</h2><p>基于Windows Vista之前的操作系统行为所设计的应用程序，可能希望Windows消息能够在进程之间自由的传递，以完成一些特殊的工作。当这些应用程序在Windows 7&#x2F;10上运行时，因为UIPI机制，这种消息传递被阻断了，应用程序就会遇到兼容性问题。</p>
+<p>为了解决这个问题，Windows Vista引入了新的API函数<strong>ChangeWindowMessageFilter</strong>和<strong>ChangeWindowMessageFilterEx</strong>。利用这2个函数，我们可以添加或者删除能够通过特权等级隔离的Windows消息。这就像拥有较高特权等级的进程，设置了一个过滤器，被允许通过的Windows消息都将被添加到这个过滤器的白名单，只有在这个白名单上的消息才允许传递进来。</p>
+<p>下面对添加&#x2F;移除白名单功能进行了简单封装（<strong>UIPIMsgFilter</strong>函数），该函数可以针对特定的窗体添加、移除消息白名单：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-function">PPX_API BOOL <span class="hljs-title">UIPIMsgFilter</span><span class="hljs-params">(HWND hWnd, UINT uMessageID, BOOL bAllow)</span> </span>&#123;<br>    OSVERSIONINFO VersionTmp;<br>    VersionTmp.dwOSVersionInfoSize = <span class="hljs-built_in">sizeof</span>(OSVERSIONINFO);<br>    <span class="hljs-built_in">GetVersionEx</span>(&amp;VersionTmp);<br>    BOOL res = FALSE;<br><br>    <span class="hljs-keyword">if</span> (VersionTmp.dwMajorVersion &gt;= <span class="hljs-number">6</span>) &#123; <span class="hljs-comment">// vista above.</span><br>        <span class="hljs-built_in">BOOL</span>(WINAPI * pfnChangeMessageFilterEx)(HWND, UINT, DWORD, PCHANGEFILTERSTRUCT);<br>        <span class="hljs-built_in">BOOL</span>(WINAPI * pfnChangeMessageFilter)(UINT, DWORD);<br><br>        CHANGEFILTERSTRUCT filterStatus;<br>        filterStatus.cbSize = <span class="hljs-built_in">sizeof</span>(CHANGEFILTERSTRUCT);<br><br>        HINSTANCE hlib = <span class="hljs-built_in">LoadLibrary</span>(_T(<span class="hljs-string">&quot;user32.dll&quot;</span>));<br><br>        <span class="hljs-keyword">if</span> (hlib != <span class="hljs-literal">NULL</span>) &#123;<br>            (FARPROC &amp;)pfnChangeMessageFilterEx = <span class="hljs-built_in">GetProcAddress</span>(hlib, <span class="hljs-string">&quot;ChangeWindowMessageFilterEx&quot;</span>);<br><br>            <span class="hljs-keyword">if</span> (pfnChangeMessageFilterEx != <span class="hljs-literal">NULL</span> &amp;&amp; hWnd != <span class="hljs-literal">NULL</span>) &#123;<br>                res = <span class="hljs-built_in">pfnChangeMessageFilterEx</span>(hWnd, uMessageID, (bAllow ? MSGFLT_ADD : MSGFLT_REMOVE), &amp;filterStatus);<br>            &#125;<br><br>            <span class="hljs-comment">// If failed, try again.</span><br>            <span class="hljs-keyword">if</span> (!res) &#123;<br>                (FARPROC &amp;)pfnChangeMessageFilter = <span class="hljs-built_in">GetProcAddress</span>(hlib, <span class="hljs-string">&quot;ChangeWindowMessageFilter&quot;</span>);<br><br>                <span class="hljs-keyword">if</span> (pfnChangeMessageFilter != <span class="hljs-literal">NULL</span>) &#123;<br>                    res = <span class="hljs-built_in">pfnChangeMessageFilter</span>(uMessageID, (bAllow ? MSGFLT_ADD : MSGFLT_REMOVE));<br>                &#125;<br>            &#125;<br>        &#125;<br><br>        <span class="hljs-keyword">if</span> (hlib != <span class="hljs-literal">NULL</span>) &#123;<br>            <span class="hljs-built_in">FreeLibrary</span>(hlib);<br>        &#125;<br>    &#125;<br>    <span class="hljs-keyword">else</span> &#123;<br>        res = TRUE;<br>    &#125;<br><br>    <span class="hljs-keyword">return</span> res;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/Win32-API/" class="category-chain-item">Win32_API</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>用户界面特权隔离</div>
+      <div>https://zytpca.github.io/2023/11/15/Win32_Api/用户界面特权隔离/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>Insomniac</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2023年11月15日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2023/11/15/Win32_Api/Windows%E7%8E%AF%E5%A2%83%E4%B8%8B%E6%8F%90%E5%8D%87%E8%BF%9B%E7%A8%8B%E7%9A%84%E6%9D%83%E9%99%90/" title="Windows环境下提升进程的权限">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">Windows环境下提升进程的权限</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2023/11/14/Win32_Api/Windows%E5%B9%B3%E5%8F%B0%E2%80%9C%E8%B7%AF%E5%BE%84%E2%80%9D%E7%9B%B8%E5%85%B3API%E6%B1%87%E6%80%BB/" title="Windows平台“路径”相关API汇总">
+                        <span class="hidden-mobile">Windows平台“路径”相关API汇总</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+  
+  
+    <article id="comments" lazyload>
+      
+  <div id="valine"></div>
+  <script type="text/javascript">
+    Fluid.utils.loadComments('#valine', function() {
+      Fluid.utils.createScript('https://lib.baomitu.com/valine/1.5.1/Valine.min.js', function() {
+        var options = Object.assign(
+          {"appId":"ZDiOGqAWSCAU9bUYDktIk21c-gzGzoHsz","appKey":"JShbv4TgfpvIvvrRl7GFc57n","path":"window.location.pathname","placeholder":null,"avatar":"retro","meta":["nick","mail","link"],"requiredFields":[],"pageSize":10,"lang":"zh-CN","highlight":false,"recordIP":false,"serverURLs":"https://zdiogqaw.lc-cn-n1-shared.com","emojiCDN":null,"emojiMaps":null,"enableQQ":false},
+          {
+            el: "#valine",
+            path: window.location.pathname
+          }
+        )
+        new Valine(options);
+        Fluid.utils.waitElementVisible('#valine .vcontent', () => {
+          var imgSelector = '#valine .vcontent img:not(.vemoji)';
+          Fluid.plugins.imageCaption(imgSelector);
+          Fluid.plugins.fancyBox(imgSelector);
+        })
+      });
+    });
+  </script>
+  <noscript>Please enable JavaScript to view the comments</noscript>
+
+
+    </article>
+  
+
+
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

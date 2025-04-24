@@ -1,0 +1,866 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="Insomniac">
+  <meta name="keywords" content="keywords">
+  
+    <meta name="description" content="一、虚拟地址空间1. 实模式下内存分配机制在8086或者80186以前，要运行一个程序，操作系统会把这些程序全都装入内存，程序都是直接运行在物理内存上的，也就是说程序中访问的内存地址都是实际的物理内存地址。当计算机同时运行多个程序时，必须保证这些程序用到的内存总量要小于计算机实际物理内存的大小。 例如某台计算机总的内存大小是128M ，现在同时运行两个程序 A和B ，A需占用内存10M ， B需占">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【NOTE】Windows内存体系">
+<meta property="og:url" content="https://zytpca.github.io/2023/11/14/Win32_Api/%E3%80%90NOTE%E3%80%91Windows%E5%86%85%E5%AD%98%E4%BD%93%E7%B3%BB/index.html">
+<meta property="og:site_name" content="Insomnia_">
+<meta property="og:description" content="一、虚拟地址空间1. 实模式下内存分配机制在8086或者80186以前，要运行一个程序，操作系统会把这些程序全都装入内存，程序都是直接运行在物理内存上的，也就是说程序中访问的内存地址都是实际的物理内存地址。当计算机同时运行多个程序时，必须保证这些程序用到的内存总量要小于计算机实际物理内存的大小。 例如某台计算机总的内存大小是128M ，现在同时运行两个程序 A和B ，A需占用内存10M ， B需占">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://zytpca.github.io/2023/11/14/Win32_Api/%E3%80%90NOTE%E3%80%91Windows%E5%86%85%E5%AD%98%E4%BD%93%E7%B3%BB/image-0.jpeg">
+<meta property="og:image" content="https://zytpca.github.io/2023/11/14/Win32_Api/%E3%80%90NOTE%E3%80%91Windows%E5%86%85%E5%AD%98%E4%BD%93%E7%B3%BB/image-1.jpeg">
+<meta property="og:image" content="https://zytpca.github.io/2023/11/14/Win32_Api/%E3%80%90NOTE%E3%80%91Windows%E5%86%85%E5%AD%98%E4%BD%93%E7%B3%BB/image-2.jpeg">
+<meta property="og:image" content="https://zytpca.github.io/2023/11/14/Win32_Api/%E3%80%90NOTE%E3%80%91Windows%E5%86%85%E5%AD%98%E4%BD%93%E7%B3%BB/image-3.jpeg">
+<meta property="og:image" content="https://zytpca.github.io/2023/11/14/Win32_Api/%E3%80%90NOTE%E3%80%91Windows%E5%86%85%E5%AD%98%E4%BD%93%E7%B3%BB/image-4.jpeg">
+<meta property="og:image" content="https://zytpca.github.io/2023/11/14/Win32_Api/%E3%80%90NOTE%E3%80%91Windows%E5%86%85%E5%AD%98%E4%BD%93%E7%B3%BB/image-5.png">
+<meta property="og:image" content="https://zytpca.github.io/2023/11/14/Win32_Api/%E3%80%90NOTE%E3%80%91Windows%E5%86%85%E5%AD%98%E4%BD%93%E7%B3%BB/image-6.png">
+<meta property="og:image" content="https://zytpca.github.io/2023/11/14/Win32_Api/%E3%80%90NOTE%E3%80%91Windows%E5%86%85%E5%AD%98%E4%BD%93%E7%B3%BB/image-7.jpeg">
+<meta property="og:image" content="https://zytpca.github.io/2023/11/14/Win32_Api/%E3%80%90NOTE%E3%80%91Windows%E5%86%85%E5%AD%98%E4%BD%93%E7%B3%BB/image-8.jpeg">
+<meta property="og:image" content="https://zytpca.github.io/2023/11/14/Win32_Api/%E3%80%90NOTE%E3%80%91Windows%E5%86%85%E5%AD%98%E4%BD%93%E7%B3%BB/image-9.jpeg">
+<meta property="og:image" content="https://zytpca.github.io/2023/11/14/Win32_Api/%E3%80%90NOTE%E3%80%91Windows%E5%86%85%E5%AD%98%E4%BD%93%E7%B3%BB/image-10.png">
+<meta property="og:image" content="https://zytpca.github.io/2023/11/14/Win32_Api/%E3%80%90NOTE%E3%80%91Windows%E5%86%85%E5%AD%98%E4%BD%93%E7%B3%BB/image-11.jpeg">
+<meta property="og:image" content="https://zytpca.github.io/2023/11/14/Win32_Api/%E3%80%90NOTE%E3%80%91Windows%E5%86%85%E5%AD%98%E4%BD%93%E7%B3%BB/image-12.jpeg">
+<meta property="og:image" content="https://zytpca.github.io/2023/11/14/Win32_Api/%E3%80%90NOTE%E3%80%91Windows%E5%86%85%E5%AD%98%E4%BD%93%E7%B3%BB/image-13.jpeg">
+<meta property="og:image" content="https://zytpca.github.io/2023/11/14/Win32_Api/%E3%80%90NOTE%E3%80%91Windows%E5%86%85%E5%AD%98%E4%BD%93%E7%B3%BB/image-14.jpeg">
+<meta property="og:image" content="https://zytpca.github.io/2023/11/14/Win32_Api/%E3%80%90NOTE%E3%80%91Windows%E5%86%85%E5%AD%98%E4%BD%93%E7%B3%BB/image-15.jpeg">
+<meta property="article:published_time" content="2023-11-14T08:12:42.000Z">
+<meta property="article:modified_time" content="2025-04-24T08:29:00.420Z">
+<meta property="article:author" content="Insomniac">
+<meta property="article:tag" content="keywords">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://zytpca.github.io/2023/11/14/Win32_Api/%E3%80%90NOTE%E3%80%91Windows%E5%86%85%E5%AD%98%E4%BD%93%E7%B3%BB/image-0.jpeg">
+  
+  
+  
+  <title>【NOTE】Windows内存体系 - Insomnia_</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"zytpca.github.io","root":"/","version":"1.9.8","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Insomniac&#39;s Blog</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="【NOTE】Windows内存体系"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2023-11-14 16:12" pubdate>
+          2023年11月14日 下午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          7.8k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          66 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">【NOTE】Windows内存体系</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h2 id="一、虚拟地址空间"><a href="#一、虚拟地址空间" class="headerlink" title="一、虚拟地址空间"></a>一、虚拟地址空间</h2><h3 id="1-实模式下内存分配机制"><a href="#1-实模式下内存分配机制" class="headerlink" title="1. 实模式下内存分配机制"></a><font style="color:rgb(79, 79, 79);">1. 实模式下</font>内存<font style="color:rgb(79, 79, 79);">分配机制</font></h3><p><font style="color:rgb(77, 77, 77);">在8086或者80186以前，要运行一个程序，操作系统会把这些程序全都装入内存，程序都是直接运行在物理内存上的，也就是说程序中访问的内存地址都是实际的物理内存地址。当计算机同时运行多个程序时，必须保证这些程序用到的内存总量要小于计算机实际物理内存的大小。</font></p>
+<p><font style="color:rgb(77, 77, 77);">例如某台计算机总的内存大小是</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">128M</font><font style="color:rgb(77, 77, 77);"> ，现在同时运行两个程序 A和B ，A需占用内存</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">10M</font><font style="color:rgb(77, 77, 77);"> ， B需占用内存</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">110M</font><font style="color:rgb(77, 77, 77);"> 。计算机在给程序分配内存时会采取这样的方法：先将内存中的前</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">10M</font><font style="color:rgb(77, 77, 77);">分配给程序 A ，接着再从内存中剩余的</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">118M</font><font style="color:rgb(77, 77, 77);">中划分出 </font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">110M</font><font style="color:rgb(77, 77, 77);">分配给程序B 。这种分配方法虽然可以保证程序A和程序B都能运行，但是这种简单的内存分配策略会导致很多问题：</font></p>
+<ul>
+<li><font style="color:rgb(77, 77, 77);">问题 1 ：进程</font><font style="color:#DF2A3F;">地址空间</font><font style="color:rgb(77, 77, 77);">不隔离。由于程序都是直接访问物理内存，所以恶意程序可以随意修改别的进程的内存数据，以达到破坏的目的。有些非恶意的，但是有 bug 的程序也可能不小心修改了其它程序的内存数据，就会导致其它程序的运行出现异常。这种情况对用户来说是无法容忍的，因为用户希望使用计算机的时候，其中一个任务失败了，至少不能影响其它的任务。</font></li>
+<li><font style="color:rgb(77, 77, 77);">问题 2 ：内存使用效率低。在 A 和 B 都运行的情况下，如果用户又运行了程序 C ，而程序 C 需要 20M 大小的内存才能运行，而此时系统只剩下 8M 的空间可供使用，所以此时系统必须在已运行的程序中选择一个将该程序的数据暂时拷贝到硬盘上，释放出部分空间来供程序 C 使用，然后再将程序 C 的数据全部装入内存中运行。可以想象得到，在这个过程中，有大量的数据在装入装出，导致效率十分低下。</font></li>
+<li><font style="color:rgb(77, 77, 77);">问题 3 ：程序运行的地址不确定。当内存中的剩余空间可以满足程序 C 的要求后，操作系统会在剩余空间中随机分配一段连续的 20M 大小的空间给程序 C 使用，因为是随机分配的，所以程序运行的地址是不确定的。</font></li>
+</ul>
+<hr>
+<h3 id="2-虚拟地址空间介绍"><a href="#2-虚拟地址空间介绍" class="headerlink" title="2. 虚拟地址空间介绍"></a><font style="color:rgb(79, 79, 79);">2. 虚拟地址空间介绍</font></h3><p><font style="color:rgb(77, 77, 77);">操作系统让每个进程都有自己的虚拟地址空间（</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">Virtual Address Space</font><font style="color:rgb(77, 77, 77);">，简称</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">VAS</font><font style="color:rgb(77, 77, 77);">）。以32位进程为例，每个进程都有</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">0x00000000 ~ 0xFFFFFFFF</font><font style="color:rgb(77, 77, 77);">(4GB)的虚拟地址空间，所以每个进程都可能分配到</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">0x123456</font><font style="color:rgb(77, 77, 77);">地址的内存，但这个地址不能在进程间相互访问。</font></p>
+<p><font style="color:rgb(77, 77, 77);">因为这些都是“虚拟”的地址空间，这些“地址”都不能直接使用，CPU在寻址的时候虽然是按照虚拟地址来寻址的，但是还要通过</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">MMU</font><font style="color:rgb(77, 77, 77);">(内存管理单元)来将虚拟地址转换为物理存储器（如内存等）上的物理地址：</font></p>
+<p><img src="/2023/11/14/Win32_Api/%E3%80%90NOTE%E3%80%91Windows%E5%86%85%E5%AD%98%E4%BD%93%E7%B3%BB/image-0.jpeg" srcset="/img/loading.gif" lazyload></p>
+<p><font style="color:rgb(77, 77, 77);">从图上可以看出，进程A和B虽然都有地址</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">0x123456</font><font style="color:rgb(77, 77, 77);">，但它们分别对应的物理地址不一样。</font></p>
+<hr>
+<h3 id="3-虚拟地址空间分区"><a href="#3-虚拟地址空间分区" class="headerlink" title="3. 虚拟地址空间分区"></a><font style="color:rgb(79, 79, 79);">3. 虚拟地址空间分区</font></h3><p><font style="color:rgb(77, 77, 77);">进程的虚拟地址空间虽然很大，但是它被划分成了很多分区，供Ring3层应用程序使用的用户模式分区并不大（一半不到），如图：<br></font><img src="/2023/11/14/Win32_Api/%E3%80%90NOTE%E3%80%91Windows%E5%86%85%E5%AD%98%E4%BD%93%E7%B3%BB/image-1.jpeg" srcset="/img/loading.gif" lazyload></p>
+<p><strong><font style="color:rgb(79, 79, 79);">3.1 空指针赋值分区</font></strong></p>
+<p><font style="color:rgb(77, 77, 77);">这一分区的进程地址空间的范围为：[</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">0x00000000</font><font style="color:rgb(77, 77, 77);">,</font><font style="color:rgb(77, 77, 77);"> </font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">0x0000FFFF</font><font style="color:rgb(77, 77, 77);">]，总大小为</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">64K</font><font style="color:rgb(77, 77, 77);">，保留该分区的目的是为了帮助应用程序员捕获对空指针的赋值。如</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">malloc</font><font style="color:rgb(77, 77, 77);">分配内存失败，就会返回</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">NULL</font><font style="color:rgb(77, 77, 77);">。</font></p>
+<p><font style="color:rgb(77, 77, 77);">如果进程中的线程试图访问该分区内的内存地址，就会引发访问违规。</font></p>
+<p><strong><font style="color:rgb(79, 79, 79);">3.2 用户模式分区</font></strong></p>
+<p><font style="color:rgb(77, 77, 77);">在Windows中，所有的exe和动态链接库都载入到这一区域。系统同时会把该进程可以访问的所有内存映射文件（后面会介绍）映射到这一分区。</font></p>
+<p><font style="color:rgb(77, 77, 77);">进程无法通过指针来读取、写入、访问其他进程的这一分区，因此一个应用程序破坏另一个应用程序的可能性就非常小了，从而使整个系统更加坚固。</font></p>
+<p><strong><font style="color:rgb(79, 79, 79);">3.3 内核模式分区</font></strong></p>
+<p><font style="color:rgb(77, 77, 77);">内核模式分区是操作系统代码的驻地。与线程调度、内存管理、文件系统支持、网络支持以及设备驱动程序相关的代码都会载入到这一分区。该分区内的代码和数据被完全的保护起来了，如果一个应用程序试图读取或写入位于这一分区的内存地址，会引发访问违规。</font></p>
+<p><font style="color:rgb(77, 77, 77);">驻留在这一分区内的代码为所有进程共有。</font></p>
+<hr>
+<h3 id="4-虚拟地址空间的使用"><a href="#4-虚拟地址空间的使用" class="headerlink" title="4. 虚拟地址空间的使用"></a><font style="color:rgb(79, 79, 79);">4. 虚拟地址空间的使用</font></h3><p><font style="color:rgb(77, 77, 77);">虚拟地址空间的使用涉及到3个概念：</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">页面大小</font><font style="color:rgb(77, 77, 77);">、</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">分配粒度</font><font style="color:rgb(77, 77, 77);">、</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">预定和调拨</font><font style="color:rgb(77, 77, 77);">。</font></p>
+<p><strong><font style="color:rgb(79, 79, 79);">4.1 页面大小</font></strong></p>
+<p><font style="color:rgb(77, 77, 77);">虚拟地址空间被分成以</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">“页面”</font><font style="color:rgb(77, 77, 77);">为单位，因为硬件内存管理单元是以</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">页面</font><font style="color:rgb(77, 77, 77);">为粒度将虚拟地址转译成物理地址的。</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">页面</font><font style="color:rgb(77, 77, 77);">的大小根据不同的CPU不而有所不同。x86和x64系统使用的</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">页面</font><font style="color:rgb(77, 77, 77);">大小都是</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">4KB</font><font style="color:rgb(77, 77, 77);">，而IA-64系统使用的</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">页面</font><font style="color:rgb(77, 77, 77);">大小是</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">8KB</font><font style="color:rgb(77, 77, 77);">。</font></p>
+<p><font style="color:rgb(85, 86, 102);background-color:rgb(238, 240, 244);">IA-64操作系统只能在INTEL安腾系列处理器及AMD部分服务器处理器运行，所以主流市场并不常见</font></p>
+<p><font style="color:rgb(77, 77, 77);">当</font><strong><font style="color:rgb(77, 77, 77);">应用程序</font></strong><font style="color:rgb(77, 77, 77);">在虚拟地址空间分配空间时，系统需要确保分配区域的大小正好是系统</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">页面</font><font style="color:rgb(77, 77, 77);">大小的整数倍。</font></p>
+<p><strong><font style="color:rgb(79, 79, 79);">4.2 分配粒度</font></strong></p>
+<p><font style="color:rgb(77, 77, 77);">当</font><strong><font style="color:rgb(77, 77, 77);">应用程序</font></strong><font style="color:rgb(77, 77, 77);">在从虚拟地址空间分配空间时，系统会确保所有分配区域的起始地址都是</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">分配粒度</font><font style="color:rgb(77, 77, 77);">的整数倍。</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">分配粒度</font><font style="color:rgb(77, 77, 77);">的会根据不同的CPU平台而有所不同，但目前所有的CPU平台的分配粒度都是使用</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">64KB</font><font style="color:rgb(77, 77, 77);">。也就是说，</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">分配的起始地址 &#x3D; 64 * N</font><font style="color:rgb(77, 77, 77);">。</font></p>
+<p><font style="color:rgb(77, 77, 77);">通过Windows的</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">GetSystemInfo</font><font style="color:rgb(77, 77, 77);">函数也可以获得此分配粒度值。</font></p>
+<p><font style="color:rgb(85, 86, 102);background-color:rgb(238, 240, 244);">上面所说的</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">分配粒度</font><font style="color:rgb(85, 86, 102);background-color:rgb(238, 240, 244);">和</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">页面大小</font><font style="color:rgb(85, 86, 102);background-color:rgb(238, 240, 244);">的限制，只是针对于</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">“应用程序”</font><font style="color:rgb(85, 86, 102);background-color:rgb(238, 240, 244);">，系统内核自己不存在这样的限制。</font></p>
+<p><strong><font style="color:rgb(79, 79, 79);">4.3 预定和调拨</font></strong></p>
+<p><font style="color:rgb(77, 77, 77);">虚拟地址空间的使用分为2个步骤：</font></p>
+<ol>
+<li><font style="color:rgba(0, 0, 0, 0.75);">预定（reserve）：告诉系统我们要从虚拟地址空间</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">预定</font><font style="color:rgba(0, 0, 0, 0.75);">哪一块区域，系统为我们保留这一块区域。预定的局域的起始地址和大小遵循上面介绍的</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">分配粒度</font><font style="color:rgba(0, 0, 0, 0.75);">和</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">页面大小</font><font style="color:rgba(0, 0, 0, 0.75);">的要求。因为预定的只是虚拟地址空间，不占用任何其他物理存储器，所以没有形成实质的开销。</font></li>
+<li><font style="color:rgba(0, 0, 0, 0.75);">调拨（commit）：预定的区域还不能使用，我们还需要为</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">预定</font><font style="color:rgba(0, 0, 0, 0.75);">的区域从</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">页交换文件</font><font style="color:rgba(0, 0, 0, 0.75);">中</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">调拨</font><font style="color:rgba(0, 0, 0, 0.75);">存储器，</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">调拨</font><font style="color:rgba(0, 0, 0, 0.75);">之后我们才能使用该区域。<br></font><font style="color:rgba(0, 0, 0, 0.75);">至于为什么要从</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">页交换文件</font><font style="color:rgba(0, 0, 0, 0.75);">中调拨存储器？ </font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">页交换文件</font><font style="color:rgba(0, 0, 0, 0.75);">如何与物理内存之间交互？下一篇文章</font><a target="_blank" rel="noopener" href="http://blog.csdn.net/china_jeffery/article/details/79611715">《Windows内存体系（2） – 虚拟内存》</a><font style="color:rgba(0, 0, 0, 0.75);">会介绍。</font></li>
+</ol>
+<hr>
+<h2 id="二、页交换文件"><a href="#二、页交换文件" class="headerlink" title="二、页交换文件"></a><font style="color:rgba(0, 0, 0, 0.75);">二、页交换文件</font></h2><h3 id="1-页交换文件"><a href="#1-页交换文件" class="headerlink" title="1. 页交换文件"></a><font style="color:rgb(79, 79, 79);">1. 页交换文件</font></h3><p><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">虚拟地址空间</font><font style="color:rgb(77, 77, 77);">只是操作系统为进程“虚拟”出来的一块地址区域，并不代表任何实际的空间。而</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">“页交换文件”</font><font style="color:rgb(77, 77, 77);">却对应了实际的空间，这个空间一般是磁盘上名为</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">“pagefile.sys”</font><font style="color:rgb(77, 77, 77);">的文件。</font></p>
+<p><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">“页交换文件”</font><font style="color:rgb(77, 77, 77);">的大小和位置可以在系统设置（</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">系统属性 -&gt; 高级 -&gt; 性能 -&gt; 设置 -&gt; 高级</font><font style="color:rgb(77, 77, 77);"> </font><font style="color:rgb(77, 77, 77);">）中进行设置：<br></font><img src="/2023/11/14/Win32_Api/%E3%80%90NOTE%E3%80%91Windows%E5%86%85%E5%AD%98%E4%BD%93%E7%B3%BB/image-2.jpeg" srcset="/img/loading.gif" lazyload></p>
+<p><font style="color:rgb(77, 77, 77);">从微软的官方文档来看，</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">“虚拟内存”</font><font style="color:rgb(77, 77, 77);">等于</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">“物理内存”+“分页文件”</font><font style="color:rgb(77, 77, 77);">总和。可以把</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">“虚拟内存”</font><font style="color:rgb(77, 77, 77);">理解为Windows的一种内存管理机制。</font></p>
+<h3 id="2-虚拟地址空间、页交换文件、物理内存"><a href="#2-虚拟地址空间、页交换文件、物理内存" class="headerlink" title="2. 虚拟地址空间、页交换文件、物理内存"></a><font style="color:rgb(79, 79, 79);">2. 虚拟地址空间、页交换文件、物理内存</font></h3><p><font style="color:rgb(77, 77, 77);">虚拟地址空间、页交换文件、物理内存三者的关系如下图：<br></font><img src="/2023/11/14/Win32_Api/%E3%80%90NOTE%E3%80%91Windows%E5%86%85%E5%AD%98%E4%BD%93%E7%B3%BB/image-3.jpeg" srcset="/img/loading.gif" lazyload></p>
+<p><font style="color:rgb(77, 77, 77);">《Windows核心编程》第13章关于“物理存储器和页交换文件”章节中讲到了“页交换文件、物理存储器之间的数据交换过程”，流程如下：</font></p>
+<p><img src="/2023/11/14/Win32_Api/%E3%80%90NOTE%E3%80%91Windows%E5%86%85%E5%AD%98%E4%BD%93%E7%B3%BB/image-4.jpeg" srcset="/img/loading.gif" lazyload></p>
+<p><font style="color:rgb(77, 77, 77);">应用程序从进程的虚拟地址空间</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">预定并调拨</font><font style="color:rgb(77, 77, 77);">了一块地址区域时，起初这块区域只是从“页交换文件”中调拨的，这样作有个好处就是：因为还不确定何时才会使用这块区域，如果立即从物理内存调拨，会将占用很多的物理内存。<br></font><font style="color:rgb(77, 77, 77);">当程序读写该地址区域时，此时就会出现上面图上的页交换文件和物理内存之间的数据交换过程。</font></p>
+<h3 id="3-将页面锁定在物理内存"><a href="#3-将页面锁定在物理内存" class="headerlink" title="3. 将页面锁定在物理内存"></a><font style="color:rgb(79, 79, 79);">3. 将页面锁定在物理内存</font></h3><p><font style="color:rgb(77, 77, 77);">从上面的几节我们知道，当物理内存中没有闲置页面时，系统会将内存中的某些页面的数据写入到交换文件中，从而将该物理内存区域释放出来供后面的程序使用。</font></p>
+<p><font style="color:rgb(77, 77, 77);">我们可以通过调用</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">VirtualLock</font><font style="color:rgb(77, 77, 77);">方法，将页面锁定在物理内存中，从而防止</font><a target="_blank" rel="noopener" href="https://so.csdn.net/so/search?q=%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98&spm=1001.2101.3001.7020">虚拟内存</a><font style="color:rgb(77, 77, 77);">管理机制将页面交换至页面文件，而引起不必要的硬盘和物理内存之间的低效页面交换。</font></p>
+<p><font style="color:rgb(77, 77, 77);">也可以通过调用</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">VirtualUnlock</font><font style="color:rgb(77, 77, 77);">方法解锁页面，允许系统对页面进行交换操作。</font></p>
+<p><font style="color:rgb(77, 77, 77);">需要注意的是，锁定页面时系统会根据当前可用实际物理内存情况，以及进程工作集配额判定当前最大可锁定的页面的实际数量，超过此数量会引起一个错误。我们可以调用</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">SetProcessWorkingSetSize</font><font style="color:rgb(77, 77, 77);">可以改变一个进程工作集大小的配额，从而可以锁定更多的物理页面。</font></p>
+<hr>
+<h2 id="三、虚拟内存使用实例"><a href="#三、虚拟内存使用实例" class="headerlink" title="三、虚拟内存使用实例"></a>三、虚拟内存使用实例</h2><p>虚拟内存<font style="color:rgb(77, 77, 77);">方面的API属于页面粒度API，通过这些API分配的内存的最小粒度是</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">64KB</font><font style="color:rgb(77, 77, 77);">。另外通过前面的</font><a target="_blank" rel="noopener" href="http://blog.csdn.net/china_jeffery/article/details/79611715">《Windows内存体系（2） – 页交换文件》</a><font style="color:rgb(77, 77, 77);">文章，我们可以知道，这些API分配（调拨）的内存区域最初都是位于</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">“页交换文件”</font><font style="color:rgb(77, 77, 77);">上面，当程序对该区域的某些“页面”（</font><strong><font style="color:rgb(77, 77, 77);">对虚拟内存的管理以页面为单位进行的</font></strong><font style="color:rgb(77, 77, 77);">）进行读写时，才会将这些页面交换到物理内存上面。</font></p>
+<p><font style="color:rgb(77, 77, 77);">从</font><a target="_blank" rel="noopener" href="http://blog.csdn.net/china_jeffery/article/details/79610915">《Windows内存体系（1） – 虚拟地址空间》</a><font style="color:rgb(77, 77, 77);">中我们知道虚拟地址空间要经过</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">预定</font><font style="color:rgb(77, 77, 77);">和</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">调拨</font><font style="color:rgb(77, 77, 77);">2个步骤之后才能使用，这2个步骤都可以通过</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">VirtualAlloc</font><font style="color:rgb(77, 77, 77);">函数实现：</font></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-function">LPVOID <span class="hljs-title">VirtualAlloc</span><span class="hljs-params">(</span></span><br><span class="hljs-params"><span class="hljs-function">    LPVOID lpAddress, </span></span><br><span class="hljs-params"><span class="hljs-function">    DWORD dwSize, </span></span><br><span class="hljs-params"><span class="hljs-function">    DWORD flAllocationType, </span></span><br><span class="hljs-params"><span class="hljs-function">    DWORD flProtect </span></span><br><span class="hljs-params"><span class="hljs-function">)</span></span>; <br></code></pre></td></tr></table></figure>
+
+<p><font style="color:rgb(77, 77, 77);">当预定或者调拨的空间我们不在需要时，我们需要调用</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">VirtualFree</font><font style="color:rgb(77, 77, 77);">来释放该地址空间：</font></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-function">BOOL <span class="hljs-title">VirtualFree</span><span class="hljs-params">(</span></span><br><span class="hljs-params"><span class="hljs-function">    LPVOID lpAddress, </span></span><br><span class="hljs-params"><span class="hljs-function">    DWORD dwSize, </span></span><br><span class="hljs-params"><span class="hljs-function">    DWORD dwFreeType </span></span><br><span class="hljs-params"><span class="hljs-function">)</span></span>; <br></code></pre></td></tr></table></figure>
+
+<p><font style="color:rgb(77, 77, 77);">下面是的示例演示了在预定、调拨、使用等操作前后，进程的各项内存的占用情况：</font></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;windows.h&gt;</span></span><br><br><span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span></span><br><span class="hljs-function"></span>&#123;<br>    SIZE_T size = <span class="hljs-number">1</span> &lt;&lt; <span class="hljs-number">30</span>; <span class="hljs-comment">// 1GB</span><br><br>    <span class="hljs-comment">// 预定1GB的空间</span><br>    <span class="hljs-type">char</span> *pVirtualAddress = (<span class="hljs-type">char</span> *)<span class="hljs-built_in">VirtualAlloc</span>(<span class="hljs-literal">NULL</span>, size, MEM_RESERVE, PAGE_READWRITE);<br>    <span class="hljs-keyword">if</span> (pVirtualAddress == <span class="hljs-literal">NULL</span>) &#123;<br>        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Reserve 1GB failed.\n&quot;</span>);<br>        <span class="hljs-keyword">return</span> <span class="hljs-number">1</span>;<br>    &#125;<br><br>    <span class="hljs-comment">// 验证分配粒度是不是64KB</span><br>    <span class="hljs-type">int</span> n = (<span class="hljs-type">long</span>)pVirtualAddress % (<span class="hljs-number">64</span>*<span class="hljs-number">1024</span>);<br>    <span class="hljs-keyword">if</span> (n == <span class="hljs-number">0</span>) &#123;<br>        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;分配粒度为64K\n&quot;</span>);<br>    &#125;<br><br>    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;已经预定1GB\n&quot;</span>);<br>    <span class="hljs-built_in">getchar</span>(); <span class="hljs-comment">// 暂停</span><br><br>    <span class="hljs-keyword">if</span> (<span class="hljs-built_in">VirtualAlloc</span>(pVirtualAddress, size, MEM_COMMIT, PAGE_READWRITE) == <span class="hljs-literal">NULL</span>) &#123;<br>        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Commit 1GB failed.\n&quot;</span>);<br>        <span class="hljs-keyword">return</span> <span class="hljs-number">1</span>;<br>    &#125;<br><br>    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;已经调拨1GB\n&quot;</span>);<br>    <span class="hljs-built_in">getchar</span>(); <span class="hljs-comment">// 暂停</span><br><br>    <span class="hljs-comment">// 页面大小为4K，访问2560个页面，即2560*4K = 10MB</span><br>    <span class="hljs-comment">// </span><br>    <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> i = <span class="hljs-number">0</span>; i &lt; <span class="hljs-number">2560</span>; i++) &#123;<br>        <span class="hljs-type">char</span> * p = pVirtualAddress + i * (<span class="hljs-number">4</span> * <span class="hljs-number">1024</span>);<br>        *p = <span class="hljs-string">&#x27;A&#x27;</span>; <span class="hljs-comment">// 只访问每个页面的第一个字节</span><br>    &#125;<br><br>    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;已经使用前10MB\n&quot;</span>);<br>    <span class="hljs-built_in">getchar</span>(); <span class="hljs-comment">// 暂停</span><br><br>    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>&#125;<br><br></code></pre></td></tr></table></figure>
+
+<p><font style="color:rgb(77, 77, 77);">在程序运行各个阶段进程的内存情况如下图：（“内存专用工作集”表示占用的物理内存的大小，“提交大小”表示调拨的页交换文件的大小）</font></p>
+<p><img src="/2023/11/14/Win32_Api/%E3%80%90NOTE%E3%80%91Windows%E5%86%85%E5%AD%98%E4%BD%93%E7%B3%BB/image-5.png" srcset="/img/loading.gif" lazyload></p>
+<hr>
+<h2 id="四、内存映射文件"><a href="#四、内存映射文件" class="headerlink" title="四、内存映射文件"></a><font style="color:rgb(77, 77, 77);">四、内存映射文件</font></h2><p><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">“内存映射文件”</font><font style="color:rgb(77, 77, 77);">可以将硬盘上的文件映射到</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">虚拟地址空间</font><font style="color:rgb(77, 77, 77);">，这样就不需要将所有东西都放入到页交换文件中，比如系统有许多程序同时运行时，如果将这些程序文件都加载到页交换文件中，</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">页交换文件</font><font style="color:rgb(77, 77, 77);">将会变得非常大。事实上，Windows也并没有将硬盘上的程序文件复制到</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">页交换文件</font><font style="color:rgb(77, 77, 77);">中，因为这样不仅会让</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">页交换文件</font><font style="color:rgb(77, 77, 77);">将会变得非常大，也会浪费很多时间，特别是可执行程序非常大的时候。</font></p>
+<p><font style="color:rgb(77, 77, 77);">当用户要求执行一个应用程序时，系统会打开该应用程序的</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">.exe</font><font style="color:rgb(77, 77, 77);">文件，并计算出应用程序的代码和数据的大小，然后系统会在进程的虚拟</font><a target="_blank" rel="noopener" href="https://so.csdn.net/so/search?q=%E5%9C%B0%E5%9D%80%E7%A9%BA%E9%97%B4&spm=1001.2101.3001.7020">地址空间</a><font style="color:rgb(77, 77, 77);">预定一块地址空间，并注明与该区域相关联的物理存储器就是</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">.exe</font><font style="color:rgb(77, 77, 77);">文件本身。</font></p>
+<p><font style="color:rgb(77, 77, 77);">当把一个位于硬盘上的文件（可以是</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">.exe</font><font style="color:rgb(77, 77, 77);">，</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">.dll</font><font style="color:rgb(77, 77, 77);">也可以是普通文件）映像用作地址空间区域对应的物理存储器时，我们称这个文件映像为</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">“内存映射文件”</font><font style="color:rgb(77, 77, 77);">。</font></p>
+<p><font style="color:rgb(77, 77, 77);">现在我们可以对</font><a target="_blank" rel="noopener" href="http://blog.csdn.net/china_jeffery/article/details/79611715">《 Windows内存体系（2） – 虚拟内存》</a><font style="color:rgb(77, 77, 77);">第2节的图进行完善了，加入“</font><a target="_blank" rel="noopener" href="https://so.csdn.net/so/search?q=%E5%86%85%E5%AD%98&spm=1001.2101.3001.7020">内存</a><font style="color:rgb(77, 77, 77);">映射文件”部分：<br></font><img src="/2023/11/14/Win32_Api/%E3%80%90NOTE%E3%80%91Windows%E5%86%85%E5%AD%98%E4%BD%93%E7%B3%BB/image-6.png" srcset="/img/loading.gif" lazyload></p>
+<hr>
+<h2 id="五、内存映射文件技术的使用"><a href="#五、内存映射文件技术的使用" class="headerlink" title="五、内存映射文件技术的使用"></a>五、内存映射文件技术的使用</h2><h3 id="1-内存映射文件技术介绍"><a href="#1-内存映射文件技术介绍" class="headerlink" title="1. 内存映射文件技术介绍"></a><font style="color:rgb(79, 79, 79);">1. 内存映射文件技术介绍</font></h3><p><font style="color:rgb(77, 77, 77);">常用的有Win32 API的</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">CreateFile()</font><font style="color:rgb(77, 77, 77);">、</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">WriteFile()</font><font style="color:rgb(77, 77, 77);">、</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">ReadFile()</font><font style="color:rgb(77, 77, 77);">和MFC提供的</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">CFile</font><font style="color:rgb(77, 77, 77);">类都可以实现文件的读写操作。一般来说，以上这些函数可以满足大多数场合的要求，但是对于某些特殊应用领域所需要的动辄几十GB、几百GB、乃至几TB的海量存储，再以平常的文件处理方法进行处理显然是行不通的（效率低下，而且内存没那么大）。目前，对于这种大文件的操作一般是以内存映射文件的方式来加以处理的。</font></p>
+<p><font style="color:rgb(77, 77, 77);">内存映射文件也是Windows的一种内存管理方法，提供了一个统一的内存管理特征，使应用程序可以通过内存指针对磁盘上的文件进行访问。通过文件映射将磁盘文件内容（全部或者部分）与进程虚拟地址空间的某个区域建立映射关联，可以直接对被映射的文件进行访问，而不必执行文件I&#x2F;O操作也无需对文件内容进行缓冲处理。内存文件映射的这种特性是非常适合于用来管理大尺寸文件的。</font></p>
+<h3 id="2-大文件读写实例"><a href="#2-大文件读写实例" class="headerlink" title="2. 大文件读写实例"></a><font style="color:rgb(79, 79, 79);">2. 大文件读写实例</font></h3><p><font style="color:rgb(77, 77, 77);">通过C++调用系统API实现文件映射的步骤大致如下：<br></font><img src="/2023/11/14/Win32_Api/%E3%80%90NOTE%E3%80%91Windows%E5%86%85%E5%AD%98%E4%BD%93%E7%B3%BB/image-7.jpeg" srcset="/img/loading.gif" lazyload></p>
+<h3 id="3-示例"><a href="#3-示例" class="headerlink" title="3. 示例"></a>3. 示例</h3><p>本示例先在**D:**生成一个<font style="color:rgb(77, 77, 77);">大小为1GB的</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">BigFile.data</font><font style="color:rgb(77, 77, 77);">文件，然后使用内存映射技术将该文件内全部填充字符A，随后读取其中的</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">第20000~20100字节</font><font style="color:rgb(77, 77, 77);">，并将这些字节修改为字符B，然后再次读取已验证是否修改成功。</font></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;windows.h&gt;</span></span><br><br><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">Test</span><span class="hljs-params">()</span> </span>&#123;<br>    HANDLE file_ = <span class="hljs-built_in">CreateFile</span>(<span class="hljs-built_in">TEXT</span>(<span class="hljs-string">&quot;D:\\BigFile.data&quot;</span>), <br>    GENERIC_READ | GENERIC_WRITE, <br>    <span class="hljs-number">0</span>, <br>    <span class="hljs-literal">NULL</span>, <br>    OPEN_ALWAYS, <br>    FILE_ATTRIBUTE_NORMAL,<br>    <span class="hljs-literal">NULL</span>);<br><br>    <span class="hljs-keyword">if</span> (file_ == INVALID_HANDLE_VALUE) &#123;<br>        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;CreateFile failed, GLE:%d\n&quot;</span>, <span class="hljs-built_in">GetLastError</span>());<br>        <span class="hljs-keyword">return</span>;<br>    &#125;<br><br>    LARGE_INTEGER filesize;<br>    filesize.QuadPart = <span class="hljs-number">1024</span> * <span class="hljs-number">1024</span> * <span class="hljs-number">1024</span>; <span class="hljs-comment">// 1GB</span><br><br>    HANDLE mapping_ = <span class="hljs-built_in">CreateFileMapping</span>(file_, <span class="hljs-literal">NULL</span>, PAGE_READWRITE, filesize.HighPart, filesize.LowPart, <span class="hljs-literal">NULL</span>);<br>    <span class="hljs-keyword">if</span> (mapping_ == <span class="hljs-literal">NULL</span>) &#123;<br>        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;CreateFileMapping failed, GLE:%d\n&quot;</span>, <span class="hljs-built_in">GetLastError</span>());<br>        <span class="hljs-keyword">return</span>;<br>    &#125;<br><br>    LARGE_INTEGER offset;<br>    offset.QuadPart = <span class="hljs-number">0</span>;<br><br>    LPVOID mapping_addr = <span class="hljs-built_in">MapViewOfFile</span>(mapping_, FILE_MAP_WRITE | FILE_MAP_READ, offset.HighPart, offset.LowPart, <span class="hljs-number">0</span>);<br>    <span class="hljs-keyword">if</span> (mapping_addr == <span class="hljs-literal">NULL</span>) &#123;<br>        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;MapViewOfFile failed, GLE:%d\n&quot;</span>, <span class="hljs-built_in">GetLastError</span>());<br>        <span class="hljs-keyword">return</span>;<br>    &#125;<br><br>    <span class="hljs-comment">// 向文件中填充1GB的字符&#x27;A&#x27;</span><br>    <span class="hljs-comment">//</span><br>    <span class="hljs-type">char</span> buf[<span class="hljs-number">1024</span>];<br>    <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> i = <span class="hljs-number">0</span>; i &lt; <span class="hljs-number">1024</span>; i++) &#123;<br>        buf[i] = <span class="hljs-string">&#x27;A&#x27;</span>;<br>    &#125;<br><br>    <span class="hljs-comment">// 每次填充1024字节，填充1024*1024次</span><br>    <span class="hljs-keyword">for</span> (<span class="hljs-type">long</span> l = <span class="hljs-number">0</span>; l &lt; <span class="hljs-number">1024</span> * <span class="hljs-number">1024</span>; l++) &#123;<br>        <span class="hljs-built_in">memcpy</span>((LPVOID)((<span class="hljs-type">long</span>)mapping_addr + l * <span class="hljs-number">1024</span>), buf, <span class="hljs-number">1024</span>);<br>    &#125;<br><br><br><br>    <span class="hljs-comment">// 填充完毕</span><br>    <span class="hljs-comment">// 读取第20000~20100字节，共100字节</span><br>    <span class="hljs-comment">//</span><br>    <span class="hljs-type">char</span> read_content[<span class="hljs-number">101</span>] = &#123; <span class="hljs-number">0</span> &#125;;<br>    <span class="hljs-built_in">memcpy</span>(read_content, (LPVOID)((<span class="hljs-type">long</span>)mapping_addr + <span class="hljs-number">20000</span>), <span class="hljs-number">100</span>);<br>    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;%s\n&quot;</span>, read_content);<br><br>    <span class="hljs-comment">// 将第20000~20100字节，共100字节全部修改为字符&#x27;B&#x27;</span><br>    <span class="hljs-comment">//</span><br>    <span class="hljs-type">char</span> write_content[<span class="hljs-number">100</span>];<br>    <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> i = <span class="hljs-number">0</span>; i &lt; <span class="hljs-number">100</span>; i++) &#123;<br>        write_content[i] = <span class="hljs-string">&#x27;B&#x27;</span>;<br>    &#125;<br><br>    <span class="hljs-built_in">memcpy</span>((LPVOID)((<span class="hljs-type">long</span>)mapping_addr + <span class="hljs-number">20000</span>), write_content, <span class="hljs-number">100</span>);<br><br>    <span class="hljs-comment">// 再次读取第20000~20100字节，共100字节，验证修改是成功</span><br>    <span class="hljs-comment">//</span><br>    <span class="hljs-built_in">memcpy</span>(read_content, (LPVOID)((<span class="hljs-type">long</span>)mapping_addr + <span class="hljs-number">20000</span>), <span class="hljs-number">100</span>);<br>    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;%s\n&quot;</span>, read_content);<br><br><br>    <span class="hljs-built_in">UnmapViewOfFile</span>(mapping_addr);<br>    <span class="hljs-built_in">CloseHandle</span>(mapping_);<br>    <span class="hljs-built_in">CloseHandle</span>(file_);<br><br>    <span class="hljs-keyword">return</span>;<br>&#125;<br><br><span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span></span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-built_in">Test</span>();<br>    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="六、内存对齐"><a href="#六、内存对齐" class="headerlink" title="六、内存对齐"></a>六、内存对齐</h2><h3 id="1-内存为什么要对齐"><a href="#1-内存为什么要对齐" class="headerlink" title="1. 内存为什么要对齐"></a><font style="color:rgb(79, 79, 79);">1. 内存为什么要对齐</font></h3><p><font style="color:rgb(77, 77, 77);">虽然所有的变量都是保存在特定地址的内存中，但最好还是按照内存对齐的要求来存储。这主要出于两个方面的原因考虑：</font></p>
+<ol>
+<li><font style="color:rgba(0, 0, 0, 0.75);">平台原因：<br></font><font style="color:rgba(0, 0, 0, 0.75);">不是所有的硬件平台(特别是嵌入式系统中使用的低端处理器)都能访问任意地址上的任意数据，某些硬件平台只能访问对齐的地址，否则会出现硬件异常。</font></li>
+<li><font style="color:rgba(0, 0, 0, 0.75);">性能原因：<br></font><font style="color:rgba(0, 0, 0, 0.75);">如果数据存放在未对齐的内存空间中，则处理器访问变量时需要进行两次内存访问才能完整读取该变量的值，而对齐的内存访问仅需一次访问。</font></li>
+</ol>
+<h3 id="2-内存对齐的规则"><a href="#2-内存对齐的规则" class="headerlink" title="2. 内存对齐的规则"></a><font style="color:rgb(79, 79, 79);">2. 内存对齐的规则</font></h3><ol>
+<li><font style="color:rgb(77, 77, 77);">对于结构（或联合）的各个成员，第一个成员位于偏移为0，以后每个数据成员的偏移量必须是</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">#pragma pack指定的数值和结构体(或联合)中最大数据成员长度 这2个数值中较小的一个</font><font style="color:rgb(77, 77, 77);">的倍数。<br></font><font style="color:rgb(77, 77, 77);">使用伪代码表示：</font><font style="color:rgb(77, 77, 77);"> </font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">min(#pragma pack, 结构最大数据成员长度) * N</font></li>
+<li><font style="color:rgb(77, 77, 77);">在数据成员完成各自对齐之后，结构(或联合)本身也要进行对齐，对齐也按照</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">#pragma pack指定的数值和结构(或联合)最大数据成员长度这2个数值中较小的一个</font><font style="color:rgb(77, 77, 77);">进行。</font></li>
+</ol>
+<p><font style="color:rgb(85, 86, 102);background-color:rgb(238, 240, 244);">如果没有使用</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">#pragma pack</font><font style="color:rgb(85, 86, 102);background-color:rgb(238, 240, 244);">指令来显式的指定内存对齐的字节数，则按照默认字节数来对齐，各个平台的默认对齐规则如下：</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">32位CPU默认按照4字节对齐；64位CPU默认按照8字节对齐。</font></p>
+<h3 id="3-pragma-pack命令"><a href="#3-pragma-pack命令" class="headerlink" title="3. #pragma pack命令"></a><font style="color:rgb(79, 79, 79);">3. #pragma pack命令</font></h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs plain">#pragma pack(n) // 使用自定义n字节对齐  n可以为1，2，4，8，16<br>#pragma pack()  // 使用缺省字节对齐<br>#pragma pack(show) // 在编译输出窗口以警告的形式显示出当前的内存以几个字节对齐<br></code></pre></td></tr></table></figure>
+
+<h3 id="4-结构体内存对齐示例"><a href="#4-结构体内存对齐示例" class="headerlink" title="4. 结构体内存对齐示例"></a><font style="color:rgb(79, 79, 79);">4. 结构体内存对齐示例</font></h3><p><font style="color:rgb(77, 77, 77);">在64位系统上编译下面的测试程序，已知在64位系统上各类型占用字节数如下：</font></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs plain">char     1字节<br>short    2字节<br>int      4字节<br>long     4字节<br>double   8字节<br>long long 8字节<br></code></pre></td></tr></table></figure>
+
+<p><font style="color:rgb(77, 77, 77);">示例代码如下：</font></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs plain">#pragma pack(8)<br><br>struct A &#123;<br>	char s[5];<br>	short c;<br>	int a;<br>&#125;;<br><br>int main()<br>&#123;<br>	int i = sizeof(A);<br>	printf(&quot;%d&quot;, i);<br><br>    return 0;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p><font style="color:rgb(77, 77, 77);">按照第二节所讲的内存对齐规则，分析如下：<br></font><font style="color:rgb(77, 77, 77);">因为结构体中最大的数据成员长度为int（即4字节），而且</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">#pragma pack(8)</font><font style="color:rgb(77, 77, 77);">指令指定按照8字节对齐，所以</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">min(4,8) &#x3D; 4</font><font style="color:rgb(77, 77, 77);">，故我们可以知道结构体A按照4字节对齐。</font></p>
+<p><font style="color:rgb(77, 77, 77);">下图是结构体A按照4字节对齐的内存布局（需要注意的是“内存不是填充在s5后面，而是填充在c后面”）：<br></font><img src="/2023/11/14/Win32_Api/%E3%80%90NOTE%E3%80%91Windows%E5%86%85%E5%AD%98%E4%BD%93%E7%B3%BB/image-8.jpeg" srcset="/img/loading.gif" lazyload></p>
+<p><font style="color:rgb(77, 77, 77);">从图我们很容易知道</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">sizeof(A) &#x3D; 12</font><font style="color:rgb(77, 77, 77);">.</font></p>
+<hr>
+<h2 id="七、堆"><a href="#七、堆" class="headerlink" title="七、堆"></a>七、堆</h2><h3 id="1-为什么要使用堆？"><a href="#1-为什么要使用堆？" class="headerlink" title="1. 为什么要使用堆？"></a>1. 为什么要使用堆？</h3><p><font style="color:rgb(77, 77, 77);">应用程序虽然可以使用页面粒度的函数（如</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">VirualAlloc</font><font style="color:rgb(77, 77, 77);">）来分配一个最小为</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">4KB</font><font style="color:rgb(77, 77, 77);">或</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">8K</font><font style="color:rgb(77, 77, 77);">的</font><a target="_blank" rel="noopener" href="https://so.csdn.net/so/search?q=%E5%86%85%E5%AD%98&spm=1001.2101.3001.7020">内存</a><font style="color:rgb(77, 77, 77);">块，但是很多时候我们并不需要分配这么大的内存块，我们可能只想分配1K，2K的内存块，那么这个时候无论从内存的使用率，还是从性能的角度来看，再分配这么大的一个内存区域显然不是最优的了。</font></p>
+<p><font style="color:rgb(77, 77, 77);">为了满足这种需求，Windows提供了一个被称为</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">“堆管理器”</font><font style="color:rgb(77, 77, 77);">的组件，它负责管理大内存区域中的内存分配，这些大内存区域就是通过一些页面粒度的内存分配函数（如</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">VirualAlloc</font><font style="color:rgb(77, 77, 77);">）来预定（</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">reserve</font><font style="color:rgb(77, 77, 77);">）的。</font></p>
+<p><font style="color:rgb(77, 77, 77);">堆管理器中的分配粒度相对比较小：</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">在32位系统上是8字节，在64位系统上是16字节</font><font style="color:rgb(77, 77, 77);">。</font></p>
+<p><font style="color:rgb(77, 77, 77);">堆管理器已经被windows系统精心设计成：在这些很小的内存分配的情况下进行了内存使用率和性能两个方面的优化。</font></p>
+<h3 id="2-进程的默认堆"><a href="#2-进程的默认堆" class="headerlink" title="2. 进程的默认堆"></a><font style="color:rgb(79, 79, 79);">2. 进程的默认堆</font></h3><p><font style="color:rgb(77, 77, 77);">每个进程至少有一个堆，那就是进程的</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">默认堆</font><font style="color:rgb(77, 77, 77);">。进程的</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">默认堆</font><font style="color:rgb(77, 77, 77);">是在进程启动的时候创建的，而且在进程的生命周期中永远不会被删除。</font></p>
+<p><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">“默认堆”</font><font style="color:rgb(77, 77, 77);">的默认大小为</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">1MB</font><font style="color:rgb(77, 77, 77);">，但是可以通过</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">&#x2F;HEAP</font><font style="color:rgb(77, 77, 77);">链接器编译器选项来指定一个更大的起始大小。这个大小值只是初始的保留内存大小，后期根据需要它可以自动扩充。</font></p>
+<p><font style="color:rgb(77, 77, 77);">应用程序可以调用</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">GetProcessHeap</font><font style="color:rgb(77, 77, 77);">来获取进程的默认堆，也可以通过调用</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">HeapCreate</font><font style="color:rgb(77, 77, 77);">函数来创建额外的私有堆，当一个进程不在需要一个私有堆的时候，它可以调用</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">HeapDestory</font><font style="color:rgb(77, 77, 77);">来释放虚拟地址空间。</font></p>
+<h3 id="3-crt堆"><a href="#3-crt堆" class="headerlink" title="3. crt堆"></a><font style="color:rgb(79, 79, 79);">3. crt堆</font></h3><p><font style="color:rgb(77, 77, 77);">C语言的</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">malloc,free</font><font style="color:rgb(77, 77, 77);">函数以及C++的</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">new,delete</font><font style="color:rgb(77, 77, 77);">都是从</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">堆</font><font style="color:rgb(77, 77, 77);">上分配和释放内存的。但是他们所使用的堆不是进程的</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">默认堆</font><font style="color:rgb(77, 77, 77);">，他们使用的是</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">私有堆</font><font style="color:rgb(77, 77, 77);">。可是我们在使用</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">malloc</font><font style="color:rgb(77, 77, 77);">函数之前并没有进行任何私有堆的创建操作呀？ 因为</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">malloc</font><font style="color:rgb(77, 77, 77);">函数使用的这个私有堆不需要程序员来创建，而是C或C++运行时库DLL的启动代码</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">_DllMainCRTStartup</font><font style="color:rgb(77, 77, 77);">中自动创建的。下面通过解析</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">malloc</font><font style="color:rgb(77, 77, 77);">函数的调用过程来说明这一点。</font></p>
+<p><strong><font style="color:rgb(79, 79, 79);">malloc函数调用过程解析</font></strong></p>
+<p><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">malloc</font><font style="color:rgb(77, 77, 77);">函数的定义在</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">malloc.c</font><font style="color:rgb(77, 77, 77);">文件中，调用流程如下：<br></font><font style="color:rgb(77, 77, 77);">（以</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">Microsoft Visual Studio 10.0</font><font style="color:rgb(77, 77, 77);">为例，</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">malloc.c</font><font style="color:rgb(77, 77, 77);">文件路径为</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\crt\src</font><font style="color:rgb(77, 77, 77);">）</font></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs plain">(1). void* __cdecl malloc(size_t const size)<br>(2). void * __cdecl _malloc_base (size_t size)<br>(3). void * __cdecl _heap_alloc (size_t size)<br></code></pre></td></tr></table></figure>
+
+<p><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">_heap_alloc</font><font style="color:rgb(77, 77, 77);">的定义如下：</font></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs plain">__forceinline void * __cdecl _heap_alloc (size_t size)<br>&#123;<br>    if (_crtheap == 0) &#123;<br>        _FF_MSGBANNER();    /* write run-time error banner */<br>        _NMSG_WRITE(_RT_CRT_NOTINIT);  /* write message */<br>        __crtExitProcess(255);  /* normally _exit(255) */<br>    &#125;<br><br>    return HeapAlloc(_crtheap, 0, size ? size : 1);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p><font style="color:rgb(77, 77, 77);">从上面的代码中，我们可以看到分配内存块的时候使用的是</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">_crtheap</font><font style="color:rgb(77, 77, 77);">句柄标记的堆。那么</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">_crtheap</font><font style="color:rgb(77, 77, 77);">堆是何时创建的了？</font></p>
+<p><font style="color:rgb(77, 77, 77);">我们从</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">heapinit.c</font><font style="color:rgb(77, 77, 77);">文件中的</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">_heap_init</font><font style="color:rgb(77, 77, 77);">函数可以看到</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">_crtheap</font><font style="color:rgb(77, 77, 77);">堆的创建过程：</font></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><code class="hljs plain">HANDLE _crtheap=NULL;<br><br>/***<br>*_heap_init() - Initialize the heap<br>*<br>*Purpose:<br>*       Setup the initial C library heap.<br>*<br>*       NOTES:<br>*       (1) This routine should only be called once!<br>*       (2) This routine must be called before any other heap requests.<br>*<br>*Entry:<br>*       &lt;void&gt;<br>*Exit:<br>*       Returns 1 if successful, 0 otherwise.<br>*<br>*Exceptions:<br>*       If heap cannot be initialized, the program will be terminated<br>*       with a fatal runtime error.<br>*<br>*******************************************************************************/<br><br>int __cdecl _heap_init (void)<br>&#123;<br>        ULONG HeapType = 2;<br><br>        //  Initialize the &quot;big-block&quot; heap first.<br>        if ( (_crtheap = HeapCreate(0, BYTES_PER_PAGE, 0)) == NULL )<br>            return 0;<br><br>#ifdef _WIN64<br>        // Enable the Low Fragmentation Heap by default on Windows XP and<br>        // Windows Server 2003.  It&#x27;s the 8 byte overhead heap, and has<br>        // generally better performance charateristics than standard heap,<br>        // particularly for apps that perform lots of small allocations.<br><br>        if (LOBYTE(GetVersion()) &lt; 6)<br>        &#123;<br>            HeapSetInformation(_crtheap, HeapCompatibilityInformation,<br>                               &amp;HeapType, sizeof(HeapType));<br>        &#125;<br>#endif  /* _WIN64 */<br>        return 1;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p><font style="color:rgb(77, 77, 77);">从上面的代码，我们可以看到，创建的</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">私有堆</font><font style="color:rgb(77, 77, 77);">句柄存放在一个</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">全局的_crtheap变量</font><font style="color:rgb(77, 77, 77);">中，后面每次调用</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">malloc</font><font style="color:rgb(77, 77, 77);">函数都是从该堆分配内存块。</font></p>
+<h3 id="4-Win32堆函数"><a href="#4-Win32堆函数" class="headerlink" title="4. Win32堆函数"></a><font style="color:rgb(79, 79, 79);">4. Win32堆函数</font></h3><p><font style="color:rgb(77, 77, 77);">我们最常用的Windows堆函数如下：</font></p>
+<ul>
+<li><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">HeapCreate</font><font style="color:rgba(0, 0, 0, 0.75);">或</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">HeapDestory</font><font style="color:rgba(0, 0, 0, 0.75);"> </font><font style="color:rgba(0, 0, 0, 0.75);">— 创建或删除一个私有堆</font></li>
+<li><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">HeapAlloc</font><font style="color:rgba(0, 0, 0, 0.75);"> </font><font style="color:rgba(0, 0, 0, 0.75);">— 分配一个堆内存块</font></li>
+<li><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">HeapFree</font><font style="color:rgba(0, 0, 0, 0.75);"> </font><font style="color:rgba(0, 0, 0, 0.75);">— 释放一个原先由</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">HeapAlloc</font><font style="color:rgba(0, 0, 0, 0.75);">分配的内存块</font></li>
+<li><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">HeapReAlloc</font><font style="color:rgba(0, 0, 0, 0.75);"> </font><font style="color:rgba(0, 0, 0, 0.75);">— 增长或缩减一个已分配的内存块的大小</font></li>
+<li><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">HeapLock</font><font style="color:rgba(0, 0, 0, 0.75);">或</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">HeapUnLock</font><font style="color:rgba(0, 0, 0, 0.75);"> </font><font style="color:rgba(0, 0, 0, 0.75);">— 控制堆操作的内存访问</font></li>
+<li><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">HeapWalk</font><font style="color:rgba(0, 0, 0, 0.75);"> — 列举一个堆内部的内存项和区域。</font></li>
+</ul>
+<hr>
+<h2 id="八、内存管理API分层结构"><a href="#八、内存管理API分层结构" class="headerlink" title="八、内存管理API分层结构"></a>八、内存管理API分层结构</h2><p><img src="/2023/11/14/Win32_Api/%E3%80%90NOTE%E3%80%91Windows%E5%86%85%E5%AD%98%E4%BD%93%E7%B3%BB/image-9.jpeg" srcset="/img/loading.gif" lazyload></p>
+<p><font style="color:rgb(77, 77, 77);">从上图可以看到，</font><a target="_blank" rel="noopener" href="https://so.csdn.net/so/search?q=%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98&spm=1001.2101.3001.7020">虚拟内存</a><font style="color:rgb(77, 77, 77);">机制（</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">Virtual Memory</font><font style="color:rgb(77, 77, 77);">）是windows</font><a target="_blank" rel="noopener" href="https://so.csdn.net/so/search?q=%E5%86%85%E5%AD%98&spm=1001.2101.3001.7020">内存</a><font style="color:rgb(77, 77, 77);">体系的基础，无论你是使用</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">堆</font><font style="color:rgb(77, 77, 77);">，还是使用</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">内存映射文件</font><font style="color:rgb(77, 77, 77);">，它们的底层都是基于虚拟内存来实现的。</font></p>
+<p><font style="color:rgb(77, 77, 77);">从上往下，每一层的</font><a target="_blank" rel="noopener" href="https://so.csdn.net/so/search?q=API&spm=1001.2101.3001.7020">API</a><font style="color:rgb(77, 77, 77);">在内部会依次调用下一层的API。下图中列举了每层API中经常使用的函数：</font></p>
+<ul>
+<li><strong><font style="color:rgba(0, 0, 0, 0.75);">CRT Memory Functions：</font></strong><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">malloc, free, new, delete</font></li>
+<li><strong><font style="color:rgba(0, 0, 0, 0.75);">Local, Global Memory API:</font>****<font style="color:rgba(0, 0, 0, 0.75);"> </font></strong><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">LocalAlloc, GlobalAlloc</font><font style="color:rgba(0, 0, 0, 0.75);"> </font><font style="color:rgba(0, 0, 0, 0.75);">（</font><strong><font style="color:rgba(0, 0, 0, 0.75);">这2个函数现在不建议使用，注意是为了兼容以前的老代码才保留下来的</font></strong><font style="color:rgba(0, 0, 0, 0.75);">）</font></li>
+<li><strong><font style="color:rgba(0, 0, 0, 0.75);">Heap Memory API：</font></strong><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">HeapCreate, HeapAlloc, HeapDestory</font></li>
+<li><strong><font style="color:rgba(0, 0, 0, 0.75);">Virtual Memory API：</font></strong><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">VirtualAlloc, VirtualFree</font></li>
+<li><strong><font style="color:rgba(0, 0, 0, 0.75);">Memory Mapped File API：</font></strong><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">CreateFileMapping, MapViewOfFile, MapViewOfFileEx, UnMapViewOfFile</font></li>
+</ul>
+<hr>
+<h2 id="九、跨MT模块的内存相互释放的问题"><a href="#九、跨MT模块的内存相互释放的问题" class="headerlink" title="九、跨MT模块的内存相互释放的问题"></a><font style="color:rgb(77, 77, 77);">九、跨MT模块的内存相互释放的问题</font></h2><p><font style="color:rgb(85, 86, 102);background-color:rgb(238, 240, 244);">在阅读本文之前，需要先对</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">MT</font><font style="color:rgb(85, 86, 102);background-color:rgb(238, 240, 244);">和</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">MD</font><font style="color:rgb(85, 86, 102);background-color:rgb(238, 240, 244);">运行时库有所了解，参考：</font><a target="_blank" rel="noopener" href="https://blog.csdn.net/china_jeffery/article/details/79555947">《理解C&#x2F;C++运行时库》</a><font style="color:rgb(85, 86, 102);background-color:rgb(238, 240, 244);">。另外建议先阅读《Windows内存体系》系列文章的前几篇文章，对</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">“虚拟内存”</font><font style="color:rgb(85, 86, 102);background-color:rgb(238, 240, 244);">，</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">“堆”</font><font style="color:rgb(85, 86, 102);background-color:rgb(238, 240, 244);">，</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">“内存API体系结构”</font><font style="color:rgb(85, 86, 102);background-color:rgb(238, 240, 244);">有所了解。</font></p>
+<p><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">《Windows核心编程 第五版》第19章 DLL基础（511页）</font><font style="color:rgb(77, 77, 77);">中给出了一个建议：“当一个MT版本的模块如果提供一个内存分配函数的时候，它必须同时提供另一个用来释放内存的函数。”。说得更加直白一点就是，“对于MT的模块，不要跨模块进行内存释放。”。但是核心编程这本书上面没有具体分析原因，本文就来分析具体的原因。</font></p>
+<h3 id="1-为什么不同堆分配的内存块不能相互释放？"><a href="#1-为什么不同堆分配的内存块不能相互释放？" class="headerlink" title="1. 为什么不同堆分配的内存块不能相互释放？"></a><font style="color:rgb(79, 79, 79);">1. 为什么不同堆分配的内存块不能相互释放？</font></h3><p><font style="color:rgb(77, 77, 77);">Windows的</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">堆管理器</font><font style="color:rgb(77, 77, 77);">对每个进程都维护了多个</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">“堆”</font><font style="color:rgb(77, 77, 77);">，我们从每个</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">“堆”</font><font style="color:rgb(77, 77, 77);">中分配处理的内存块的地址都不一样。所以我们不能将从“堆A”中分配出来的内存块拿到“堆B”中，让“堆B”来释放，这样就会导致程序异常。</font></p>
+<p><img src="/2023/11/14/Win32_Api/%E3%80%90NOTE%E3%80%91Windows%E5%86%85%E5%AD%98%E4%BD%93%E7%B3%BB/image-10.png" srcset="/img/loading.gif" lazyload></p>
+<p><font style="color:rgb(77, 77, 77);">如上图，通过</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">malloc</font><font style="color:rgb(77, 77, 77);">函数从“堆A”中分配100字节内存块，内存块地址为</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">0x123456</font><font style="color:rgb(77, 77, 77);">；从“堆B”中分配100字节内存块，内存块地址为</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">0x345678</font><font style="color:rgb(77, 77, 77);">.<br></font><font style="color:rgb(77, 77, 77);">如果将</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">0x123456</font><font style="color:rgb(77, 77, 77);">这个地址拿到“堆B”中去释放，势必会导致异常，因为“堆B”中没有这地址。</font></p>
+<p><font style="color:rgb(77, 77, 77);">那么我们是不是可以使用</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">HeapFree</font><font style="color:rgb(77, 77, 77);">函数来释放</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">hHeap</font><font style="color:rgb(77, 77, 77);">参数指定的“堆”中的任何内存块了。答案是：不能。<br></font><font style="color:rgb(77, 77, 77);">回忆前面介绍的</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">HeapFree</font><font style="color:rgb(77, 77, 77);">函数，</font></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs plain">BOOL HeapFree(<br>  HANDLE hHeap,<br>  DWORD dwFlags,<br>  LPVOID lpMem<br>);<br></code></pre></td></tr></table></figure>
+
+<p><font style="color:rgb(77, 77, 77);">这个函数只要求传入了内存块的起始地址指针，但没有要求传入需要释放的内存块的</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">大小</font><font style="color:rgb(77, 77, 77);">，那么该函数是如何知道起始地址指针指向的内存块的大小了？</font></p>
+<p><font style="color:rgb(77, 77, 77);">我们可以简单的理解为，</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">HeapAlloc</font><font style="color:rgb(77, 77, 77);">函数每次分配内存块的时候都会额外分配一点空间用于存储一个结构体，该结构体中存储了本次分配的内存块的大小等信息。大致如下图：<br></font><img src="/2023/11/14/Win32_Api/%E3%80%90NOTE%E3%80%91Windows%E5%86%85%E5%AD%98%E4%BD%93%E7%B3%BB/image-11.jpeg" srcset="/img/loading.gif" lazyload></p>
+<p><font style="color:rgb(77, 77, 77);">所以，</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">HeapFree</font><font style="color:rgb(77, 77, 77);">函数首先会通过</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">lpMem</font><font style="color:rgb(77, 77, 77);">指针计算出“结构体”的地址，然后从结构体中获取到分配的内存块的具体大小，最后执行释放操作。</font></p>
+<p><font style="color:rgb(77, 77, 77);">基于上面的原因，我们不能在</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">HeapFree</font><font style="color:rgb(77, 77, 77);">函数的</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">lpMem</font><font style="color:rgb(77, 77, 77);">参数中传入随意的地址，因为该地址处可能没有存储用于存放内存块信息的结构体，所以释放操作就会失败。</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">free</font><font style="color:rgb(77, 77, 77);">函数也一样，因为</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">free</font><font style="color:rgb(77, 77, 77);">函数内部也是调用的</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">HeapFree</font><font style="color:rgb(77, 77, 77);">函数。</font></p>
+<h3 id="2-为什么MT模块内存不能相互释放，而MD的却可以？"><a href="#2-为什么MT模块内存不能相互释放，而MD的却可以？" class="headerlink" title="2. 为什么MT模块内存不能相互释放，而MD的却可以？"></a><font style="color:rgb(79, 79, 79);">2. 为什么MT模块内存不能相互释放，而MD的却可以？</font></h3><p><strong><font style="color:rgb(79, 79, 79);">我们先分析为什么MT模块的内存间相互释放会崩溃。</font></strong></p>
+<p><font style="color:rgb(77, 77, 77);">现在有2个模块（</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">A.dll</font><font style="color:rgb(77, 77, 77);">和</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">B.dll</font><font style="color:rgb(77, 77, 77);">）都是使用</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">MT</font><font style="color:rgb(77, 77, 77);">运行时库，即加载的静态库</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">libcmt.lib</font><font style="color:rgb(77, 77, 77);">（可以参考</font><a target="_blank" rel="noopener" href="https://blog.csdn.net/china_jeffery/article/details/79555947">《理解C&#x2F;C++运行时库》</a><font style="color:rgb(77, 77, 77);">），在</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">A.dll</font><font style="color:rgb(77, 77, 77);">中使用</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">malloc</font><font style="color:rgb(77, 77, 77);">分配100字节的内存，</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">malloc</font><font style="color:rgb(77, 77, 77);">返回的内存地址为</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">0x123456</font><font style="color:rgb(77, 77, 77);">。然后将该地址传给</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">B.dll</font><font style="color:rgb(77, 77, 77);">，在</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">B.dll</font><font style="color:rgb(77, 77, 77);">中调用</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">free</font><font style="color:rgb(77, 77, 77);">函数来释放这个内存。如图：<br></font><img src="/2023/11/14/Win32_Api/%E3%80%90NOTE%E3%80%91Windows%E5%86%85%E5%AD%98%E4%BD%93%E7%B3%BB/image-12.jpeg" srcset="/img/loading.gif" lazyload></p>
+<p><font style="color:rgb(77, 77, 77);">从</font><a target="_blank" rel="noopener" href="https://blog.csdn.net/china_jeffery/article/details/79627032">《Windows内存体系（7） – 堆》</a><font style="color:rgb(77, 77, 77);">我们知道，DLL在启动代码</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">_DllMainCRTStartup</font><font style="color:rgb(77, 77, 77);">中会建立一个“堆”（堆句柄存放在_crtheap变量中），所以A.dll和B.dll中都会有一个crt堆。</font></p>
+<p><font style="color:rgb(77, 77, 77);">为了区分，我们将</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">A.dll</font><font style="color:rgb(77, 77, 77);">中的</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">crt堆</font><font style="color:rgb(77, 77, 77);">称作</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">_crtheap_A</font><font style="color:rgb(77, 77, 77);">，</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">B.dll</font><font style="color:rgb(77, 77, 77);">中的</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">crt堆</font><font style="color:rgb(77, 77, 77);">称作</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">_crtheap_B</font><font style="color:rgb(77, 77, 77);">。</font></p>
+<p><font style="color:rgb(77, 77, 77);">从上面图可以看到，</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">A.dll</font><font style="color:rgb(77, 77, 77);">中</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">malloc</font><font style="color:rgb(77, 77, 77);">的内存拿到</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">B.dll</font><font style="color:rgb(77, 77, 77);">去中去</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">free</font><font style="color:rgb(77, 77, 77);">，就相当于从堆</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">_crtheap_A</font><font style="color:rgb(77, 77, 77);">中分配的内存拿到另一个堆</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">_crtheap_B</font><font style="color:rgb(77, 77, 77);">中的释放。第一节已经解释了为什么不能这样做了。</font></p>
+<p><strong><font style="color:rgb(79, 79, 79);">现在我们分析为什么MD模块的内存间相互释放不会崩溃。</font></strong></p>
+<p><font style="color:rgb(77, 77, 77);">还是2个模块（</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">A.dll</font><font style="color:rgb(77, 77, 77);">和</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">B.dll</font><font style="color:rgb(77, 77, 77);">），但是现在他们都是使用</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">MD</font><font style="color:rgb(77, 77, 77);">运行时库，即加载的动态库</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">msvcr100.dll</font><font style="color:rgb(77, 77, 77);">（可以参考</font><a target="_blank" rel="noopener" href="https://blog.csdn.net/china_jeffery/article/details/79555947">《理解C&#x2F;C++运行时库》</a><font style="color:rgb(77, 77, 77);">），程序的代码的过程和上面一样，还是在</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">A.dll</font><font style="color:rgb(77, 77, 77);">中使用</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">malloc</font><font style="color:rgb(77, 77, 77);">分配100字节的内存，</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">malloc</font><font style="color:rgb(77, 77, 77);">返回的内存地址为</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">0x123456</font><font style="color:rgb(77, 77, 77);">。然后将该地址传给</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">B.dll</font><font style="color:rgb(77, 77, 77);">，在</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">B.dll</font><font style="color:rgb(77, 77, 77);">中调用</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">free</font><font style="color:rgb(77, 77, 77);">函数来释放这个内存。但是这个时候程序却不会崩溃，通过下面的图我们基本可以明白原因了，如图：<br></font><img src="/2023/11/14/Win32_Api/%E3%80%90NOTE%E3%80%91Windows%E5%86%85%E5%AD%98%E4%BD%93%E7%B3%BB/image-13.jpeg" srcset="/img/loading.gif" lazyload></p>
+<p><font style="color:rgb(77, 77, 77);">因为A、B两个dll都是链接的·msvcr100.dll·，同一个dll在一个进程只会被加载一次，所以进程中只会有一个crt堆（</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">_crtheap</font><font style="color:rgb(77, 77, 77);">），</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">malloc</font><font style="color:rgb(77, 77, 77);">和</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">free</font><font style="color:rgb(77, 77, 77);">都是运行时库提供的函数，所以都会调到运行时库里面去，然后从运行时库里面的</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">_crtheap</font><font style="color:rgb(77, 77, 77);">分配和释放内存块。因为分配和释放都是在同一个堆上，所以不会崩溃。</font></p>
+<hr>
+<h2 id="十、使用std-string跨MT模块传参"><a href="#十、使用std-string跨MT模块传参" class="headerlink" title="十、使用std::string跨MT模块传参"></a>十、使用std::string跨MT模块传参</h2><h3 id="1-问题描述"><a href="#1-问题描述" class="headerlink" title="1. 问题描述"></a><font style="color:rgb(79, 79, 79);">1. 问题描述</font></h3><p><font style="color:rgb(77, 77, 77);">这篇文章主要介绍我们在实际开发中经常遇到的一个问题：针对MT模块定义接口函数时，接口参数使用</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">std::string</font><font style="color:rgb(77, 77, 77);">类型，在程序运行时遇到</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">“Debug Assertion Failed”</font><font style="color:rgb(77, 77, 77);">错误的问题。<br></font><img src="/2023/11/14/Win32_Api/%E3%80%90NOTE%E3%80%91Windows%E5%86%85%E5%AD%98%E4%BD%93%E7%B3%BB/image-14.jpeg" srcset="/img/loading.gif" lazyload></p>
+<p><font style="color:rgb(77, 77, 77);">上面的错误提示是</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">debug_heap.cpp</font><font style="color:rgb(77, 77, 77);">文件中的一个调试断言（</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">release模式</font><font style="color:rgb(77, 77, 77);">下调用的是</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">heap.cpp</font><font style="color:rgb(77, 77, 77);">中的分配函数），用于判断指针是否指向堆分配的内存块的第一块。在release模式下不会弹出这样的断言错误，程序可能会直接崩溃（崩溃相对来说还比较好排查），或者出现其他不可预料的、难以排查的错误。</font></p>
+<h3 id="2-实例"><a href="#2-实例" class="headerlink" title="2. 实例"></a><font style="color:rgb(79, 79, 79);">2. 实例</font></h3><p><font style="color:rgb(77, 77, 77);">现有</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">DLLUser.exe</font><font style="color:rgb(77, 77, 77);">调用</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">DLL.dll</font><font style="color:rgb(77, 77, 77);">中的</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">TestFun</font><font style="color:rgb(77, 77, 77);">函数，代码量非常小：</font></p>
+<p><strong><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">DLL.dll</font><strong><strong><font style="color:rgb(79, 79, 79);">中</font></strong></strong><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">TestFun</font>****<font style="color:rgb(79, 79, 79);">函数定义：</font></strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs plain">DLL_API void TestFun( std::string str)<br>&#123;<br>    return;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p><strong><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">DLLUser.exe</font><strong><strong><font style="color:rgb(79, 79, 79);">中调用</font></strong></strong><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">TestFun</font>****<font style="color:rgb(79, 79, 79);">函数：</font></strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs plain">int _tmain(int argc, _TCHAR* argv[])<br>&#123;<br>    std::string str = &quot;test&quot;;<br><br>    TestFun(str);<br><br>    return 0;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p><font style="color:rgb(77, 77, 77);">上面的代码运行之后程序就会弹出错误断言。原因是</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">std::string</font><font style="color:rgb(77, 77, 77);">在进行</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">值传参</font><font style="color:rgb(77, 77, 77);">的过程中会执行一次深拷贝，即：在堆上分配内存块，拷贝“test”到内存块中，然后将临时形参</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">std::string</font><font style="color:rgb(77, 77, 77);">对象传递到dll中，dll中的</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">TestFun</font><font style="color:rgb(77, 77, 77);">函数在作用域结束后对临时形参进行释放时就出现了错误，因为尝试在</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">dll的crt堆</font><font style="color:rgb(77, 77, 77);">中释放由在</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">exe的crt堆</font><font style="color:rgb(77, 77, 77);">中分配的内存块。</font></p>
+<p><img src="/2023/11/14/Win32_Api/%E3%80%90NOTE%E3%80%91Windows%E5%86%85%E5%AD%98%E4%BD%93%E7%B3%BB/image-15.jpeg" srcset="/img/loading.gif" lazyload></p>
+<h3 id="3-自定义std-allocator解决崩溃"><a href="#3-自定义std-allocator解决崩溃" class="headerlink" title="3. 自定义std::allocator解决崩溃"></a>3. 自定义std::allocator解决崩溃</h3><p><font style="color:rgb(77, 77, 77);">通过上面问题的分析，加上前面几篇文章对Windows内存体系的介绍，我们不难想出解决方案，其中一种方案就是让</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">std::string</font><font style="color:rgb(77, 77, 77);">统一在进程的默认堆上分配内存块，而不是在各个模块的</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">crt堆</font><font style="color:rgb(77, 77, 77);">上分配。</font></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;windows.h&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;string&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;vector&gt;</span></span><br><br><span class="hljs-keyword">template</span> &lt;<span class="hljs-keyword">typename</span> T&gt;<br><span class="hljs-keyword">class</span> <span class="hljs-title class_">vm_allocator</span> : <span class="hljs-keyword">public</span> std::allocator&lt;T&gt; &#123;<br><span class="hljs-keyword">public</span>:<br>    <span class="hljs-keyword">typedef</span> <span class="hljs-type">size_t</span> size_type;<br>    <span class="hljs-keyword">typedef</span> T* pointer;<br>    <span class="hljs-keyword">typedef</span> <span class="hljs-type">const</span> T* const_pointer;<br><br>    <span class="hljs-keyword">template</span>&lt;<span class="hljs-keyword">typename</span> _Tp1&gt;<br>    <span class="hljs-keyword">struct</span> <span class="hljs-title class_">rebind</span> &#123;<br>        <span class="hljs-keyword">typedef</span> vm_allocator&lt;_Tp1&gt; other;<br>    &#125;;<br><br>    <span class="hljs-function">pointer <span class="hljs-title">allocate</span><span class="hljs-params">(size_type n, <span class="hljs-type">const</span> <span class="hljs-type">void</span> *hint = <span class="hljs-number">0</span>)</span> </span>&#123;<br>        <span class="hljs-built_in">UNREFERENCED_PARAMETER</span>(hint);<br>        <span class="hljs-type">void</span>* pBuffer = <span class="hljs-built_in">HeapAlloc</span>(<span class="hljs-built_in">GetProcessHeap</span>(), HEAP_ZERO_MEMORY, n * <span class="hljs-built_in">sizeof</span>(T));<br><br>        <span class="hljs-keyword">return</span> (pointer)pBuffer;<br>    &#125;<br><br>    <span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">deallocate</span><span class="hljs-params">(pointer p, size_type n)</span> </span>&#123;<br>        <span class="hljs-built_in">UNREFERENCED_PARAMETER</span>(n);<br>        <span class="hljs-keyword">if</span> (p) &#123;<br>            <span class="hljs-built_in">HeapFree</span>(<span class="hljs-built_in">GetProcessHeap</span>(), <span class="hljs-number">0</span>, p);<br>        &#125;<br>    &#125;<br><br>    <span class="hljs-built_in">vm_allocator</span>() <span class="hljs-keyword">throw</span>() : std::<span class="hljs-built_in">allocator</span>&lt;T&gt;() &#123;<br>    &#125;<br><br>    <span class="hljs-built_in">vm_allocator</span>(<span class="hljs-type">const</span> vm_allocator &amp;a) <span class="hljs-built_in">throw</span>() : std::<span class="hljs-built_in">allocator</span>&lt;T&gt;(a) &#123;<br>    &#125;<br><br>    <span class="hljs-keyword">template</span> &lt;<span class="hljs-keyword">class</span> U&gt;<br>    <span class="hljs-built_in">vm_allocator</span>(<span class="hljs-type">const</span> vm_allocator&lt;U&gt; &amp;a) <span class="hljs-built_in">throw</span>() : std::<span class="hljs-built_in">allocator</span>&lt;T&gt;(a) &#123;<br>    &#125;<br><br>    ~<span class="hljs-built_in">vm_allocator</span>() <span class="hljs-built_in">throw</span>() &#123;<br>    &#125;<br>&#125;;<br><br><span class="hljs-keyword">typedef</span> std::basic_string&lt;<span class="hljs-type">char</span>, std::char_traits&lt;<span class="hljs-type">char</span>&gt;, vm_allocator&lt;<span class="hljs-type">char</span>&gt; &gt; mystring;<br><br></code></pre></td></tr></table></figure>
+
+<p><font style="color:rgb(77, 77, 77);">上面的代码使用自定义的内存分配器</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">vm_allocator<char></font><font style="color:rgb(77, 77, 77);">定义了</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">mystring</font><font style="color:rgb(77, 77, 77);">类，我们只需要将</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">TestFun</font><font style="color:rgb(77, 77, 77);">函数接口中的</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">std::string</font><font style="color:rgb(77, 77, 77);">修改为</font><font style="color:rgb(199, 37, 78);background-color:rgb(249, 242, 244);">mystring</font><font style="color:rgb(77, 77, 77);">即可解决崩溃问题。</font></p>
+<p><font style="color:rgb(77, 77, 77);"></font></p>
+<hr>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/Win32-API/" class="category-chain-item">Win32_API</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>【NOTE】Windows内存体系</div>
+      <div>https://zytpca.github.io/2023/11/14/Win32_Api/【NOTE】Windows内存体系/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>Insomniac</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2023年11月14日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2023/11/14/Win32_Api/Windows%E7%9A%84%E6%B6%88%E6%81%AF%E6%9C%BA%E5%88%B6/" title="Windows的消息机制">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">Windows的消息机制</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2023/11/14/Win32_Api/Windows%E7%B3%BB%E7%BB%9F%E4%B8%8A%E7%9A%84VirtualAlloc,HeapAlloc%E5%92%8Cmalloc,new%E7%9A%84%E5%8C%BA%E5%88%AB/" title="Windows系统上的VirtualAlloc,HeapAlloc和malloc,new的区别">
+                        <span class="hidden-mobile">Windows系统上的VirtualAlloc,HeapAlloc和malloc,new的区别</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+  
+  
+    <article id="comments" lazyload>
+      
+  <div id="valine"></div>
+  <script type="text/javascript">
+    Fluid.utils.loadComments('#valine', function() {
+      Fluid.utils.createScript('https://lib.baomitu.com/valine/1.5.1/Valine.min.js', function() {
+        var options = Object.assign(
+          {"appId":"ZDiOGqAWSCAU9bUYDktIk21c-gzGzoHsz","appKey":"JShbv4TgfpvIvvrRl7GFc57n","path":"window.location.pathname","placeholder":null,"avatar":"retro","meta":["nick","mail","link"],"requiredFields":[],"pageSize":10,"lang":"zh-CN","highlight":false,"recordIP":false,"serverURLs":"https://zdiogqaw.lc-cn-n1-shared.com","emojiCDN":null,"emojiMaps":null,"enableQQ":false},
+          {
+            el: "#valine",
+            path: window.location.pathname
+          }
+        )
+        new Valine(options);
+        Fluid.utils.waitElementVisible('#valine .vcontent', () => {
+          var imgSelector = '#valine .vcontent img:not(.vemoji)';
+          Fluid.plugins.imageCaption(imgSelector);
+          Fluid.plugins.fancyBox(imgSelector);
+        })
+      });
+    });
+  </script>
+  <noscript>Please enable JavaScript to view the comments</noscript>
+
+
+    </article>
+  
+
+
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

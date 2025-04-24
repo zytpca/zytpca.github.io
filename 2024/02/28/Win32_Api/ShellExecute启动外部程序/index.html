@@ -1,0 +1,752 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="Insomniac">
+  <meta name="keywords" content="keywords">
+  
+    <meta name="description" content="ShellExecute 函数 （shellapi.h）ShellExecute的功能是运行一个外部程序（或者是打开一个已注册的文件、打开一个目录、打印一个文件等等。也可以打开URL），并对外部程序有一定的控制。 基本简介有几个API函数都可以实现这些功能，但是在大多数情况下ShellExecute是更多的被使用的，同时它并不是太复杂。 原型参数12345678HINSTANCE ShellExe">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ShellExecute启动外部程序">
+<meta property="og:url" content="https://zytpca.github.io/2024/02/28/Win32_Api/ShellExecute%E5%90%AF%E5%8A%A8%E5%A4%96%E9%83%A8%E7%A8%8B%E5%BA%8F/index.html">
+<meta property="og:site_name" content="Insomnia_">
+<meta property="og:description" content="ShellExecute 函数 （shellapi.h）ShellExecute的功能是运行一个外部程序（或者是打开一个已注册的文件、打开一个目录、打印一个文件等等。也可以打开URL），并对外部程序有一定的控制。 基本简介有几个API函数都可以实现这些功能，但是在大多数情况下ShellExecute是更多的被使用的，同时它并不是太复杂。 原型参数12345678HINSTANCE ShellExe">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2024-02-28T07:36:36.000Z">
+<meta property="article:modified_time" content="2025-04-24T07:34:42.547Z">
+<meta property="article:author" content="Insomniac">
+<meta property="article:tag" content="keywords">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  
+  <title>ShellExecute启动外部程序 - Insomnia_</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"zytpca.github.io","root":"/","version":"1.9.8","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Insomniac&#39;s Blog</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="ShellExecute启动外部程序"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2024-02-28 15:36" pubdate>
+          2024年2月28日 下午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          1.3k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          11 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">ShellExecute启动外部程序</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="ShellExecute-函数-（shellapi-h）"><a href="#ShellExecute-函数-（shellapi-h）" class="headerlink" title="ShellExecute 函数 （shellapi.h）"></a><font style="color:rgb(22, 22, 22);">ShellExecute 函数 （shellapi.h）</font></h1><p><font style="color:rgb(36, 41, 46);">ShellExecute的功能是运行一个外部程序（或者是打开一个已注册的文件、打开一个目录、打印一个文件等等。也可以打开URL），并对外部程序有一定的控制。</font></p>
+<h2 id="基本简介"><a href="#基本简介" class="headerlink" title="基本简介"></a><font style="color:rgb(24, 24, 24) !important;">基本简介</font></h2><p><font style="color:rgb(36, 41, 46);">有几个API函数都可以实现这些功能，但是在大多数情况下ShellExecute是更多的被使用的，同时它并不是太复杂。</font></p>
+<h2 id="原型参数"><a href="#原型参数" class="headerlink" title="原型参数"></a><font style="color:rgb(24, 24, 24) !important;">原型参数</font></h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-function">HINSTANCE <span class="hljs-title">ShellExecute</span><span class="hljs-params">(</span></span><br><span class="hljs-params"><span class="hljs-function">  HWND    hwnd,         <span class="hljs-comment">// 父窗口句柄（可为 NULL）</span></span></span><br><span class="hljs-params"><span class="hljs-function">  LPCTSTR lpOperation,  <span class="hljs-comment">// 操作类型（如 &quot;open&quot;, &quot;edit&quot;, &quot;print&quot;）</span></span></span><br><span class="hljs-params"><span class="hljs-function">  LPCTSTR lpFile,       <span class="hljs-comment">// 指定要打开的文件或程序路径或 URL</span></span></span><br><span class="hljs-params"><span class="hljs-function">  LPCTSTR lpParameters, <span class="hljs-comment">// 命令行参数（可为 NULL）</span></span></span><br><span class="hljs-params"><span class="hljs-function">  LPCTSTR lpDirectory,  <span class="hljs-comment">// 默认工作目录（可为 NULL）</span></span></span><br><span class="hljs-params"><span class="hljs-function">  INT     nShowCmd      <span class="hljs-comment">// 窗口显示方式（如 SW_SHOW）</span></span></span><br><span class="hljs-params"><span class="hljs-function">)</span></span>;<br></code></pre></td></tr></table></figure>
+
+<p>常用操作类型 (<code>lpOperation</code>)</p>
+<table>
+<thead>
+<tr>
+<th><strong>操作类型</strong></th>
+<th><strong>说明</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>&quot;open&quot;</code></td>
+<td>用默认程序打开文件&#x2F;文件夹&#x2F;URL</td>
+</tr>
+<tr>
+<td><code>&quot;edit&quot;</code></td>
+<td>用关联编辑器打开文件</td>
+</tr>
+<tr>
+<td><code>&quot;print&quot;</code></td>
+<td>打印文件</td>
+</tr>
+<tr>
+<td><code>&quot;explore&quot;</code></td>
+<td>浏览文件夹</td>
+</tr>
+<tr>
+<td><code>&quot;runas&quot;</code></td>
+<td>以管理员权限运行程序</td>
+</tr>
+</tbody></table>
+<p><code>INT     nShowCmd</code></p>
+<p><font style="color:rgb(0, 0, 0);">用于指定程序窗口初始显示方式。 </font></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs plain">#define SW_HIDE             0     /*隐藏窗体，并激活另一个窗体*/<br>#define SW_SHOWNORMAL       1     /*与SW_RESTORE相同*/<br>#define SW_SHOWMINIMIZED    2     /*激活并以最小化的形式显示窗体*/<br>#define SW_SHOWMAXIMIZED    3     /*激活并以最大化的形式显示窗体*/<br>#define SW_MAXIMIZE         3     /*最大化指定的窗体*/<br>#define SW_SHOWNOACTIVATE   4     /*以上次的状态显示指定的窗体，但不激活它*/<br>#define SW_SHOW             5     /*激活窗体，并将其显示在当前的大小和位置上*/<br>#define SW_MINIMIZE         6     /*最小化指定的窗体，并激活另一个窗体*/<br>#define SW_SHOWMINNOACTIVE  7     /*以最小化形式显示指定的窗体，但不激活它*/<br>#define SW_SHOWNA           8     /*以当前的状态显示指定的窗体，但不激活它*/<br>#define SW_RESTORE          9     /*以原本的大小和位置，激活并显示指定的窗体*/<br>#define SW_SHOWDEFAULT      10    /*设置显示的状态由STARTUPINFO结构体指定*/<br></code></pre></td></tr></table></figure>
+
+<h2 id="返回值"><a href="#返回值" class="headerlink" title="返回值"></a><font style="color:rgb(24, 24, 24) !important;">返回值</font></h2><p><font style="color:rgb(36, 41, 46);">执行成功会返回</font><font style="color:rgb(36, 41, 46);"> </font><a target="_blank" rel="noopener" href="http://baike.baidu.com/view/330120.htm">应用程序</a><font style="color:rgb(36, 41, 46);">句柄</font></p>
+<p><font style="color:rgb(36, 41, 46);">返回的HINSTANCE可以将它转换为一个整数(%d)，并比较它的值大于还是小于32或比较它的错误代码</font></p>
+<p><font style="color:rgb(36, 41, 46);">返回值大于32表示执行成功</font></p>
+<p><font style="color:rgb(36, 41, 46);">返回值小于32表示执行错误</font></p>
+<p><font style="color:rgb(36, 41, 46);">返回值可能的错误有: </font></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs plain">= 0 &#123; 内存不足&#125;<br>ERROR_FILE_NOT_FOUND = 2; &#123;文件名错误&#125;<br>ERROR_PATH_NOT_FOUND = 3; &#123;路径名错误&#125;<br>ERROR_BAD_FORMAT = 11; &#123;EXE 文件无效&#125;<br>SE_ERR_SHARE = 26; &#123;发生共享错误&#125;<br>SE_ERR_ASSOCINCOMPLETE = 27; &#123;文件名不完全或无效&#125;<br>SE_ERR_DDETIMEOUT = 28; &#123;超时&#125;<br>SE_ERR_DDEFAIL = 29; &#123;DDE 事务失败&#125;<br>SE_ERR_DDEBUSY = 30; &#123;正在处理其他 DDE 事务而不能完成该 DDE 事务&#125;<br>SE_ERR_NOASSOC = 31; &#123;没有相关联的 应用程序&#125;<br></code></pre></td></tr></table></figure>
+
+<h2 id="例子"><a href="#例子" class="headerlink" title="例子"></a><font style="color:rgb(24, 24, 24) !important;">例子</font></h2><p><font style="color:rgb(0, 0, 0);">打开计算器： </font></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-built_in">ShellExecute</span>(<span class="hljs-keyword">this</span>-&gt;m_hWnd, <span class="hljs-string">&quot;open&quot;</span>, <span class="hljs-string">&quot;calc.exe&quot;</span>,<span class="hljs-literal">NULL</span>, <span class="hljs-literal">NULL</span>,SW_SHOWMAXIMIZED );<br></code></pre></td></tr></table></figure>
+
+<p><font style="color:rgb(0, 0, 0);">打开一个指定的程序：</font></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-built_in">ShellExecute</span>(<span class="hljs-keyword">this</span>-&gt;m_hWnd, <span class="hljs-string">&quot;open&quot;</span>,<span class="hljs-string">&quot;D:\\Program Files (x86)\\Notepad++\\notepad++.exe&quot;</span>,<span class="hljs-literal">NULL</span>,<span class="hljs-literal">NULL</span>,SW_SHOWMAXIMIZED );  <br><span class="hljs-built_in">ShellExecute</span>(<span class="hljs-keyword">this</span>-&gt;m_hWnd, <span class="hljs-string">&quot;open&quot;</span>, <span class="hljs-string">&quot;notepad++.exe&quot;</span>,<span class="hljs-literal">NULL</span>, <span class="hljs-string">&quot;D:\\Program Files (x86)\\Notepad++&quot;</span>,SW_SHOWMAXIMIZED ); <br><span class="hljs-built_in">ShellExecute</span>(<span class="hljs-keyword">this</span>-&gt;m_hWnd,<span class="hljs-string">&quot;open&quot;</span>, <span class="hljs-string">&quot;notepad++.exe&quot;</span>,<span class="hljs-literal">NULL</span>, <span class="hljs-string">&quot;D:\\Program Files (x86)\\Notepad++\\&quot;</span>,SW_SHOWMAXIMIZED );<br><span class="hljs-comment">//三个语句其结果都是一样</span><br></code></pre></td></tr></table></figure>
+
+<p><font style="color:rgb(0, 0, 0);">打开一个指定的文件:</font></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-built_in">ShellExecute</span>(<span class="hljs-keyword">this</span>-&gt;m_hWnd,<span class="hljs-string">&quot;open&quot;</span>, <span class="hljs-string">&quot;F:\\C\\MFC\\MFC.pdf&quot;</span>,<span class="hljs-literal">NULL</span>,<span class="hljs-literal">NULL</span>,SW_SHOWMAXIMIZED );  <br><span class="hljs-built_in">ShellExecute</span>(<span class="hljs-keyword">this</span>-&gt;m_hWnd,<span class="hljs-string">&quot;open&quot;</span>, <span class="hljs-string">&quot;MFC.pdf&quot;</span>,<span class="hljs-literal">NULL</span>,<span class="hljs-string">&quot;F:\\C\\MFC\\&quot;</span>,SW_SHOWMAXIMIZED );<br></code></pre></td></tr></table></figure>
+
+<p><font style="color:rgb(0, 0, 0);">打开一个指定的文件夹：</font></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-built_in">ShellExecute</span>(<span class="hljs-keyword">this</span>-&gt;m_hWnd, <span class="hljs-string">&quot;open&quot;</span>, <span class="hljs-string">&quot;F:\\C\\MFC&quot;</span>,<span class="hljs-literal">NULL</span>,<span class="hljs-literal">NULL</span>,SW_SHOWMAXIMIZED );  <br><span class="hljs-built_in">ShellExecute</span>(<span class="hljs-keyword">this</span>-&gt;m_hWnd, <span class="hljs-string">&quot;open&quot;</span>, <span class="hljs-literal">NULL</span>,<span class="hljs-literal">NULL</span>,<span class="hljs-string">&quot;F:\\C\\MFC&quot;</span>,SW_SHOWMAXIMIZED );  <br><span class="hljs-built_in">ShellExecute</span>(<span class="hljs-keyword">this</span>-&gt;m_hWnd,<span class="hljs-string">&quot;explore&quot;</span>, <span class="hljs-literal">NULL</span>,<span class="hljs-literal">NULL</span>,<span class="hljs-string">&quot;F:\\C\\MFC&quot;</span>,SW_SHOWMAXIMIZED );<br></code></pre></td></tr></table></figure>
+
+<p><font style="color:rgb(0, 0, 0);">打开URL：</font></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-built_in">ShellExecute</span>(<span class="hljs-keyword">this</span>-&gt;m_hWnd, <span class="hljs-string">&quot;open&quot;</span>, <span class="hljs-string">&quot;http://tmxk.org/2012/&quot;</span>, <span class="hljs-literal">NULL</span>, <span class="hljs-literal">NULL</span>,SW_SHOWMAXIMIZED );<br></code></pre></td></tr></table></figure>
+
+<p>hWnd<font style="color:rgb(0, 0, 0);">可以设为NULL。</font></p>
+<h2 id="特殊用法"><a href="#特殊用法" class="headerlink" title="特殊用法"></a><font style="color:rgb(24, 24, 24) !important;">特殊用法</font></h2><ul>
+<li><font style="color:rgb(36, 41, 46);">如果将FileName参数设置为“http:”协议格式，那么该函数将打开默认 </font><a target="_blank" rel="noopener" href="http://baike.baidu.com/view/7718.htm">浏览器</a><font style="color:rgb(36, 41, 46);">并链接到指定的URL地址。若用户机器中安装了多个 </font><a target="_blank" rel="noopener" href="http://baike.baidu.com/view/7718.htm">浏览器</a><font style="color:rgb(36, 41, 46);">，则该函数将根据Windows 9x&#x2F;NT注册表中http协议处理程序（Protocols Handler）的设置确定启动哪个浏览器。</font></li>
+</ul>
+<p><strong><font style="color:rgb(36, 41, 46);">格式一：http:&#x2F;&#x2F;网站域名</font></strong></p>
+<p><font style="color:rgb(36, 41, 46);">如：ShellExecute(Handle, “open”, “http:&#x2F;&#x2F; ;</font></p>
+<p><font style="color:rgb(36, 41, 46);"><a target="_blank" rel="noopener" href="http://www.neu.edu.cn/">www.neu.edu.cn</a>“, NULL, NULL, SW_SHOWNORMAL);</font></p>
+<p><strong><font style="color:rgb(36, 41, 46);">格式二：http:&#x2F;&#x2F;网站域名&#x2F;网页文件名</font></strong></p>
+<p><font style="color:rgb(36, 41, 46);">如：ShellExecute(Handle, “open”,” http:&#x2F;&#x2F; ;</font></p>
+<p><font style="color:rgb(36, 41, 46);"><a target="_blank" rel="noopener" href="http://www.neu.edu.cn/default.htm%22,NULL,NULL">www.neu.edu.cn/default.htm&quot;,NULL,NULL</a>,</font></p>
+<p><font style="color:rgb(36, 41, 46);">SW_SHOWNORMAL);</font></p>
+<p><font style="color:rgb(36, 41, 46);"></font></p>
+<ul>
+<li><font style="color:rgb(36, 41, 46);">如果将FileName参数设置为“mailto:”协议格式，那么该函数将启动默认邮件客户程序，如Microsoft Outlook（也包括Microsoft Outlook Express）或Netscape Messanger。若用户机器中安装了多个邮件客户程序，则该函数将根据Windows 9x&#x2F;NT注册表中mailto协议处理程序的设置确定启动哪个邮件客户程序。</font></li>
+</ul>
+<p><strong><font style="color:rgb(36, 41, 46);">格式一：mailto</font></strong></p>
+<p><font style="color:rgb(36, 41, 46);">如：ShellExecute(Handle,”open”, “mailto:”, NULL, NULL, SW_SHOWNORMAL);打开新邮件窗口。</font></p>
+<p><strong><font style="color:rgb(36, 41, 46);">格式二：mailto:用户账号@邮件服务器地址</font></strong></p>
+<p><font style="color:rgb(36, 41, 46);">如：ShellExecute(Handle, “open”,” mailto:<a href="mailto:&#119;&#x68;&#x6f;&#x40;&#109;&#x61;&#x69;&#x6c;&#46;&#x6e;&#x65;&#x75;&#46;&#x65;&#100;&#x75;&#x2e;&#99;&#110;">who@mail.neu.edu.cn</a>“, NULL, NULL, SW_SHOWNORMAL);打开新邮件窗口，并自动填入收件人地址。若指定多个收件人地址，则收件人地址之间必须用分号或逗号分隔开（下同）。</font></p>
+<p><strong><font style="color:rgb(36, 41, 46);">格式三：mailto:用户账号@邮件服务器地址</font></strong></p>
+<p><font style="color:rgb(36, 41, 46);">subject&#x3D;邮件主题&amp;body&#x3D;邮件正文</font></p>
+<p><font style="color:rgb(36, 41, 46);">如：ShellExecute(handle, ‘open’, ‘ mailto:<a href="mailto:&#119;&#104;&#x6f;&#64;&#109;&#x61;&#105;&#x6c;&#46;&#110;&#101;&#x75;&#x2e;&#x65;&#x64;&#x75;&#46;&#x63;&#x6e;">who@mail.neu.edu.cn</a>？subject&#x3D;Hello&amp;Body&#x3D;This is a test’,NULL, NULL, SW_SHOWNORMAL);打开新邮件窗口，并自动填入收件人地址、邮件主题和邮件正文。若邮件正文包括多行文本，则必须在每行文本之间加入换行 </font><a target="_blank" rel="noopener" href="http://baike.baidu.com/view/73.htm">转义字符</a><font style="color:rgb(36, 41, 46);">%0a。</font></p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/Win32-API/" class="category-chain-item">Win32_API</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>ShellExecute启动外部程序</div>
+      <div>https://zytpca.github.io/2024/02/28/Win32_Api/ShellExecute启动外部程序/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>Insomniac</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2024年2月28日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2024/03/05/Win32_Api/FlushFileBuffers_FILE_FLAG_WRITE_THROUGH_FILE_FLAG_NO_BUFFERING/" title="FlushFileBuffers\FILE_FLAG_WRITE_THROUGH\FILE_FLAG_NO_BUFFERING">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">FlushFileBuffers\FILE_FLAG_WRITE_THROUGH\FILE_FLAG_NO_BUFFERING</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2024/02/05/Win32_Api/Windows%E6%93%8D%E4%BD%9C%E7%A3%81%E7%9B%98API/" title="Windows操作磁盘API">
+                        <span class="hidden-mobile">Windows操作磁盘API</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+  
+  
+    <article id="comments" lazyload>
+      
+  <div id="valine"></div>
+  <script type="text/javascript">
+    Fluid.utils.loadComments('#valine', function() {
+      Fluid.utils.createScript('https://lib.baomitu.com/valine/1.5.1/Valine.min.js', function() {
+        var options = Object.assign(
+          {"appId":"ZDiOGqAWSCAU9bUYDktIk21c-gzGzoHsz","appKey":"JShbv4TgfpvIvvrRl7GFc57n","path":"window.location.pathname","placeholder":null,"avatar":"retro","meta":["nick","mail","link"],"requiredFields":[],"pageSize":10,"lang":"zh-CN","highlight":false,"recordIP":false,"serverURLs":"https://zdiogqaw.lc-cn-n1-shared.com","emojiCDN":null,"emojiMaps":null,"enableQQ":false},
+          {
+            el: "#valine",
+            path: window.location.pathname
+          }
+        )
+        new Valine(options);
+        Fluid.utils.waitElementVisible('#valine .vcontent', () => {
+          var imgSelector = '#valine .vcontent img:not(.vemoji)';
+          Fluid.plugins.imageCaption(imgSelector);
+          Fluid.plugins.fancyBox(imgSelector);
+        })
+      });
+    });
+  </script>
+  <noscript>Please enable JavaScript to view the comments</noscript>
+
+
+    </article>
+  
+
+
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

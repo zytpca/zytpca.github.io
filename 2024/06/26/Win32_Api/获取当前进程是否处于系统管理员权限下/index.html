@@ -1,0 +1,791 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="Insomniac">
+  <meta name="keywords" content="keywords">
+  
+    <meta name="description" content="IsUserAnAdmin 函数 (shlobj_core.h)[IsUserAnAdmin 可用于“要求”部分中指定的操作系统。 在后续版本中，它可能已更改或不可用。] 测试当前用户是否是管理员组的成员。 语法1BOOL IsUserAnAdmin();  返回值类型： BOOL 如果用户是管理员组的成员，则返回 TRUE ;否则为 FALSE。 注解此函数是 CheckTokenMembers">
+<meta property="og:type" content="article">
+<meta property="og:title" content="获取当前进程是否处于系统管理员权限下">
+<meta property="og:url" content="https://zytpca.github.io/2024/06/26/Win32_Api/%E8%8E%B7%E5%8F%96%E5%BD%93%E5%89%8D%E8%BF%9B%E7%A8%8B%E6%98%AF%E5%90%A6%E5%A4%84%E4%BA%8E%E7%B3%BB%E7%BB%9F%E7%AE%A1%E7%90%86%E5%91%98%E6%9D%83%E9%99%90%E4%B8%8B/index.html">
+<meta property="og:site_name" content="Insomnia_">
+<meta property="og:description" content="IsUserAnAdmin 函数 (shlobj_core.h)[IsUserAnAdmin 可用于“要求”部分中指定的操作系统。 在后续版本中，它可能已更改或不可用。] 测试当前用户是否是管理员组的成员。 语法1BOOL IsUserAnAdmin();  返回值类型： BOOL 如果用户是管理员组的成员，则返回 TRUE ;否则为 FALSE。 注解此函数是 CheckTokenMembers">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2024-06-26T09:10:42.000Z">
+<meta property="article:modified_time" content="2025-04-24T08:21:11.839Z">
+<meta property="article:author" content="Insomniac">
+<meta property="article:tag" content="keywords">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  
+  <title>获取当前进程是否处于系统管理员权限下 - Insomnia_</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"zytpca.github.io","root":"/","version":"1.9.8","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Insomniac&#39;s Blog</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="获取当前进程是否处于系统管理员权限下"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2024-06-26 17:10" pubdate>
+          2024年6月26日 下午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          1.1k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          10 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">获取当前进程是否处于系统管理员权限下</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="IsUserAnAdmin-函数-shlobj-core-h"><a href="#IsUserAnAdmin-函数-shlobj-core-h" class="headerlink" title="IsUserAnAdmin 函数 (shlobj_core.h)"></a><font style="color:rgb(22, 22, 22);">IsUserAnAdmin 函数 (shlobj_core.h)</font></h1><p><font style="color:rgb(22, 22, 22);">[</font><strong><font style="color:rgb(22, 22, 22);">IsUserAnAdmin</font></strong><font style="color:rgb(22, 22, 22);"> </font><font style="color:rgb(22, 22, 22);">可用于“要求”部分中指定的操作系统。 在后续版本中，它可能已更改或不可用。]</font></p>
+<p><font style="color:rgb(22, 22, 22);">测试当前用户是否是管理员组的成员。</font></p>
+<h2 id="语法"><a href="#语法" class="headerlink" title="语法"></a><font style="color:rgb(22, 22, 22);">语法</font></h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-function">BOOL <span class="hljs-title">IsUserAnAdmin</span><span class="hljs-params">()</span></span>;<br></code></pre></td></tr></table></figure>
+
+<h2 id="返回值"><a href="#返回值" class="headerlink" title="返回值"></a><font style="color:rgb(22, 22, 22);">返回值</font></h2><p><font style="color:rgb(22, 22, 22);">类型：</font><font style="color:rgb(22, 22, 22);"> </font><strong><font style="color:rgb(22, 22, 22);">BOOL</font></strong></p>
+<p><font style="color:rgb(22, 22, 22);">如果用户是管理员组的成员，则返回</font><font style="color:rgb(22, 22, 22);"> </font><strong><font style="color:rgb(22, 22, 22);">TRUE</font></strong><font style="color:rgb(22, 22, 22);"> </font><font style="color:rgb(22, 22, 22);">;否则为</font><font style="color:rgb(22, 22, 22);"> </font><strong><font style="color:rgb(22, 22, 22);">FALSE</font></strong><font style="color:rgb(22, 22, 22);">。</font></p>
+<h2 id="注解"><a href="#注解" class="headerlink" title="注解"></a><font style="color:rgb(22, 22, 22);">注解</font></h2><p><font style="color:#DF2A3F;">此函数是 </font><a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows/desktop/api/securitybaseapi/nf-securitybaseapi-checktokenmembership"><font style="color:#DF2A3F;">CheckTokenMembership</font></a><font style="color:#DF2A3F;"> 的包装器。 建议直接调用该函数来确定管理员组状态，而不是调用 </font><strong><font style="color:#DF2A3F;">IsUserAnAdmin</font></strong><font style="color:#DF2A3F;">。</font></p>
+<h2 id="要求"><a href="#要求" class="headerlink" title="要求"></a><font style="color:rgb(22, 22, 22);">要求</font></h2><p><strong>展开表</strong></p>
+<table>
+<thead>
+<tr>
+<th align="left"><font style="color:rgb(22, 22, 22);">要求</font></th>
+<th align="left"><font style="color:rgb(22, 22, 22);">值</font></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong><font style="color:rgb(22, 22, 22);">最低受支持的客户端</font></strong></td>
+<td align="left"><font style="color:rgb(22, 22, 22);">Windows XP [仅限桌面应用]</font></td>
+</tr>
+<tr>
+<td align="left"><strong><font style="color:rgb(22, 22, 22);">最低受支持的服务器</font></strong></td>
+<td align="left"><font style="color:rgb(22, 22, 22);">Windows Server 2003 [仅限桌面应用]</font></td>
+</tr>
+<tr>
+<td align="left"><strong><font style="color:rgb(22, 22, 22);">目标平台</font></strong></td>
+<td align="left"><font style="color:rgb(22, 22, 22);">Windows</font></td>
+</tr>
+<tr>
+<td align="left"><strong><font style="color:rgb(22, 22, 22);">标头</font></strong></td>
+<td align="left"><font style="color:rgb(22, 22, 22);">shlobj_core.h (包括 Shlobj.h)</font></td>
+</tr>
+<tr>
+<td align="left"><strong><font style="color:rgb(22, 22, 22);">Library</font></strong></td>
+<td align="left"><font style="color:rgb(22, 22, 22);">Shell32.lib</font></td>
+</tr>
+<tr>
+<td align="left"><strong><font style="color:rgb(22, 22, 22);">DLL</font></strong></td>
+<td align="left"><font style="color:rgb(22, 22, 22);">Shell32.dll (5.0 或更高版本)</font></td>
+</tr>
+<tr>
+<td align="left"><strong><font style="color:rgb(22, 22, 22);">API 集</font></strong></td>
+<td align="left"><font style="color:rgb(22, 22, 22);">Windows 10版本 10.0.10240 中引入的 ext-ms-win-shell-shell32-l1-2-1 ()</font></td>
+</tr>
+</tbody></table>
+<h2 id="另请参阅"><a href="#另请参阅" class="headerlink" title="另请参阅"></a><font style="color:rgb(22, 22, 22);">另请参阅</font></h2><p><a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows/desktop/api/securitybaseapi/nf-securitybaseapi-checktokenmembership"><font style="color:rgb(0, 101, 179);">CheckTokenMembership</font></a></p>
+<hr>
+<h1 id="CheckTokenMembership-函数-securitybaseapi-h"><a href="#CheckTokenMembership-函数-securitybaseapi-h" class="headerlink" title="CheckTokenMembership 函数 (securitybaseapi.h)"></a><font style="color:rgb(22, 22, 22);">CheckTokenMembership 函数 (securitybaseapi.h)</font></h1><p><strong><font style="color:rgb(22, 22, 22);">CheckTokenMembership</font></strong><font style="color:rgb(22, 22, 22);"> </font><font style="color:rgb(22, 22, 22);">函数确定是否在</font><a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows/desktop/SecGloss/a-gly"><font style="color:rgb(0, 101, 179);">访问令牌</font></a><font style="color:rgb(22, 22, 22);">中启用指定的</font><a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows/desktop/SecGloss/s-gly"><font style="color:rgb(0, 101, 179);">安全标识符</font></a><font style="color:rgb(22, 22, 22);"> </font><font style="color:rgb(22, 22, 22);">(SID) 。 如果要确定应用容器令牌的组成员身份，则需要使用</font><font style="color:rgb(22, 22, 22);"> </font><a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows/desktop/api/securitybaseapi/nf-securitybaseapi-checktokenmembershipex"><font style="color:rgb(0, 101, 179);">CheckTokenMembershipEx</font></a><font style="color:rgb(22, 22, 22);"> </font><font style="color:rgb(22, 22, 22);">函数。</font></p>
+<h2 id="语法-1"><a href="#语法-1" class="headerlink" title="语法"></a><font style="color:rgb(22, 22, 22);">语法</font></h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-function">BOOL <span class="hljs-title">CheckTokenMembership</span><span class="hljs-params">(</span></span><br><span class="hljs-params"><span class="hljs-function">  [in, optional] HANDLE TokenHandle,</span></span><br><span class="hljs-params"><span class="hljs-function">  [in]           PSID   SidToCheck,</span></span><br><span class="hljs-params"><span class="hljs-function">  [out]          PBOOL  IsMember</span></span><br><span class="hljs-params"><span class="hljs-function">)</span></span>;<br></code></pre></td></tr></table></figure>
+
+<h2 id="parameters"><a href="#parameters" class="headerlink" title="parameters"></a><font style="color:rgb(22, 22, 22);">parameters</font></h2><p><code>[in, optional] TokenHandle</code></p>
+<p><font style="color:rgb(22, 22, 22);">访问令牌的句柄。 句柄必须具有对令牌TOKEN_QUERY访问权限。 令牌必须是</font><font style="color:rgb(22, 22, 22);"> </font><a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows/desktop/SecGloss/i-gly"><font style="color:rgb(0, 101, 179);">模拟令牌</font></a><font style="color:rgb(22, 22, 22);">。</font></p>
+<p><font style="color:rgb(22, 22, 22);">如果</font><font style="color:rgb(22, 22, 22);"> </font><em><font style="color:rgb(22, 22, 22);">TokenHandle</font></em><font style="color:rgb(22, 22, 22);"> </font><font style="color:rgb(22, 22, 22);">为</font><font style="color:rgb(22, 22, 22);"> </font><strong><font style="color:rgb(22, 22, 22);">NULL</font></strong><font style="color:rgb(22, 22, 22);">，</font><font style="color:rgb(22, 22, 22);"> </font><strong><font style="color:rgb(22, 22, 22);">则 CheckTokenMembership</font></strong><font style="color:rgb(22, 22, 22);"> </font><font style="color:rgb(22, 22, 22);">使用调用线程的模拟令牌。 如果线程未模拟，该函数将复制线程</font><font style="color:rgb(22, 22, 22);"> </font><a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows/desktop/SecGloss/p-gly"><font style="color:rgb(0, 101, 179);">的主令牌</font></a><font style="color:rgb(22, 22, 22);"> </font><font style="color:rgb(22, 22, 22);">以创建</font><font style="color:rgb(22, 22, 22);"> </font><a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows/desktop/SecGloss/i-gly"><font style="color:rgb(0, 101, 179);">模拟令牌</font></a><font style="color:rgb(22, 22, 22);">。</font></p>
+<p><code>[in] SidToCheck</code></p>
+<p><font style="color:rgb(22, 22, 22);">指向</font><font style="color:rgb(22, 22, 22);"> </font><a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows/desktop/api/winnt/ns-winnt-sid"><font style="color:rgb(0, 101, 179);">SID</font></a><font style="color:rgb(22, 22, 22);"> </font><font style="color:rgb(22, 22, 22);">结构的指针。</font><font style="color:rgb(22, 22, 22);"> </font><strong><font style="color:rgb(22, 22, 22);">CheckTokenMembership</font></strong><font style="color:rgb(22, 22, 22);"> </font><font style="color:rgb(22, 22, 22);">函数检查访问令牌的用户和组 SID 中是否存在此 SID。</font></p>
+<p><code>[out] IsMember</code></p>
+<p><font style="color:rgb(22, 22, 22);">指向接收检查结果的变量的指针。 如果 SID 存在并且具有 SE_GROUP_ENABLED 属性，</font><font style="color:rgb(22, 22, 22);"> </font><em><font style="color:rgb(22, 22, 22);">则 IsMember</font></em><font style="color:rgb(22, 22, 22);"> </font><font style="color:rgb(22, 22, 22);">返回</font><font style="color:rgb(22, 22, 22);"> </font><strong><font style="color:rgb(22, 22, 22);">TRUE</font></strong><font style="color:rgb(22, 22, 22);">;否则返回</font><font style="color:rgb(22, 22, 22);"> </font><strong><font style="color:rgb(22, 22, 22);">FALSE</font></strong><font style="color:rgb(22, 22, 22);">。</font></p>
+<h2 id="返回值-1"><a href="#返回值-1" class="headerlink" title="返回值"></a><font style="color:rgb(22, 22, 22);">返回值</font></h2><p><font style="color:rgb(22, 22, 22);">如果该函数成功，则返回值为非零值。</font></p>
+<p><font style="color:rgb(22, 22, 22);">如果函数失败，则返回值为零。 要获得更多的错误信息，请调用 GetLastError。</font></p>
+<h2 id="注解-1"><a href="#注解-1" class="headerlink" title="注解"></a><font style="color:rgb(22, 22, 22);">注解</font></h2><p><strong><font style="color:rgb(22, 22, 22);">CheckTokenMembership</font></strong><font style="color:rgb(22, 22, 22);"> </font><font style="color:rgb(22, 22, 22);">函数简化了确定访问令牌中是否同时存在和已启用 SID 的过程。</font></p>
+<p><font style="color:rgb(22, 22, 22);">即使令牌中存在 SID，系统也不得在访问检查中使用 SID。 SID 可能已禁用或具有</font><font style="color:rgb(22, 22, 22);"> </font><strong><font style="color:rgb(22, 22, 22);">SE_GROUP_USE_FOR_DENY_ONLY</font></strong><font style="color:rgb(22, 22, 22);"> </font><font style="color:rgb(22, 22, 22);">属性。 在执行访问检查时，系统仅使用已启用的 SID 授予访问权限。 有关详细信息，请参阅</font><font style="color:rgb(22, 22, 22);"> </font><a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows/desktop/SecAuthZ/sid-attributes-in-an-access-token"><font style="color:rgb(0, 101, 179);">访问令牌中的 SID 属性</font></a><font style="color:rgb(22, 22, 22);">。</font></p>
+<p><font style="color:rgb(22, 22, 22);">如果</font><font style="color:rgb(22, 22, 22);"> </font><em><font style="color:rgb(22, 22, 22);">TokenHandle</font></em><font style="color:rgb(22, 22, 22);"> </font><font style="color:rgb(22, 22, 22);">是受限令牌，或者</font><font style="color:rgb(22, 22, 22);"> </font><em><font style="color:rgb(22, 22, 22);">TokenHandle</font></em><font style="color:rgb(22, 22, 22);"> </font><font style="color:rgb(22, 22, 22);">为</font><font style="color:rgb(22, 22, 22);"> </font><strong><font style="color:rgb(22, 22, 22);">NULL</font></strong><font style="color:rgb(22, 22, 22);"> </font><font style="color:rgb(22, 22, 22);">，并且调用线程的当前有效令牌是受限令牌，</font><font style="color:rgb(22, 22, 22);"> </font><strong><font style="color:rgb(22, 22, 22);">则 CheckTokenMembership</font></strong><font style="color:rgb(22, 22, 22);"> </font><font style="color:rgb(22, 22, 22);">还会检查 SID 是否存在于限制 SID 列表中。</font></p>
+<h2 id="示例"><a href="#示例" class="headerlink" title="示例"></a><font style="color:rgb(22, 22, 22);">示例</font></h2><p><font style="color:rgb(22, 22, 22);">以下示例演示如何检查管理员本地组中的成员身份的令牌。</font></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-function">BOOL <span class="hljs-title">IsUserAdmin</span><span class="hljs-params">(VOID)</span></span><br><span class="hljs-function"><span class="hljs-comment">/*++ </span></span><br><span class="hljs-comment"><span class="hljs-function">Routine Description: This routine returns TRUE if the caller&#x27;s</span></span><br><span class="hljs-comment"><span class="hljs-function">process is a member of the Administrators local group. Caller is NOT</span></span><br><span class="hljs-comment"><span class="hljs-function">expected to be impersonating anyone and is expected to be able to</span></span><br><span class="hljs-comment"><span class="hljs-function">open its own process and process token. </span></span><br><span class="hljs-comment"><span class="hljs-function">Arguments: None. </span></span><br><span class="hljs-comment"><span class="hljs-function">Return Value: </span></span><br><span class="hljs-comment"><span class="hljs-function">   TRUE - Caller has Administrators local group. </span></span><br><span class="hljs-comment"><span class="hljs-function">   FALSE - Caller does not have Administrators local group. --</span></span><br><span class="hljs-comment"><span class="hljs-function">*/</span> </span><br><span class="hljs-function"></span>&#123;<br>    BOOL b;<br>    SID_IDENTIFIER_AUTHORITY NtAuthority = SECURITY_NT_AUTHORITY;<br>    PSID AdministratorsGroup;<br>    b = <span class="hljs-built_in">AllocateAndInitializeSid</span>(<br>        &amp;NtAuthority,<br>        <span class="hljs-number">2</span>,<br>        SECURITY_BUILTIN_DOMAIN_RID,<br>        DOMAIN_ALIAS_RID_ADMINS,<br>        <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>,<br>        &amp;AdministratorsGroup );<br><br>    <span class="hljs-keyword">if</span>(b)<br>    &#123;<br>        <span class="hljs-keyword">if</span> (!<span class="hljs-built_in">CheckTokenMembership</span>( <span class="hljs-literal">NULL</span>, AdministratorsGroup, &amp;b))<br>        &#123;<br>             b = FALSE;<br>        &#125;<br>        <span class="hljs-built_in">FreeSid</span>(AdministratorsGroup);<br>    &#125;<br><br>    <span class="hljs-keyword">return</span>(b);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h2 id="要求-1"><a href="#要求-1" class="headerlink" title="要求"></a><font style="color:rgb(22, 22, 22);">要求</font></h2><p><strong>展开表</strong></p>
+<table>
+<thead>
+<tr>
+<th align="left"><font style="color:rgb(22, 22, 22);"> </font></th>
+<th align="left"><font style="color:rgb(22, 22, 22);"> </font></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong><font style="color:rgb(22, 22, 22);">最低受支持的客户端</font></strong></td>
+<td align="left"><font style="color:rgb(22, 22, 22);">Windows XP [桌面应用</td>
+</tr>
+<tr>
+<td align="left"><strong><font style="color:rgb(22, 22, 22);">最低受支持的服务器</font></strong></td>
+<td align="left"><font style="color:rgb(22, 22, 22);">Windows Server 2003 [桌面应用</td>
+</tr>
+<tr>
+<td align="left"><strong><font style="color:rgb(22, 22, 22);">目标平台</font></strong></td>
+<td align="left"><font style="color:rgb(22, 22, 22);">Windows</font></td>
+</tr>
+<tr>
+<td align="left"><strong><font style="color:rgb(22, 22, 22);">标头</font></strong></td>
+<td align="left"><font style="color:rgb(22, 22, 22);">securitybaseapi.h (包括 Windows.h)</font></td>
+</tr>
+<tr>
+<td align="left"><strong><font style="color:rgb(22, 22, 22);">Library</font></strong></td>
+<td align="left"><font style="color:rgb(22, 22, 22);">Advapi32.lib</font></td>
+</tr>
+<tr>
+<td align="left"><strong><font style="color:rgb(22, 22, 22);">DLL</font></strong></td>
+<td align="left"><font style="color:rgb(22, 22, 22);">Advapi32.dll</font></td>
+</tr>
+</tbody></table>
+<h2 id="请参阅"><a href="#请参阅" class="headerlink" title="请参阅"></a><font style="color:rgb(22, 22, 22);">请参阅</font></h2><p><a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows/desktop/SecAuthZ/access-control"><font style="color:rgb(0, 101, 179);">访问控制概述</font></a></p>
+<p><a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows/desktop/api/securitybaseapi/nf-securitybaseapi-accesscheck"><font style="color:rgb(0, 101, 179);">AccessCheck</font></a></p>
+<p><a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows/desktop/SecAuthZ/authorization-functions"><font style="color:rgb(0, 101, 179);">基本访问控制函数</font></a></p>
+<p><a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows/desktop/api/securitybaseapi/nf-securitybaseapi-checktokenmembershipex"><font style="color:rgb(0, 101, 179);">CheckTokenMembershipEx</font></a></p>
+<p><a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows/desktop/api/securitybaseapi/nf-securitybaseapi-createrestrictedtoken"><font style="color:rgb(0, 101, 179);">CreateRestrictedToken</font></a></p>
+<hr>
+<h1 id="GetTokenInformation-函数-securitybaseapi-h"><a href="#GetTokenInformation-函数-securitybaseapi-h" class="headerlink" title="GetTokenInformation 函数 (securitybaseapi.h)"></a><font style="color:rgb(22, 22, 22);">GetTokenInformation 函数 (securitybaseapi.h)</font></h1><p>此函数可以获取一个进程的特权，当进程被加载到内存后，会被分配一个结构体，里面包含进程的一些特权，我们可以通过这个函数获取到这个结构体，并得到我们想要的信息</p>
+<h3 id="函数原型："><a href="#函数原型：" class="headerlink" title="函数原型："></a>函数原型：</h3><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-function">BOOL <span class="hljs-title">GetTokenInformation</span><span class="hljs-params">(</span></span><br><span class="hljs-params"><span class="hljs-function">  [in]            HANDLE                  TokenHandle,</span></span><br><span class="hljs-params"><span class="hljs-function">  [in]            TOKEN_INFORMATION_CLASS TokenInformationClass,</span></span><br><span class="hljs-params"><span class="hljs-function">  [out, optional] LPVOID                  TokenInformation,</span></span><br><span class="hljs-params"><span class="hljs-function">  [in]            DWORD                   TokenInformationLength,</span></span><br><span class="hljs-params"><span class="hljs-function">  [out]           PDWORD                  ReturnLength</span></span><br><span class="hljs-params"><span class="hljs-function">)</span></span>;<br></code></pre></td></tr></table></figure>
+
+<p><code>[in] HANDLE TokenHandle</code></p>
+<p>令牌指针可以使用OpenProcessToken函数获取</p>
+<p><code>[in]TOKEN_INFORMATION_CLASS TokenInformationClass,</code></p>
+<p>要获取的信息类型</p>
+<p><code>  [out, optional] LPVOID TokenInformation,</code></p>
+<p>返回的信息存放内存</p>
+<p><code>[in] DWORD TokenInformationLength</code></p>
+<p>存放的内存大小</p>
+<p><code>[out] PDWORD ReturnLength</code></p>
+<p>返回到的内存实际大小</p>
+<h2 id="用法："><a href="#用法：" class="headerlink" title="用法："></a>用法：</h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-function">BOOL <span class="hljs-title">IsAdministrator</span><span class="hljs-params">()</span> <span class="hljs-comment">//判断是否管理员模式</span></span><br><span class="hljs-function"></span>&#123;<br>    BOOL bIsElevated = FALSE;<br>    HANDLE hToken = <span class="hljs-literal">NULL</span>;<br>    UINT16 uWinVer = <span class="hljs-built_in">LOWORD</span>(<span class="hljs-built_in">GetVersion</span>());<br>    uWinVer = <span class="hljs-built_in">MAKEWORD</span>(<span class="hljs-built_in">HIBYTE</span>(uWinVer),<span class="hljs-built_in">LOBYTE</span>(uWinVer));<br><br>    <span class="hljs-keyword">if</span> (uWinVer &lt; <span class="hljs-number">0x0600</span>)<span class="hljs-comment">//不是VISTA、Windows7</span><br>        <span class="hljs-keyword">return</span>(FALSE);<br><br>    <span class="hljs-keyword">if</span> (<span class="hljs-built_in">OpenProcessToken</span>(<span class="hljs-built_in">GetCurrentProcess</span>(),TOKEN_QUERY,&amp;hToken)) &#123;<br><br>        <span class="hljs-keyword">struct</span> &#123;<br>            DWORD TokenIsElevated;<br>        &#125; <span class="hljs-comment">/*TOKEN_ELEVATION*/</span>te;<br>        DWORD dwReturnLength = <span class="hljs-number">0</span>;<br><br>        <span class="hljs-keyword">if</span> (<span class="hljs-built_in">GetTokenInformation</span>(hToken,<span class="hljs-comment">/*TokenElevation*/</span>(_TOKEN_INFORMATION_CLASS)<span class="hljs-number">20</span>,&amp;te,<span class="hljs-built_in">sizeof</span>(te),&amp;dwReturnLength)) &#123;<br>            <span class="hljs-keyword">if</span> (dwReturnLength == <span class="hljs-built_in">sizeof</span>(te))<br>                bIsElevated = te.TokenIsElevated;<br>        &#125;<br>        <span class="hljs-built_in">CloseHandle</span>( hToken );<br>    &#125;<br>    <span class="hljs-keyword">return</span> bIsElevated;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><code class="hljs cpp">BOOL bElevated = FALSE;	<span class="hljs-comment">//是否管理员</span><br>	<span class="hljs-comment">//1.得到自身进程的权限访问令牌</span><br>	HANDLE hToken = <span class="hljs-literal">NULL</span>;<br>	<span class="hljs-keyword">if</span> (!<span class="hljs-built_in">OpenProcessToken</span>(<span class="hljs-built_in">GetCurrentProcess</span>(), TOKEN_QUERY, &amp;hToken))<br> <br>		<span class="hljs-keyword">return</span> FALSE;<br> <br> <br>	<span class="hljs-comment">//2.获取进程相关运行权限</span><br>	TOKEN_ELEVATION tokenEle;<br>	DWORD dwRetLen = <span class="hljs-number">0</span>;<br>	<span class="hljs-keyword">if</span> (<span class="hljs-built_in">GetTokenInformation</span>(hToken, TokenElevation, &amp;tokenEle, <span class="hljs-built_in">sizeof</span>(tokenEle), &amp;dwRetLen)) 	<br>	&#123;<br>		<span class="hljs-comment">//如果接受到的内存大小和结构体成正比例，代表接受完整的进程权限数据</span><br>		<span class="hljs-keyword">if</span> (dwRetLen == <span class="hljs-built_in">sizeof</span>(tokenEle)) 	<br>	&#123; <br>		<span class="hljs-comment">//取是否管理员布尔值</span><br>		bElevated = tokenEle.TokenIsElevated; <br>		&#125;<br>	&#125;   	<br>	<span class="hljs-comment">//关闭进程令牌</span><br>	<span class="hljs-built_in">CloseHandle</span>(hToken);  	<br>	<span class="hljs-comment">//返回是否OK</span><br>	<span class="hljs-keyword">return</span> bElevated;<br></code></pre></td></tr></table></figure>
+
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/Win32-API/" class="category-chain-item">Win32_API</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>获取当前进程是否处于系统管理员权限下</div>
+      <div>https://zytpca.github.io/2024/06/26/Win32_Api/获取当前进程是否处于系统管理员权限下/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>Insomniac</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2024年6月26日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2024/06/26/Win32_Api/%E6%89%BE%E4%B8%8D%E5%88%B0%E6%98%A0%E5%B0%84%E7%9A%84%E7%BD%91%E7%BB%9C%E9%A9%B1%E5%8A%A8%E5%99%A8/" title="找不到映射的网络驱动器">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">找不到映射的网络驱动器</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2024/05/08/Win32_Api/Windows%E4%B8%8BC++%E7%94%9F%E6%88%90Dump%E8%B0%83%E8%AF%95%E6%96%87%E4%BB%B6%E4%B8%8E%E5%88%86%E6%9E%90/" title="Windows下C++生成Dump调试文件与分析">
+                        <span class="hidden-mobile">Windows下C++生成Dump调试文件与分析</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+  
+  
+    <article id="comments" lazyload>
+      
+  <div id="valine"></div>
+  <script type="text/javascript">
+    Fluid.utils.loadComments('#valine', function() {
+      Fluid.utils.createScript('https://lib.baomitu.com/valine/1.5.1/Valine.min.js', function() {
+        var options = Object.assign(
+          {"appId":"ZDiOGqAWSCAU9bUYDktIk21c-gzGzoHsz","appKey":"JShbv4TgfpvIvvrRl7GFc57n","path":"window.location.pathname","placeholder":null,"avatar":"retro","meta":["nick","mail","link"],"requiredFields":[],"pageSize":10,"lang":"zh-CN","highlight":false,"recordIP":false,"serverURLs":"https://zdiogqaw.lc-cn-n1-shared.com","emojiCDN":null,"emojiMaps":null,"enableQQ":false},
+          {
+            el: "#valine",
+            path: window.location.pathname
+          }
+        )
+        new Valine(options);
+        Fluid.utils.waitElementVisible('#valine .vcontent', () => {
+          var imgSelector = '#valine .vcontent img:not(.vemoji)';
+          Fluid.plugins.imageCaption(imgSelector);
+          Fluid.plugins.fancyBox(imgSelector);
+        })
+      });
+    });
+  </script>
+  <noscript>Please enable JavaScript to view the comments</noscript>
+
+
+    </article>
+  
+
+
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>
